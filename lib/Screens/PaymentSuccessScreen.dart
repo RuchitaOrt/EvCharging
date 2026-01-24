@@ -6,6 +6,7 @@ import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/main.dart';
+import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -19,7 +20,7 @@ class PaymentSuccessScreen extends StatelessWidget {
       // Navigate to MainTab instead of popping
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainTab()),
+        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin)),
       );
       return false; // prevent default pop
     },
@@ -34,7 +35,7 @@ class PaymentSuccessScreen extends StatelessWidget {
             onPressed: () 
             { Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const MainTab()),
+          MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin)),
         );
       
             }
@@ -59,7 +60,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                           onPressed: () {
                                Navigator.push(
                         routeGlobalKey.currentContext!,
-                        MaterialPageRoute(builder: (context) =>  MainTab()),
+                        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin)),
                       );
                           },
                           style: ElevatedButton.styleFrom(

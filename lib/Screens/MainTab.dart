@@ -1,5 +1,5 @@
 import 'package:ev_charging_app/Screens/ChargingStationsScreen.dart';
-import 'package:ev_charging_app/Screens/MapScreen.dart';
+import 'package:ev_charging_app/Screens/Map/MapScreen.dart';
 import 'package:ev_charging_app/Screens/ProfileScreen.dart';
 import 'package:ev_charging_app/Screens/ScanScreen.dart';
 import 'package:ev_charging_app/Screens/Transaction.dart';
@@ -10,8 +10,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class MainTab extends StatefulWidget {
+  final bool isLoggedIn;
    static const String route = "/main_screen";
-  const MainTab({super.key});
+   MainTab({super.key,  this.isLoggedIn=false});
 
   @override
   State<MainTab> createState() => _MainTabState();
@@ -20,14 +21,21 @@ class MainTab extends StatefulWidget {
 class _MainTabState extends State<MainTab> {
 
   int currentIndex = 0;
-
-  final screens = [
-    const MapScreen(),
+  List screens=[];
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print(widget.isLoggedIn);
+     screens = [
+     MapScreen(isLogin: widget.isLoggedIn),
      ChargingStationsScreen(),
      ScanScreen(), // Center button screen
     const Transaction(),
     const ProfileScreen(),
   ];
+  }
+  
 
   @override
   Widget build(BuildContext context) {

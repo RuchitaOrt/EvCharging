@@ -4,6 +4,7 @@ import 'package:ev_charging_app/Utils/CommonAppBar.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
+import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -35,7 +36,7 @@ class _ScanScreenState extends State<ScanScreen> {
       // Navigate to MainTab instead of popping
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainTab()),
+        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin)),
       );
       return false; // prevent default pop
     },

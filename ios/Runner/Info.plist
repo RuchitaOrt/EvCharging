@@ -28,8 +28,7 @@
 		<string>LaunchScreen</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
-		<key>GMSApiKey</key>
-        <string>AIzaSyCFbPEUrwlpi-MmZivtEtgMcHlHCF3HzhE</string>
+		
 		<key>UISupportedInterfaceOrientations</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>

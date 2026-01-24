@@ -2,6 +2,7 @@ import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
+import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -53,13 +54,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainTab()),
+        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin,)),
       );
     }
   }
 
   double get progress => (currentIndex + 1) / onboardingData.length;
-
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+            FocusManager.instance.primaryFocus?.unfocus();
+          });
+      
+     
+    
+  }
   @override
   Widget build(BuildContext context) {
     // Initialize SizeConfig for this device
@@ -139,7 +150,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       {
 Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MainTab()),
+        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin)),
       );
                       },
                       // => _controller.jumpToPage(onboardingData.length - 1),

@@ -75,6 +75,7 @@ class CommonImagePath {
  static String charger = "assets/images/charger.png";
 static String swipe = "assets/images/swipe.png";
 static String filter = "assets/images/filter.png";
+static String filterblue = "assets/images/filter.svg";
 
 
  

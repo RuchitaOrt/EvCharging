@@ -20,7 +20,11 @@ class RegexHelper {
   bool isLocationValid(String location) {
     return RegExp(locationRegex).hasMatch(location);
   }
-
+ bool isPhoneValid(String phone) {
+    // Matches 10-digit numbers, optional +91 or 0 prefix
+    final pattern = r'^(?:\+91|0)?[6-9]\d{9}$';
+    return RegExp(pattern).hasMatch(phone);
+  }
   bool isNumbersOnly(String value) {
     return RegExp(integerRegex).hasMatch(value);
   }

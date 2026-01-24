@@ -16,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Navigate to onboarding screen after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
+       FocusScope.of(context).unfocus();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),

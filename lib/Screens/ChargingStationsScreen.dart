@@ -292,6 +292,7 @@ import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/main.dart';
+import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -380,7 +381,7 @@ class ChargingStationsScreen extends StatelessWidget {
       onBack: ()  {
 Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const MainTab()),
+        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin,)),
       );
       }),
 

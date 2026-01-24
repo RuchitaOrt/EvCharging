@@ -30,6 +30,11 @@ class CommonStrings {
 
     static const String strRegistration = "Register";
 static const String strfirstName = "First Name";
+static const String strAmount = "Amount";
+static const String strAmountHint = "Enter amount";
+static const String strAdditionalInfo = "Additional Info";
+static const String strAdditionalInfoHint = "Enter Additional Info";
+
 static const String strfirstNameHint = "Enter First Name";
 static const String strlastName = "Last Name";
 static const String strlasttNameHint = "Enter Last Name";
