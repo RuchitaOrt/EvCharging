@@ -1,290 +1,4 @@
-// import 'package:ev_charging_app/Screens/StationDetailsScreen.dart';
-// import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-// import 'package:ev_charging_app/Utils/commoncolors.dart';
-// import 'package:ev_charging_app/Utils/commonimages.dart';
-// import 'package:ev_charging_app/Utils/sizeConfig.dart';
-// import 'package:ev_charging_app/main.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_svg/flutter_svg.dart';
-// import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-// import 'MapStationCardScreen.dart';
-// class StationModel {
-//   final String name;
-//   final String distance;
-//   final String rating;
-//   final String time;
-//   final String typeA;
-//   final String typeB;
-
-//   StationModel({
-//     required this.name,
-//     required this.distance,
-//     required this.rating,
-//     required this.time,
-//     required this.typeA,
-//     required this.typeB,
-//   });
-// }
-
-// class ChargingStationsScreen extends StatelessWidget {
-  
-//    ChargingStationsScreen({super.key});
-//   List<StationModel> stationList = [
-//   StationModel(
-//     name: "Hitech EV",
-//     distance: "4.8 KM",
-//     rating: "4.5",
-//     time: "9:00AM - 12:00PM",
-//     typeA: "₹12.99 / kWh",
-//     typeB: "₹12.99 / kWh",
-//   ),
-//   StationModel(
-//     name: "IOC Madinaguda",
-//     distance: "4.8 KM",
-//     rating: "4.5",
-//     time: "9:00AM - 12:00PM",
-//     typeA: "₹12.99 / kWh",
-//     typeB: "₹12.99 / kWh",
-//   ),
-//   StationModel(
-//     name: "Galleria Mall | Panjagutta",
-//     distance: "4.8 KM",
-//     rating: "4.5",
-//     time: "9:00AM - 12:00PM",
-//     typeA: "₹12.99 / kWh",
-//     typeB: "₹12.99 / kWh",
-//   ),
-// ];
-
-//   Widget _searchBar() {
-//     return Container(
-//       padding: const EdgeInsets.symmetric(horizontal: 16),
-//       height: 48,
-//       decoration: BoxDecoration(
-//       color: CommonColors.neutral50,
-//         borderRadius: BorderRadius.circular(12),
-//         border: Border.all(
-//           color: CommonColors.hintGrey, // choose your color here
-//           width: 0.3,
-//         ),
-//         // boxShadow: [
-//         //   BoxShadow(color: Colors.black12, blurRadius: 8),
-//         // ],
-//       ),
-//       child: Row(
-//         children: [
-//           Icon(
-//             Icons.search,
-//             color: CommonColors.hintGrey,
-//           ),
-//           SizedBox(width: 12),
-//           Expanded(
-//               child: Text(
-//             "Search station",
-//             style: TextStyle(color: CommonColors.hintGrey),
-//           )),
-//         ],
-//       ),
-//     );
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: CommonColors.neutral50,
-      
-//       appBar:
-//       CommonAppBar(title: "Charging Stations",),
-     
-//       body: Padding(
-//         padding: const EdgeInsets.all(8.0),
-//         child: ListView(
-//           shrinkWrap: true,
-//           physics: ScrollPhysics(),
-//           children: [
-//              Padding(
-//                padding: const EdgeInsets.symmetric(horizontal: 10),
-//                child: Row(
-//                            children: [
-//                 SizedBox(
-//                   width: SizeConfig.blockSizeHorizontal*73,
-//                   child: _searchBar()),
-//                   SizedBox(width: 10,),
-//                 Image.asset(CommonImagePath.filter)
-//                            ],
-//                          ),
-//              ),
-//           Expanded(
-//   child: ListView.builder(
-//     itemCount: stationList.length,
-//     itemBuilder: (context, index) {
-//       return _stationBottomCard(stationList[index]);
-//     },
-//   ),
-// )
-
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-
-// Widget _stationBottomCard(StationModel station) {
-//   return GestureDetector(
-//     onTap: () {
-//       Navigator.push(
-//         routeGlobalKey.currentContext!,
-//         MaterialPageRoute(builder: (context) => StationDetailsScreen()),
-//       );
-//     },
-//     child: SizedBox(
-//       child: Padding(
-//         padding: const EdgeInsets.all(8.0),
-//         child: Container(
-//           padding: const EdgeInsets.all(8),
-//           height: 160,
-//           decoration: BoxDecoration(
-//             color: CommonColors.white,
-//             borderRadius: BorderRadius.circular(12),
-//           ),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               // TOP ROW with Image, Title, More Menu
-//               Container(
-//                 decoration: BoxDecoration(
-//                   color: CommonColors.neutral50,
-//                   borderRadius: BorderRadius.circular(12),
-//                 ),
-//                 padding: const EdgeInsets.all(2),
-//                 child: Row(
-//                   children: [
-//                     Image.asset(
-//                       CommonImagePath.frame,
-//                       height: 70,
-//                       fit: BoxFit.cover,
-//                     ),
-//                     const SizedBox(width: 8),
-//                     Expanded(
-//                       child: Column(
-//                         crossAxisAlignment: CrossAxisAlignment.start,
-//                         children: [
-//                           Row(
-//                             children: [
-//                               Expanded(
-//                                 child: Text(
-//                                   station.name,
-//                                   style: const TextStyle(
-//                                     fontSize: 18,
-//                                     fontWeight: FontWeight.w600,
-//                                     color: CommonColors.primary,
-//                                   ),
-//                                 ),
-//                               ),
-//                               const Icon(Icons.more_vert,
-//                                   color: CommonColors.blue),
-//                             ],
-//                           ),
-//                           Row(
-//                             children: [
-//                               _infoTag(CommonImagePath.redpin, station.distance),
-//                               const SizedBox(width: 4),
-//                               _infoTag(CommonImagePath.star, station.rating),
-//                               const SizedBox(width: 4),
-//                               _infoTag(CommonImagePath.clock, station.time),
-//                             ],
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-
-//               const SizedBox(height: 8),
-
-//               // FEATURES ROW
-//               Row(
-//                 children: [
-//                   Text("4 Plugs", style: TextStyle(fontSize: 12, color: CommonColors.neutral500)),
-//                   const SizedBox(width: 6),
-//                   circularDot(CommonColors.blue, 5),
-//                   const SizedBox(width: 4),
-//                   Text("Wifi", style: TextStyle(fontSize: 12, color: CommonColors.neutral500)),
-//                   const SizedBox(width: 6),
-//                   circularDot(CommonColors.blue, 5),
-//                   const SizedBox(width: 4),
-//                   Text("Cafe", style: TextStyle(fontSize: 12, color: CommonColors.neutral500)),
-//                   const SizedBox(width: 6),
-//                   circularDot(CommonColors.blue, 5),
-//                   const SizedBox(width: 4),
-//                   Text("Restaurant", style: TextStyle(fontSize: 12, color: CommonColors.neutral500)),
-//                 ],
-//               ),
-
-//               const SizedBox(height: 6),
-
-//               Row(
-//                 children: [
-//                   _typeInfo("Type A", station.typeA),
-//                   const SizedBox(width: 20),
-//                   Expanded(child: _typeInfo("Type B", station.typeB)),
-//                   SvgPicture.asset(CommonImagePath.direction),
-//                 ],
-//               ),
-//             ],
-//           ),
-//         ),
-//       ),
-//     ),
-//   );
-// }
-
-
-//   Widget _infoTag(String icon, String text) {
-//     return Container(
-//       padding: EdgeInsets.symmetric(vertical: 4, horizontal: 3),
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(4),
-//       ),
-//       child: Row(
-//         children: [
-//           Image.asset(icon, height: 14),
-//           SizedBox(width: 4),
-//           Text(text, style: TextStyle(fontSize: 12)),
-//         ],
-//       ),
-//     );
-//   }
-
-//   Widget _typeInfo(String type, String price) {
-//     return Column(
-//       crossAxisAlignment: CrossAxisAlignment.start,
-//       children: [
-//         Text(type,
-//             style: TextStyle(fontSize: 14, color: CommonColors.neutral500)),
-//             SizedBox(height: 2),
-//         Text(price,
-//             style: TextStyle(
-//                 fontSize: 14,
-//                 fontWeight: FontWeight.w600,
-//                 color: CommonColors.primary)),
-//       ],
-//     );
-//   }
-// }
-
-// Widget circularDot(Color color, double size) {
-//   return Container(
-//     width: size,
-//     height: size,
-//     decoration: BoxDecoration(
-//       color: color,
-//       shape: BoxShape.circle,
-//     ),
-//   );
-// }
 import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Screens/StationDetailsScreen.dart';
 import 'package:ev_charging_app/Utils/CommonAppBar.dart';
@@ -296,11 +10,55 @@ import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
 import '../Provider/HubProvider.dart';
 
-class ChargingStationsScreen extends StatelessWidget {
+class ChargingStationsScreen extends StatefulWidget {
   const ChargingStationsScreen({super.key});
+
+  @override
+  State<ChargingStationsScreen> createState() => _ChargingStationsScreenState();
+}
+
+class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  // Add a ScrollController for pagination
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Setup scroll listener for pagination
+    _scrollController.addListener(_scrollListener);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // Scroll listener for pagination
+  void _scrollListener() {
+    if (_searchQuery.isNotEmpty) return; // Don't paginate while searching
+
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      // Load more data when near bottom
+      _loadMoreData();
+    }
+  }
+
+  void _loadMoreData() {
+    final provider = Provider.of<HubProvider>(context, listen: false);
+    if (!provider.loading && provider.hasMore) {
+      provider.loadHubs(context, loadMore: true);
+    }
+  }
 
   // ---------------- Search Bar ----------------
   Widget _searchBar() {
@@ -320,11 +78,30 @@ class ChargingStationsScreen extends StatelessWidget {
           Icon(Icons.search, color: CommonColors.hintGrey),
           SizedBox(width: 12),
           Expanded(
-            child: Text(
-              "Search station",
-              style: TextStyle(color: CommonColors.hintGrey),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Search Hub",
+                hintStyle: TextStyle(color: CommonColors.hintGrey),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase().trim();
+                });
+              },
             ),
           ),
+          if (_searchQuery.isNotEmpty)
+            IconButton(
+              icon: Icon(Icons.clear, size: 18, color: CommonColors.hintGrey),
+              onPressed: () {
+                setState(() {
+                  _searchQuery = '';
+                  _searchController.clear();
+                });
+              },
+            ),
         ],
       ),
     );
@@ -349,12 +126,22 @@ class ChargingStationsScreen extends StatelessWidget {
     }
   }
 
+  // Filter hubs based on search query
+  List<dynamic> _filterHubs(List<dynamic> allHubs, String query) {
+    if (query.isEmpty) return allHubs;
+
+    return allHubs.where((hub) {
+      final hubName = hub.chargingHubName?.toString().toLowerCase() ?? '';
+      return hubName.contains(query);
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(
-        title: "Charging Stations",
+        title: "Charging Hubs",
         onBack: () {
           Navigator.push(
             context,
@@ -372,6 +159,9 @@ class ChargingStationsScreen extends StatelessWidget {
               provider.loadHubs(context, reset: true);
             }
           });
+
+          // Filter hubs based on search query
+          final filteredHubs = _filterHubs(provider.hubs, _searchQuery);
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
@@ -393,9 +183,42 @@ class ChargingStationsScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
 
+                // Show search result count
+                if (_searchQuery.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${filteredHubs.length} station${filteredHubs.length != 1 ? 's' : ''} found',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: CommonColors.neutral500,
+                          ),
+                        ),
+                        Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _searchQuery = '';
+                              _searchController.clear();
+                            });
+                          },
+                          child: Text(
+                            'Clear search',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: CommonColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 // Main content area
                 Expanded(
-                  child: _buildMainContent(context, provider),
+                  child: _buildMainContent(context, provider, filteredHubs),
                 ),
               ],
             ),
@@ -406,7 +229,7 @@ class ChargingStationsScreen extends StatelessWidget {
   }
 
   // Helper method to build the main content
-  Widget _buildMainContent(BuildContext context, HubProvider provider) {
+  Widget _buildMainContent(BuildContext context, HubProvider provider, List<dynamic> filteredHubs) {
     // Show loading
     if (provider.loading && provider.hubs.isEmpty) {
       return Center(
@@ -414,7 +237,7 @@ class ChargingStationsScreen extends StatelessWidget {
       );
     }
 
-    // Show empty state
+    // Show empty state - no stations at all
     if (provider.hubs.isEmpty && !provider.loading) {
       return Center(
         child: Column(
@@ -439,17 +262,92 @@ class ChargingStationsScreen extends StatelessWidget {
       );
     }
 
-    // Show stations list
+    // Show no search results
+    if (_searchQuery.isNotEmpty && filteredHubs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 60,
+              color: CommonColors.neutral500,
+            ),
+            SizedBox(height: 16),
+            Text(
+              'No hub found for "$_searchQuery"',
+              style: TextStyle(
+                color: CommonColors.neutral500,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Try a different search',
+              style: TextStyle(
+                color: CommonColors.neutral500,
+                fontSize: 14,
+              ),
+            ),
+
+          ],
+        ),
+      );
+    }
+
+    // Show stations list with pagination
     return RefreshIndicator(
       onRefresh: () async {
         await provider.loadHubs(context, reset: true);
       },
-      child: ListView.builder(
-        itemCount: provider.hubs.length,
-        itemBuilder: (context, index) {
-          final hub = provider.hubs[index];
-          return _stationCard(hub);
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (scrollNotification) {
+          // This handles overscroll scenarios
+          if (scrollNotification is ScrollEndNotification &&
+              _scrollController.position.extentAfter == 0) {
+            _loadMoreData();
+          }
+          return false;
         },
+        child: ListView.builder(
+          controller: _scrollController,
+          itemCount: filteredHubs.length + (provider.hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            // Show loading indicator at the bottom
+            if (index >= filteredHubs.length) {
+              return _buildLoadingIndicator(provider);
+            }
+
+            final hub = filteredHubs[index];
+            return _stationCard(hub);
+          },
+        ),
+      ),
+    );
+  }
+
+  // Loading indicator widget for pagination
+  Widget _buildLoadingIndicator(HubProvider provider) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: provider.loading
+            ? CircularProgressIndicator()
+            : provider.hasMore
+            ? TextButton(
+          onPressed: _loadMoreData,
+          child: Text('Load More'),
+        )
+            : Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'No more stations',
+            style: TextStyle(
+              color: CommonColors.neutral500,
+              fontSize: 12,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -483,11 +381,11 @@ class ChargingStationsScreen extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-         Navigator.push(
+        Navigator.push(
           routeGlobalKey.currentContext!,
           MaterialPageRoute(
             builder: (context) => StationDetailsScreen(
-           /*   hubId: hub.recId,
+              /*  hubId: hub.recId,
               hubName: hub.chargingHubName,*/
             ),
           ),

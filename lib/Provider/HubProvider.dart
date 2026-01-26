@@ -66,8 +66,10 @@ class HubProvider extends ChangeNotifier {
       hasMore = true;
       // polyLines.clear(); remove routes
     }
+
     loading = true;
     notifyListeners();
+
     try {
       await loadIcons();
       final ChargingHubResponse res = await _repo.fetchHubs(context);
@@ -282,10 +284,10 @@ class HubProvider extends ChangeNotifier {
     );
     markers.add(
       Marker(
-        markerId: MarkerId('243246' ?? ''),
-        position: LatLng(19.262147, 72.983966),
-        icon: normalMarkerIcon,
-        infoWindow: InfoWindow(
+          markerId: MarkerId('243246' ?? ''),
+          position: LatLng(19.262147, 72.983966),
+          icon: normalMarkerIcon,
+          infoWindow: InfoWindow(
             title:  'Vishu Electric Vehicle Charging Station',
             snippet: 'Tap for details',
         ),

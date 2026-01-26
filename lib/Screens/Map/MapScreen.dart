@@ -25,27 +25,27 @@ class _MapScreenState extends State<MapScreen> {
   late MapController controller;
   late String mapsStyle;
   @override
- void initState()  {
+  void initState()  {
     super.initState();
     controller = MapController();
     print("LOGGED IN init");
-loadData();
+    loadData();
   }
-loadData() {
- WidgetsBinding.instance.addPostFrameCallback((_) async {
-   mapsStyle = await DefaultAssetBundle.of(context)
-       .loadString('assets/map_styles/dark_map.json');
+  loadData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      mapsStyle = await DefaultAssetBundle.of(context)
+          .loadString('assets/map_styles/dark_map.json');
       context.read<HubProvider>().loadHubs(context);
       // if (!widget.isLogin) {
       //   showLoginSheet(context);
       // }
       final isLoggedIn = await AuthStorage.isLoggedIn();
       print("LOGGED IN ${isLoggedIn}");
-    if (!isLoggedIn) {
-      showLoginSheet(context);
-    }
+      if (!isLoggedIn) {
+        showLoginSheet(context);
+      }
     });
-}
+  }
   void showLoginSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -53,78 +53,66 @@ loadData() {
       enableDrag: false,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-     builder: (_) {
-      return WillPopScope(
-        onWillPop: () async => false, // ❌ BACK BUTTON BLOCKED
-        child: const LoginSheetWidget(),
-      );
-    },
+      builder: (_) {
+        return WillPopScope(
+          onWillPop: () async => false, // ❌ BACK BUTTON BLOCKED
+          child: const LoginSheetWidget(),
+        );
+      },
     );
   }
-@override
-Widget build(BuildContext context) {
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarBrightness: Brightness.light,
-    statusBarIconBrightness:Brightness.light
-  ));
-  return Consumer<HubProvider>(
-    builder: (_, hubProvider, __) {
-      // Zoom to first marker once
-      // if (!hubProvider.hasZoomedToFirst &&
-      //     hubProvider.firstMarkerPosition != null) {
-      //   WidgetsBinding.instance.addPostFrameCallback((_) {
-      //     controller.zoomTo(hubProvider.firstMarkerPosition!);
-      //     hubProvider.hasZoomedToFirst = true;
-      //   });
-      // }
-      return Scaffold(
-        body: Stack(
-          children: [
-            GoogleMap(
-              initialCameraPosition: CameraPosition(
-                // target location
-                target: controller.center,
-                // target: hubProvider.firstMarkerPosition!,
-                zoom: 12,
-                tilt: 45,
-                bearing: 0,
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness:Brightness.light
+    ));
+    return Consumer<HubProvider>(
+      builder: (_, hubProvider, __) {
+        // Zoom to first marker once
+        // if (!hubProvider.hasZoomedToFirst &&
+        //     hubProvider.firstMarkerPosition != null) {
+        //   WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     controller.zoomTo(hubProvider.firstMarkerPosition!);
+        //     hubProvider.hasZoomedToFirst = true;
+        //   });
+        // }
+        return Scaffold(
+          body: Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  // target location
+                  target: controller.center,
+                  // target: hubProvider.firstMarkerPosition!,
+                  zoom: 12,
+                ),
+                myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                markers: hubProvider.markers,
+                onMapCreated: controller.onMapCreated,
+                onCameraIdle: () {
+                  hubProvider.loadHubs(context);
+                },
+                zoomControlsEnabled: false,
+                style: mapsStyle,
+                compassEnabled: false,
+                mapToolbarEnabled: false,
+                buildingsEnabled: false,
+                trafficEnabled: false,
+                polylines: hubProvider.polyLines,
+                onTap: (LatLng){
+                  print('MapScreen Click');
+                },
+
               ),
-              myLocationEnabled: false,
-              myLocationButtonEnabled: false,
-              markers: hubProvider.markers,
-              onMapCreated: controller.onMapCreated,
-              onCameraIdle: () {
-                // hubProvider.loadHubs(context);
-              },
-              zoomControlsEnabled: false,
-              style: mapsStyle,
-              compassEnabled: false,
-              mapToolbarEnabled: false,
-              buildingsEnabled: false,
-              trafficEnabled: false,
-              polylines: hubProvider.polyLines,
-              onTap: (LatLng){
-                print('MapScreen Click');
-                // hubProvider.clearRoute();
-              },
-              onLongPress: (LatLong) async {
-                print('MapScreen Click');
-                hubProvider.clearRoute();
-                // final Position position = await MapController().getCurrentPosition();
-                // // drawRoute(LatLng(19.262147, 72.983966), LatLng(19.193039, 72.953840));
-                // hubProvider.drawRoute(LatLng(position.latitude, position.longitude), LatLng(19.196262, 72.962967));
 
-              },
+              const Positioned(top: 60, left: 20, right: 20, child: SearchBarWidget()),
+              const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
+              const Positioned(top: 190, right: 20, child: DiscountWidget(label: "10 %")),
 
-            ),
-            const Positioned(top: 60, left: 20, right: 20, child: SearchBarWidget()),
-            const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
-            const Positioned(top: 190, right: 20, child: DiscountWidget(label: "10 %")),
-            if (hubProvider.isRouteLoading)
-              const Center(child: CircularProgressIndicator(color: Colors.green,)),
-
-           /* if (hubProvider.loading)
+              /* if (hubProvider.loading)
               const Center(child: CircularProgressIndicator()),
             const Positioned(
               bottom: 40,
@@ -132,11 +120,11 @@ Widget build(BuildContext context) {
               right: 0,
               child: StationCardWidget(),
             ),*/
-          ],
-        ),
-      );
-    },
-  );
-}
+            ],
+          ),
+        );
+      },
+    );
+  }
 
 }
