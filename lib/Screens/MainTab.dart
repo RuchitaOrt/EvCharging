@@ -93,7 +93,7 @@ class _MainTabState extends State<MainTab> {
         children: [
           navItem(0, CommonImagePath.map, "Map"),
            const SizedBox(width: 10),
-          navItem(1, CommonImagePath.station, "Stations"),
+          navItem(1, CommonImagePath.station, "Hubs"),
           const SizedBox(width: 40),
           navItem(3, CommonImagePath.transaction, "Transactions"),
           navItem(4, CommonImagePath.profile, "Profile"),
