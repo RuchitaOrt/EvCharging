@@ -56,7 +56,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
   void _loadMoreData() {
     final provider = Provider.of<HubProvider>(context, listen: false);
     if (!provider.loading && provider.hasMore) {
-      provider.loadHubs(context, loadMore: true);
+      provider.loadHubs(context,);
     }
   }
 
@@ -396,7 +396,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             padding: const EdgeInsets.all(8),
-            height: 160,
+            height: 165,
             decoration: BoxDecoration(
               color: CommonColors.white,
               borderRadius: BorderRadius.circular(12),
