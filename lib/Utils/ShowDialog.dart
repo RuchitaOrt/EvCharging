@@ -55,3 +55,28 @@ import 'package:shared_preferences/shared_preferences.dart';
     fontSize: 12.0,
   );
   }
+  infoNormalDialog(BuildContext context, {String? message}) {
+    Widget okButton = ElevatedButton(
+        child: Text("OK"),
+        onPressed: () {
+          Navigator.pop(context);
+        });
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Hyworth Land Survey"),
+      content: Text(message!),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }

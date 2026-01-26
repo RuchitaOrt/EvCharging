@@ -429,7 +429,7 @@ class APIManager {
           validateStatus: (_) => true,
         ),
       );
-
+    print('Response code: ${response.statusCode}');
       if (response.statusCode == 200) {
         return parseResponse(api, response.data);
       }
@@ -439,9 +439,9 @@ class APIManager {
       }
 
       if (response.statusCode == 401) {
-        unAthorizedTokenErrorDialog(
+        infoNormalDialog(
           context,
-          message: "Session expired. Please login again.",
+          message: response.data['message']??'',
         );
         throw UnauthorisedError("Unauthorized");
       }
@@ -471,4 +471,6 @@ class APIManager {
     }
     return data?.toString() ?? "Something went wrong";
   }
+
+
 }

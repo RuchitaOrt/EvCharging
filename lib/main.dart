@@ -17,12 +17,12 @@ final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
 final GlobalKey<NavigatorState> routeGlobalKey = GlobalKey();
+
 Future<void> main() async {
- 
-WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   await Utility().loadAPIConfig();
 //await DatabaseHelper.instance.deleteOldDatabase();
-SystemChrome.setPreferredOrientations([
+  SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
@@ -31,6 +31,7 @@ SystemChrome.setPreferredOrientations([
 
 class MyApp extends StatefulWidget {
   const MyApp() : super();
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -41,33 +42,34 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-       providers: [
-    ChangeNotifierProvider(create: (_) => AuthProvider()),
-      ChangeNotifierProvider(create: (_) => LoginProvider()),
-      ChangeNotifierProvider(create: (_) => ProfileProvider()),
-      ChangeNotifierProvider(
-  create: (_) => HubProvider(),
-), ChangeNotifierProvider(
-  create: (_) => WalletProvider(),
-)
-  ],
-      child: MaterialApp(
-          navigatorObservers: [routeObserver],
-          title: 'Ev Charging',
-          debugShowCheckedModeBanner: false,
-          navigatorKey: routeGlobalKey,
-          theme: ThemeData(
-            textTheme: GoogleFonts.poppinsTextTheme(),
-            textSelectionTheme: TextSelectionThemeData(
-              selectionColor:
-                  CommonColors.blue.withOpacity(0.3), // background highlight
-              selectionHandleColor: CommonColors.blue, // draggable handle
-              cursorColor: CommonColors.blue, // fallback cursor
-            ),
-          ),
-          initialRoute: SplashScreen.route,
-          onGenerateRoute: Routers.generateRoute,
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => LoginProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(
+          create: (_) => HubProvider(),
         ),
+        ChangeNotifierProvider(
+          create: (_) => WalletProvider(),
+        )
+      ],
+      child: MaterialApp(
+        navigatorObservers: [routeObserver],
+        title: 'Ev Charging',
+        debugShowCheckedModeBanner: false,
+        navigatorKey: routeGlobalKey,
+        theme: ThemeData(
+          textTheme: GoogleFonts.poppinsTextTheme(),
+          textSelectionTheme: TextSelectionThemeData(
+            selectionColor:
+                CommonColors.blue.withOpacity(0.3), // background highlight
+            selectionHandleColor: CommonColors.blue, // draggable handle
+            cursorColor: CommonColors.blue, // fallback cursor
+          ),
+        ),
+        initialRoute: SplashScreen.route,
+        onGenerateRoute: Routers.generateRoute,
+      ),
     );
   }
 }

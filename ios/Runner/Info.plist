@@ -50,5 +50,7 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSLocationWhenInUseUsageDescription</key>
+        <string>We need your location to show nearby charging stations</string>
 	</dict>
 </plist>
