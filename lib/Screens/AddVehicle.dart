@@ -246,11 +246,11 @@ await provider.addVehicle(
               );
 
               if (provider.vehicle != null) {
-                showToast("Vehicle added successfully");
+                showToast("${provider.message}");
 
                 Navigator.pop(context); // or move to another screen
               } else {
-                showToast("Failed to add vehicle");
+                showToast("${provider.message}");
               }
               Navigator.push(
                 routeGlobalKey.currentContext!,
@@ -270,11 +270,11 @@ await provider.addVehicle(
 );
 
 if (ok) {
-  showToast("Vehicle updated successfully");
+ showToast("${provider.message}");
   Navigator.pop(context);
 }
 else{
-   showToast("Failed to update successfully");
+  showToast("${provider.message}");
 }
 
             

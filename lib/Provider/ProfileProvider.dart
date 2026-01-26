@@ -27,7 +27,7 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
+String? message;
 
   /// ✅ UPDATE PROFILE
  Future<bool> updateProfile(
@@ -77,6 +77,7 @@ class ProfileProvider extends ChangeNotifier {
 
   try {
     profile = await _repo.updateProfile(context, body: body);
+    message=profile!.message;
     loading = false;
     notifyListeners();
     return true;

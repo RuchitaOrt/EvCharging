@@ -258,12 +258,14 @@ final request = RegisterRequest(
   city: "",
   pinCode: "",
 );
+ final provider = context.read<AuthProvider>();
 
-bool success = await context.read<AuthProvider>().register(context, request);
+  bool success = await provider.register(context, request);
+// bool success = await context.read<AuthProvider>().register(context, request);
 
 if (success) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    showToast("Registration Successful");
+    showToast("${provider.message}");
     Navigator.pushReplacement(
       routeGlobalKey.currentContext!,
       MaterialPageRoute(

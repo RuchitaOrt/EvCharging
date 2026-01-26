@@ -107,13 +107,17 @@ class _MyVehicleScreenState extends State<MyVehicleScreen> {
                       onBackToHome: () {},
                       onCancel: () => Navigator.pop(context),
                       onLogout: () async {
-                        final ok = await context
-                            .read<UserVehicleProvider>()
-                            .deleteVehicle(context, vehicleId);
+
+                         final provider = context.read<UserVehicleProvider>();
+
+  final ok = await provider.deleteVehicle(context, vehicleId);
+                        // final ok = await context
+                        //     .read<UserVehicleProvider>()
+                        //     .deleteVehicle(context, vehicleId);
       
                         if (ok) {
                           Navigator.pop(context);
-                          showToast("Vehicle deleted successfully");
+                        showToast("${provider.message}");
       
                           // 🔥 REFRESH LIST
                           context.read<VehicleProvider>().loadVehicles(context);

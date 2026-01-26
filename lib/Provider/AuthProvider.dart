@@ -17,6 +17,7 @@ class AuthProvider extends ChangeNotifier {
   bool isLoading = false;
   RegistrationResponse? registrationResponse;
   AppError? error;
+  String? message;
  Future<bool> register(BuildContext context, RegisterRequest request) async {
   // 🔹 Validation
   if (!ValidationHelper.isNotEmpty(request.firstName)) {
@@ -57,8 +58,10 @@ class AuthProvider extends ChangeNotifier {
 
     if (registrationResponse?.success == true) {
       GlobalLists.islLogin = true;
+      message=registrationResponse!.message;
       return true; // ✅ Registration success
     } else {
+      message=registrationResponse!.message;
       showToast(registrationResponse?.message ?? "Registration failed");
       return false;
     }

@@ -8,6 +8,7 @@ class UserVehicleProvider extends ChangeNotifier {
 
   bool loading = false;
   UserVehicle? vehicle;
+  String? message;
 
   Future<void> addVehicle({
     required BuildContext context,
@@ -36,9 +37,11 @@ class UserVehicleProvider extends ChangeNotifier {
 
       if (res.success) {
         vehicle = res.vehicle;
+        message=res.message;
       } else {
         // show message if needed
         vehicle = null;
+         message=res.message;
       }
     } catch (e) {
       vehicle = null;
@@ -67,8 +70,12 @@ class UserVehicleProvider extends ChangeNotifier {
 
     if (res.success) {
       vehicles.removeWhere((e) => e.recId == vehicleRecId);
+      message=res.message;
       notifyListeners();
       return true;
+    }
+    else{
+      message=res.message;
     }
 
     notifyListeners();
@@ -111,7 +118,10 @@ Future<bool> updateVehicle(
 
     if (res.success) {
       updatedVehicle = res.vehicle;
+      message=res.message;
       return true;
+    }else{
+      message=res.message;
     }
   } catch (e) {
     debugPrint("❌ Update vehicle failed: $e");
