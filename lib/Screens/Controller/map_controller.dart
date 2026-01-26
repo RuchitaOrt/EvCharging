@@ -12,6 +12,8 @@ class MapController {
   final LatLng center = const LatLng(19.0760, 72.8777);
   LatLng? currentLocation;
   StreamSubscription<Position>? _positionStream;
+
+
   Future<void> onMapCreated(GoogleMapController controller) async {
 
     // String style = await DefaultAssetBundle.of(routeGlobalKey.currentContext!)
@@ -22,8 +24,7 @@ class MapController {
     await moveToCurrentLocation();
 
   }
-  /// Get GPS location + animate camera
-  /// One-time camera move
+   /// One-time camera move
   Future<void> moveToCurrentLocation() async {
     final Position position = await _getPosition();
     print('Current Location: ${position.latitude}, ${position.longitude}');
@@ -39,8 +40,8 @@ class MapController {
       ),
     );
   }
-  /// Auto refresh when user moves
-  void startLocationTracking() {
+
+   void startLocationTracking() {
     _positionStream?.cancel(); // safety
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
@@ -51,16 +52,22 @@ class MapController {
       zoomTo(LatLng(position.latitude, position.longitude));
     });
   }
-  /// Stop tracking (VERY IMPORTANT)
-  void stopLocationTracking() {
+   void stopLocationTracking() {
     _positionStream?.cancel();
     _positionStream = null;
   }
-  /// Permission-safe position getter
-  Future<Position> _getPosition() async {
+   Future<Position> _getPosition() async {
     final bool ready = await LocationPermissionManager.instance.ensureLocationReady(routeGlobalKey.currentContext!);
-    if (!ready) {
-      throw Exception('Location not ready');
+    if (!ready) {      throw Exception('Location not ready');
+
+    }
+    return Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+  }
+  Future<Position> getCurrentPosition() async {
+    final bool ready = await LocationPermissionManager.instance.ensureLocationReady(routeGlobalKey.currentContext!);
+    if (!ready) {      throw Exception('Location not ready');
     }
     return Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,

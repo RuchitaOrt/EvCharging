@@ -8,7 +8,9 @@ import 'package:ev_charging_app/Screens/SearchBarWidget.dart';
 import 'package:ev_charging_app/Screens/auth/login_bottom_sheet.dart';
 import 'package:ev_charging_app/Utils/AuthStorage.dart';
 import 'package:flutter/material.dart';
+
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 class MapScreen extends StatefulWidget {
@@ -38,7 +40,7 @@ loadData() {
       //   showLoginSheet(context);
       // }
       final isLoggedIn = await AuthStorage.isLoggedIn();
-print("LOGGED IN ${isLoggedIn}");
+      print("LOGGED IN ${isLoggedIn}");
     if (!isLoggedIn) {
       showLoginSheet(context);
     }
@@ -85,13 +87,15 @@ Widget build(BuildContext context) {
                 target: controller.center,
                 // target: hubProvider.firstMarkerPosition!,
                 zoom: 12,
+                tilt: 45,
+                bearing: 0,
               ),
-              myLocationEnabled: true,
+              myLocationEnabled: false,
               myLocationButtonEnabled: false,
               markers: hubProvider.markers,
               onMapCreated: controller.onMapCreated,
               onCameraIdle: () {
-                hubProvider.loadHubs(context);
+                // hubProvider.loadHubs(context);
               },
               zoomControlsEnabled: false,
               style: mapsStyle,
@@ -102,13 +106,23 @@ Widget build(BuildContext context) {
               polylines: hubProvider.polyLines,
               onTap: (LatLng){
                 print('MapScreen Click');
+                // hubProvider.clearRoute();
+              },
+              onLongPress: (LatLong) async {
+                print('MapScreen Click');
+                hubProvider.clearRoute();
+                // final Position position = await MapController().getCurrentPosition();
+                // // drawRoute(LatLng(19.262147, 72.983966), LatLng(19.193039, 72.953840));
+                // hubProvider.drawRoute(LatLng(position.latitude, position.longitude), LatLng(19.196262, 72.962967));
+
               },
 
             ),
-
             const Positioned(top: 60, left: 20, right: 20, child: SearchBarWidget()),
             const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
             const Positioned(top: 190, right: 20, child: DiscountWidget(label: "10 %")),
+            if (hubProvider.isRouteLoading)
+              const Center(child: CircularProgressIndicator(color: Colors.green,)),
 
            /* if (hubProvider.loading)
               const Center(child: CircularProgressIndicator()),
