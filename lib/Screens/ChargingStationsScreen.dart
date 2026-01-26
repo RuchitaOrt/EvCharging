@@ -321,7 +321,7 @@ class ChargingStationsScreen extends StatelessWidget {
           SizedBox(width: 12),
           Expanded(
             child: Text(
-              "Search station",
+              "Search hub",
               style: TextStyle(color: CommonColors.hintGrey),
             ),
           ),
@@ -354,7 +354,7 @@ class ChargingStationsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(
-        title: "Charging Stations",
+        title: "Charging Hubs",
         onBack: () {
           Navigator.push(
             context,
