@@ -5,6 +5,7 @@ import 'package:ev_charging_app/Provider/ProfileProvider.dart';
 import 'package:ev_charging_app/Provider/VehicleProvider.dart';
 import 'package:ev_charging_app/Provider/WalletProvider.dart';
 import 'package:ev_charging_app/Provider/car_manufacturer_provider.dart';
+import 'package:ev_charging_app/Provider/charging_hub_provider.dart';
 import 'package:ev_charging_app/Provider/hardware_master_provider.dart';
 import 'package:ev_charging_app/Provider/user_vehicle_provider.dart';
 import 'package:ev_charging_app/Routers/routers.dart';
@@ -52,6 +53,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
          ChangeNotifierProvider(create: (_) => VehicleProvider()),
            ChangeNotifierProvider(create: (_) => UserVehicleProvider()),
+              ChangeNotifierProvider(create: (_) => ChargingHubProvider()),
          ChangeNotifierProvider(
   create: (_) => HardwareMasterProvider(),
 ),

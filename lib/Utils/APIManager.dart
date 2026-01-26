@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:ev_charging_app/model/DeleteVehicleResponse.dart';
 import 'package:ev_charging_app/model/EndChargingSessionResponse.dart';
 import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
@@ -50,7 +51,8 @@ enum API {
   userVehicleUpdate,
   startChargingSession,
   endChargingSession,
-  unlockConnector
+  unlockConnector,
+  comprehensivelist
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -415,6 +417,8 @@ class APIManager {
 
       case API.unlockConnector:
         return "/ChargingSession/unlock-connector";
+         case API.comprehensivelist:
+        return "/ChargingHub/comprehensive-list";
     }
   }
 
@@ -480,7 +484,8 @@ class APIManager {
         return EndChargingSessionResponse.fromJson(json);
       case API.unlockConnector:
         return UnlockConnectorResponse.fromJson(json);
-
+ case API.comprehensivelist:
+        return ChargingcomprehensiveHubResponse.fromJson(json);
       default:
         return json;
     }

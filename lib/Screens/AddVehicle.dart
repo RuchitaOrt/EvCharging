@@ -57,8 +57,8 @@ class _AddehicleScreenState extends State<AddVehicleScreen> {
   void _bindEditData(HardwareMasterProvider p) {
     final v = widget.vehicle!;
     print(v);
-  print( v.evManufacturerID);
- 
+    print(v.evManufacturerID);
+
     /// Manufacturer
     final manufacturer = p.manufacturers.firstWhere(
       (e) => e.recId == v.evManufacturerID,
@@ -208,6 +208,39 @@ class _AddehicleScreenState extends State<AddVehicleScreen> {
   String selectedPlug = 'Plug Type A';
 
   int selectedUnitsIndex = 2;
+bool _validateForm() {
+  if (selectedManufacturerID == null) {
+    showToast("Please select manufacturer");
+    return false;
+  }
+
+  if (selectedModelID == null) {
+    showToast("Please select model");
+    return false;
+  }
+
+  if (registrationNoController.text.trim().isEmpty) {
+    showToast("Please enter vehicle registration number");
+    return false;
+  }
+
+  if (selectedBatteryTypeID == null) {
+    showToast("Please select battery type");
+    return false;
+  }
+
+  if (selectedBatteryCapacityID == null) {
+    showToast("Please select battery capacity");
+    return false;
+  }
+
+  if (selectedChargerTypeId == null) {
+    showToast("Please select charger type");
+    return false;
+  }
+
+  return true; // ✅ all good
+}
 
   final List<VehicleUnit> vehicleUnits = [
     VehicleUnit(image: CommonImagePath.veh1, type: "Type A"),
@@ -232,58 +265,57 @@ class _AddehicleScreenState extends State<AddVehicleScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () async {
+              if (!_validateForm()) return; // ❌ stop if invalid
               final provider = context.read<UserVehicleProvider>();
-           if(!widget.isEdit){
-await provider.addVehicle(
-                context: context,
-                evManufacturerID: selectedManufacturerID!,
-                carModelID: selectedModelID!,
-                carModelVariant: selectedModel,
-                carRegistrationNumber: registrationNoController.text,
-                defaultConfig: 0,
-                batteryTypeId: selectedBatteryTypeID!,
-                batteryCapacityId: selectedBatteryCapacityID!,
-              );
+              if (!widget.isEdit) {
+                await provider.addVehicle(
+                  context: context,
+                  evManufacturerID: selectedManufacturerID!,
+                  carModelID: selectedModelID!,
+                  carModelVariant: selectedModel,
+                  carRegistrationNumber: registrationNoController.text,
+                  defaultConfig: 0,
+                  batteryTypeId: selectedBatteryTypeID!,
+                  batteryCapacityId: selectedBatteryCapacityID!,
+                );
 
-              if (provider.vehicle != null) {
-                showToast("${provider.message}");
+                if (provider.vehicle != null) {
+                  showToast("${provider.message}");
 
-                Navigator.pop(context); // or move to another screen
+                  Navigator.pop(context); // or move to another screen
+                } else {
+                  showToast("${provider.message}");
+                }
+                Navigator.push(
+                  routeGlobalKey.currentContext!,
+                  MaterialPageRoute(builder: (context) => MyVehicleScreen()),
+                );
               } else {
-                showToast("${provider.message}");
+                final ok =
+                    await context.read<UserVehicleProvider>().updateVehicle(
+                          context,
+                          recId: widget.vehicle!.recId!,
+                          evManufacturerID: selectedManufacturerID!,
+                          carModelID: selectedModelID!,
+                          carModelVariant: selectedModel!,
+                          carRegistrationNumber: registrationNoController.text,
+                          defaultConfig: 0,
+                          batteryTypeId: selectedBatteryTypeID!,
+                          batteryCapacityId: selectedBatteryCapacityID!,
+                        );
+
+                if (ok) {
+                  showToast("${provider.message}");
+                  Navigator.pop(context);
+                } else {
+                  showToast("${provider.message}");
+                }
+
+                Navigator.push(
+                  routeGlobalKey.currentContext!,
+                  MaterialPageRoute(builder: (context) => MyVehicleScreen()),
+                );
               }
-              Navigator.push(
-                routeGlobalKey.currentContext!,
-                MaterialPageRoute(builder: (context) => MyVehicleScreen()),
-              );
-           }else{
-           final ok = await context.read<UserVehicleProvider>().updateVehicle(
-  context,
-  recId: widget.vehicle!.recId!,
-  evManufacturerID: selectedManufacturerID!,
-  carModelID: selectedModelID!,
-  carModelVariant: selectedModel!,
-  carRegistrationNumber: registrationNoController.text,
-  defaultConfig: 0,
-  batteryTypeId: selectedBatteryTypeID!,
-  batteryCapacityId: selectedBatteryCapacityID!,
-);
-
-if (ok) {
- showToast("${provider.message}");
-  Navigator.pop(context);
-}
-else{
-  showToast("${provider.message}");
-}
-
-            
-              Navigator.push(
-                routeGlobalKey.currentContext!,
-                MaterialPageRoute(builder: (context) => MyVehicleScreen()),
-              );
-           }
-              
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: CommonColors.blue,
