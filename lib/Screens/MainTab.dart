@@ -83,7 +83,7 @@ class _MainTabState extends State<MainTab> {
       ),
         ),
         child: BottomAppBar(
-      height: 65,
+      height: 70,
       color: Colors.transparent,
       elevation: 0,
       shape: const CircularNotchedRectangle(),
