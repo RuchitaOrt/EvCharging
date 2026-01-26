@@ -80,20 +80,247 @@ class APIManager {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Log request details
+          _logRequest(options);
+
           final cookies = await cookieJar?.loadForRequest(options.uri);
           print("🍪 Request cookies: $cookies");
           handler.next(options);
         },
         onResponse: (response, handler) {
+          // Log response details
+          _logResponse(response);
+
           print("🍪 Set-Cookie: ${response.headers['set-cookie']}");
           handler.next(response);
         },
         onError: (e, handler) {
+          // Log error details
+          _logError(e);
           print("❌ API ERROR: ${e.response?.statusCode}");
           handler.next(e);
         },
       ),
     );
+  }
+
+  /// 📝 REQUEST LOGGER
+  void _logRequest(RequestOptions options) {
+    print('\n' + '=' * 60);
+    print('📤 API REQUEST');
+    print('=' * 60);
+    print('🌐 Method: ${options.method}');
+    print('🔗 URL: ${options.baseUrl}${options.path}');
+    print('🆔 API Endpoint: ${_getApiNameFromUrl(options.path)}');
+
+    // Log headers (excluding sensitive info)
+    if (options.headers.isNotEmpty) {
+      print('📋 Headers:');
+      final safeHeaders = Map<String, dynamic>.from(options.headers);
+      // Remove or mask sensitive headers
+      if (safeHeaders.containsKey('authorization')) {
+        safeHeaders['authorization'] = 'Bearer ********';
+      }
+      safeHeaders.forEach((key, value) {
+        print('  $key: $value');
+      });
+    }
+
+    // Log query parameters
+    if (options.queryParameters.isNotEmpty) {
+      print('🔍 Query Parameters:');
+      options.queryParameters.forEach((key, value) {
+        print('  $key: $value');
+      });
+    }
+
+    // Log request body
+    if (options.data != null) {
+      print('📦 Request Body:');
+      if (options.data is Map) {
+        final data = options.data as Map;
+        // Mask sensitive fields
+        final safeData = _maskSensitiveData(data);
+        final prettyJson = JsonEncoder.withIndent('  ').convert(safeData);
+        print(prettyJson);
+      } else if (options.data is String) {
+        try {
+          final jsonData = jsonDecode(options.data as String);
+          final safeData = _maskSensitiveData(jsonData);
+          final prettyJson = JsonEncoder.withIndent('  ').convert(safeData);
+          print(prettyJson);
+        } catch (e) {
+          print('  ${options.data}');
+        }
+      } else {
+        print('  ${options.data}');
+      }
+    }
+
+    print('=' * 60 + '\n');
+  }
+
+  /// 📝 RESPONSE LOGGER
+  void _logResponse(Response response) {
+    print('\n' + '=' * 60);
+    print('📥 API RESPONSE');
+    print('=' * 60);
+    print('✅ Status Code: ${response.statusCode}');
+    print('🔗 URL: ${response.requestOptions.baseUrl}${response.requestOptions.path}');
+    print('🆔 API Endpoint: ${_getApiNameFromUrl(response.requestOptions.path)}');
+
+    // Log response headers
+    if (response.headers.map.isNotEmpty) {
+      print('📋 Response Headers:');
+      response.headers.forEach((key, values) {
+        print('  $key: $values');
+      });
+    }
+
+    // Log response data
+    if (response.data != null) {
+      print('📦 Response Body:');
+      try {
+        if (response.data is Map) {
+          final prettyJson = JsonEncoder.withIndent('  ').convert(response.data);
+          print(prettyJson);
+        } else if (response.data is String) {
+          final jsonData = jsonDecode(response.data as String);
+          final prettyJson = JsonEncoder.withIndent('  ').convert(jsonData);
+          print(prettyJson);
+        } else {
+          print('  ${response.data}');
+        }
+      } catch (e) {
+        print('  ${response.data}');
+      }
+    }
+
+    // Log response time if available
+    if (response.requestOptions.receiveTimeout != null) {
+      print('⏱️ Receive Timeout: ${response.requestOptions.receiveTimeout}');
+    }
+
+    print('=' * 60 + '\n');
+  }
+
+  /// 📝 ERROR LOGGER
+  void _logError(DioException error) {
+    print('\n' + '=' * 60);
+    print('❌ API ERROR');
+    print('=' * 60);
+    print('🔗 URL: ${error.requestOptions.baseUrl}${error.requestOptions.path}');
+    print('🆔 API Endpoint: ${_getApiNameFromUrl(error.requestOptions.path)}');
+    print('📤 Method: ${error.requestOptions.method}');
+    print('⚠️ Error Type: ${error.type}');
+    print('📊 Status Code: ${error.response?.statusCode}');
+
+    // Log error message
+    if (error.message != null) {
+      print('💬 Error Message: ${error.message}');
+    }
+
+    // Log response data if available
+    if (error.response?.data != null) {
+      print('📦 Error Response:');
+      try {
+        if (error.response!.data is Map) {
+          final prettyJson = JsonEncoder.withIndent('  ').convert(error.response!.data);
+          print(prettyJson);
+        } else if (error.response!.data is String) {
+          final jsonData = jsonDecode(error.response!.data as String);
+          final prettyJson = JsonEncoder.withIndent('  ').convert(jsonData);
+          print(prettyJson);
+        } else {
+          print('  ${error.response!.data}');
+        }
+      } catch (e) {
+        print('  ${error.response!.data}');
+      }
+    }
+
+    // Log stack trace for debugging
+    if (error.stackTrace != null) {
+      print('🔍 Stack Trace:');
+      print(error.stackTrace.toString());
+    }
+
+    print('=' * 60 + '\n');
+  }
+
+  /// 🎭 MASK SENSITIVE DATA
+  /// 🎭 MASK SENSITIVE DATA
+  Map<String, dynamic> _maskSensitiveData(dynamic data) {
+    if (data is! Map) return {};
+
+    final Map<String, dynamic> safeData = {};
+
+    // Convert all keys to String
+    for (var entry in data.entries) {
+      final key = entry.key.toString();
+      var value = entry.value;
+
+      // Mask sensitive fields
+      if (_isSensitiveField(key)) {
+        safeData[key] = '********';
+        continue;
+      }
+
+      // Handle nested maps
+      if (value is Map) {
+        safeData[key] = _maskSensitiveData(value);
+      }
+      // Handle lists
+      else if (value is List) {
+        final List<dynamic> safeList = [];
+        for (var item in value) {
+          if (item is Map) {
+            safeList.add(_maskSensitiveData(item));
+          } else {
+            safeList.add(item);
+          }
+        }
+        safeData[key] = safeList;
+      }
+      // Handle other types
+      else {
+        safeData[key] = value;
+      }
+    }
+
+    return safeData;
+  }
+
+  /// 🔐 CHECK IF FIELD IS SENSITIVE
+  bool _isSensitiveField(String fieldName) {
+    final sensitiveFields = [
+      'password',
+      'token',
+      'access_token',
+      'refresh_token',
+      'authorization',
+      'credit_card',
+      'cvv',
+      'pin',
+      'secret',
+      'private_key',
+      'otp',
+      'social_security',
+      'ssn',
+      'bank_account',
+      'api_key'
+    ];
+
+    return sensitiveFields.contains(fieldName.toLowerCase());
+  }
+  /// 🔍 GET API NAME FROM URL
+  String _getApiNameFromUrl(String path) {
+    for (var api in API.values) {
+      if (apiEndPoint(api) == path) {
+        return api.toString().split('.').last;
+      }
+    }
+    return 'Unknown API';
   }
 
   /// ⚙️ CONFIG
@@ -130,13 +357,12 @@ class APIManager {
         return "/User/profile";
       case API.profileUpdate:
         return "/User/profile-update";
-       case API.addWalletCredits: // <-- endpoint
-      return "/User/add-wallet-credits";
-
+      case API.addWalletCredits:
+        return "/User/add-wallet-credits";
       case API.profileDelete:
         return "/User/profile-delete";
-           case API.walletDetails:
-      return "/User/wallet-details";
+      case API.walletDetails:
+        return "/User/wallet-details";
     }
   }
 
@@ -176,9 +402,9 @@ class APIManager {
         return ChargingListResponse.fromJson(json);
       case API.chargingStationList:
         return ChargingStationListResponse.fromJson(json);
-        case API.addWalletCredits:
+      case API.addWalletCredits:
         return WalletResponse.fromJson(json);
-          case API.walletDetails:
+      case API.walletDetails:
         return WalletListResponse.fromJson(json);
       default:
         return json;
@@ -187,12 +413,12 @@ class APIManager {
 
   /// 🌐 MAIN REQUEST
   Future<dynamic> apiRequest(
-    BuildContext context,
-    API api, {
-    dynamic jsonval,
-    String? path,
-    Map<String, dynamic>? queryParams,
-  }) async {
+      BuildContext context,
+      API api, {
+        dynamic jsonval,
+        String? path,
+        Map<String, dynamic>? queryParams,
+      }) async {
     try {
       final response = await dio.request(
         apiEndPoint(api) + (path ?? ""),

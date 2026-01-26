@@ -25,6 +25,8 @@ class HubProvider extends ChangeNotifier {
 
   final List hubs = [];
   late Set<Marker> markers = {};
+  final List<dynamic> hubs = []; // Use dynamic or ChargingHub type
+  final Set<Marker> markers = {};
   Set<Polyline> polyLines = {};
 
   bool _isRouteLoading = false;
