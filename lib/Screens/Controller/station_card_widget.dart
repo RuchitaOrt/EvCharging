@@ -2,30 +2,83 @@ import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../Provider/HubProvider.dart';
+import '../../model/ChargingHubResponse.dart';
 
 class StationCardWidget extends StatelessWidget {
-  const StationCardWidget({super.key});
+ const StationCardWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 160,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        scrollDirection: Axis.horizontal,
-        itemCount: 5,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (_, __) => const _StationCard(),
+      child: Consumer <HubProvider>(
+        builder: (BuildContext context, HubProvider value, Widget? child) {
+          return ListView.separated(
+            controller: value.scrollController, // from provider
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            scrollDirection: Axis.horizontal,
+            itemCount: value.recordsStation.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            // itemBuilder: (BuildContext context, int index) => _StationCard(value.recordsStation[index]),
+            itemBuilder: (BuildContext context, int index) {
+              final isSelected = value.selectedIndex == index;
+
+              return GestureDetector(
+                  onTap: () {
+                    value.selectStation(index); // 👈 auto scroll here
+                  },
+                  child: _StationCard(
+                    chargingHub: value.recordsStation[index],
+                    isSelected: isSelected,
+                  ),
+              );
+
+            },
+          );
+        },
       ),
     );
   }
 }
 
 class _StationCard extends StatelessWidget {
-  const _StationCard();
+  final ChargingHub chargingHub;
+  final bool isSelected;
+
+  const _StationCard({
+    super.key,
+    required this.chargingHub,
+    required this.isSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final openingTime = _formatTime(chargingHub.openingTime);
+    final closingTime = _formatTime(chargingHub.closingTime);
+    final hours = '$openingTime - $closingTime';
+
+    final distance = chargingHub.distanceKm != null
+        ? '${chargingHub.distanceKm} KM'
+        : 'N/A';
+
+    final rating = chargingHub.averageRating?? 'N/A';
+
+    final typeAPrice = chargingHub.typeATariff?.isNotEmpty == true
+        ? '₹${chargingHub.typeATariff} / kWh'
+        : '₹12.99 / kWh';
+
+    final typeBPrice = chargingHub.typeBTariff?.isNotEmpty == true
+        ? '₹${chargingHub.typeBTariff} / kWh'
+        : '₹12.99 / kWh';
+
+    // Parse amenities
+    final amenitiesStr = chargingHub.amenities?.toString() ?? '';
+    final amenitiesList = amenitiesStr.isNotEmpty
+        ? amenitiesStr.split(',').map((a) => a.trim()).where((a) => a.isNotEmpty).toList()
+        : [];
     return SizedBox(
       width: 338,
       child: Container(
@@ -60,9 +113,9 @@ class _StationCard extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: Text(
-                              "Hitech EV",
+                              chargingHub.chargingHubName ?? "Station Name",
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -75,13 +128,15 @@ class _StationCard extends StatelessWidget {
                       const SizedBox(height: 6),
                       Row(
                         children:  [
-                          _InfoTag(icon: CommonImagePath.redpin, text: "4.8 KM"),
+                          _InfoTag(icon: CommonImagePath.redpin, text: distance),
                           SizedBox(width: 2),
-                          _InfoTag(icon: CommonImagePath.star, text: "4.5"),
+                          _InfoTag(icon: CommonImagePath.star, text: 'NA'),
                           SizedBox(width: 2),
-                          _InfoTag(
-                            icon: CommonImagePath.clock,
-                            text: "9.00AM - 12.00PM",
+                          Expanded(
+                            child: _InfoTag(
+                              icon: CommonImagePath.clock,
+                              text: hours,
+                            ),
                           ),
                         ],
                       ),
@@ -96,16 +151,20 @@ class _StationCard extends StatelessWidget {
             /// --- FOOTER ---
             Row(
               children: [
-                const _TypeInfo(type: "Type 1", price: "₹12.99 / kWh"),
+                  _TypeInfo(type: "Type 1", price: typeAPrice),
                 SizedBox(width: SizeConfig.blockSizeHorizontal * 2),
-                const _TypeInfo(type: "Type 2", price: "₹12.99 / kWh"),
+                  _TypeInfo(type: "Type 2", price: typeBPrice),
                 SizedBox(width: SizeConfig.blockSizeHorizontal * 2),
 
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      // context.read<HubProvider>().getDirection(context, '243245');
+                      context.read<HubProvider>().getDirectionOfRoute(context, chargingHub);
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
+                      // backgroundColor: isSelected ? Colors.lightGreen : Colors.white,
                       foregroundColor: CommonColors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -115,7 +174,7 @@ class _StationCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Get Directions",
                       style: TextStyle(
                         fontSize: 12,
@@ -132,7 +191,24 @@ class _StationCard extends StatelessWidget {
     );
   }
 }
+// Helper method to format time
+String _formatTime(String? time) {
+  if (time == null || time.isEmpty) return "N/A";
 
+  try {
+    final parts = time.split(':');
+    if (parts.length >= 2) {
+      final hour = int.tryParse(parts[0]) ?? 0;
+      final minute = parts[1];
+      final period = hour >= 12 ? 'PM' : 'AM';
+      final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      return '$displayHour:$minute $period';
+    }
+    return time;
+  } catch (e) {
+    return time;
+  }
+}
 class _InfoTag extends StatelessWidget {
   final String icon;
   final String text;
@@ -150,8 +226,8 @@ class _InfoTag extends StatelessWidget {
       child: Row(
         children: [
           Image.asset(icon, height: 14),
-          const SizedBox(width: 4),
-          Text(text, style: const TextStyle(fontSize: 12)),
+          // const SizedBox(width: 4),
+          Text(text, maxLines: 1,  overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );

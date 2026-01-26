@@ -124,14 +124,14 @@ Widget build(BuildContext context) {
             if (hubProvider.isRouteLoading)
               const Center(child: CircularProgressIndicator(color: Colors.green,)),
 
-           /* if (hubProvider.loading)
+            if (hubProvider.loading)
               const Center(child: CircularProgressIndicator()),
             const Positioned(
               bottom: 40,
               left: 0,
               right: 0,
               child: StationCardWidget(),
-            ),*/
+            ),
           ],
         ),
       );

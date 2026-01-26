@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:ev_charging_app/Services/hub_repository.dart';
+import 'package:ev_charging_app/Utils/LocationConvert.dart';
 import 'package:ev_charging_app/model/ChargingHubResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,10 +24,9 @@ class HubProvider extends ChangeNotifier {
   bool hasMore = true;
   int page = 1;
 
-  final List hubs = [];
   late Set<Marker> markers = {};
-  // final List<dynamic> hubs = []; // Use dynamic or ChargingHub type
-  // final Set<Marker> markers = {};
+  List<ChargingHub> _recordsStation =[];
+  List<ChargingHub> get recordsStation => _recordsStation;
   Set<Polyline> polyLines = {};
 
   bool _isRouteLoading = false;
@@ -38,7 +38,33 @@ class HubProvider extends ChangeNotifier {
   BitmapDescriptor? activeMarkerIcon;
   BitmapDescriptor? currentMarkerIcon;
 
-  // ✅ Load icons once
+  int selectedIndex = 0;
+
+  final ScrollController scrollController = ScrollController();
+
+  void selectStation(int index) {
+    selectedIndex = index;
+    scrollToIndex(index);
+    notifyListeners();
+  }
+
+  void scrollToIndex(int index) {
+    const double itemWidth = 350.0; // your card width + separator
+    scrollController.animateTo(
+      index * itemWidth,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  // Load icons once
   Future<void> loadIcons() async {
     normalMarkerIcon = await getResizedMarker(
       'assets/images/normalMarker.png',
@@ -61,7 +87,7 @@ class HubProvider extends ChangeNotifier {
     if (loading || !hasMore) return;
     if (reset) {
       page = 1;
-      hubs.clear();
+      _recordsStation.clear();
       markers.clear();
       hasMore = true;
       // polyLines.clear(); remove routes
@@ -69,15 +95,16 @@ class HubProvider extends ChangeNotifier {
     loading = true;
     notifyListeners();
     try {
+      _recordsStation.clear();
       await loadIcons();
       final ChargingHubResponse res = await _repo.fetchHubs(context);
-      print(res.hubs);
+      print('Hub Stations Lists: ${res.hubs.length}');
       final List<ChargingHub> data = res.hubs ?? [];
       if (data.isEmpty) {
         hasMore = false;
       } else {
-        hubs.addAll(data);
-        _createMarkers(context);
+        _recordsStation.addAll(data);
+        _createMarkers(context, _recordsStation);
         page++;
       }
     } catch (e) {
@@ -88,29 +115,26 @@ class HubProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _createMarkersoldone(List<ChargingHub> hubList) async {
-    for (final hub in hubList) {
-      final double lat = hub.latitude ?? 0.0;
-      final double lng = hub.longitude ?? 0.0;
-      markers.add(
-        Marker(
-          markerId: MarkerId(hub.recId ?? ''),
-          position: LatLng(lat, lng),
-          infoWindow: InfoWindow(
-              title: hub.chargingHubName ?? '',
-              snippet: 'Tap for details',
-              onTap: () {
-                debugPrint('Marker tapped: ${hub.additionalInfo1}');
-              }),
-        ),
-      );
-    }
-  }
 
-  Future<void> _createMarkers(BuildContext context) async {
+  Future<void> _createMarkers(BuildContext context,List<ChargingHub> hubList) async {
     markers.clear();
+    //
+    for (final hub in hubList) {
+      LatLng? location = LocationConvert.getLatLngFromHub(hub);
+      if (location != null) {
+        markers.add(
+          _buildMarker(
+            id: hub.recId??'',
+            position: LatLng(location.latitude, location.longitude),
+            title: hub.chargingHubName??'',
+            // icon: targetMarkerIcon!,
+          ),
+        );
+      }
+    }
+    //
 
-    markers.add(
+/*    markers.add(
       _buildMarker(
         id: "243243",
         position: const LatLng(19.196262132107243, 72.96296701103056),
@@ -140,16 +164,16 @@ class HubProvider extends ChangeNotifier {
         id: "243246",
         position: const LatLng(19.262147, 72.983966),
         title: "Vishu Electric Vehicle Charging Station",
-        /*onTap: () async {
+        *//*onTap: () async {
           final position = await MapController().getCurrentPosition();
           clearRoute();
           drawRoute(
             LatLng(position.latitude, position.longitude),
             const LatLng(19.193039, 72.953840),
           );
-        },*/
+        },*//*
       ),
-    );
+    );*/
   }
 
   Marker _buildMarker({
@@ -159,19 +183,7 @@ class HubProvider extends ChangeNotifier {
     BitmapDescriptor? icon,
     VoidCallback? onTap,
   }) {
-    /* final String id = m.markerId.value;
-    BitmapDescriptor iconToUse;
-    if (id == "12345678") {
-      //current location marker
-      iconToUse = currentMarkerIcon!;
-    } else if (id == selectedMarkerId) {
-      //active selected marker
-      iconToUse = activeMarkerIcon!;
-    } else {
-      //normal marker
-      iconToUse = normalMarkerIcon!;
-    }*/
-    return Marker(
+     return Marker(
       markerId: MarkerId(id),
       position: position,
       icon: selectedMarkerId == id
@@ -180,21 +192,17 @@ class HubProvider extends ChangeNotifier {
               ? currentMarkerIcon!
               : (icon ?? normalMarkerIcon!),
       anchor: const Offset(0.5, 0.5),
-      infoWindow: InfoWindow(title: title, snippet: "Tap for details"),
+      // infoWindow: InfoWindow(title: title, snippet: "Tap for details"),
       onTap: () async {
         clearRoute();
-        _isRouteLoading = true;
-        selectMarker(id);
-        //
-        final currentPosition = await MapController().getCurrentPosition();
-        // clearRoute();
-        drawRoute(
-          //current position
-          LatLng(currentPosition.latitude, currentPosition.longitude),
-          // target position
-          LatLng(position.latitude, position.longitude),
-        );
-        _isRouteLoading = false;
+         for (int i = 0; i < _recordsStation.length; i++) {
+          if (_recordsStation[i].recId == id) {
+            print('Card Position $i');
+            scrollToIndex(i);
+            selectMarker(id);
+            break;
+          }
+        }
         //
         if (onTap != null) onTap();
       },
@@ -356,4 +364,41 @@ class HubProvider extends ChangeNotifier {
     polyLines.clear();
     notifyListeners();
   }
+  void getDirection(BuildContext context, String markerId){
+    selectedMarkerId = markerId;
+    _createMarkers(context, _recordsStation);
+    notifyListeners();
+  }
+  Future<void> getDirectionOfRoute(BuildContext context,ChargingHub chargingHub) async {
+    selectedMarkerId = chargingHub.recId;
+    // selectedMarkerId =  '243243';
+    _createMarkers(context, _recordsStation);
+    //
+    clearRoute();
+    _isRouteLoading = true;
+    selectMarker(chargingHub.recId??'');
+    // selectMarker('243243');
+    //
+    // LatLng location = convertToLatLng('${chargingHub.latitude}', '${chargingHub.longitude}');
+    LatLng? location = LocationConvert.getLatLngFromHub(chargingHub);
+    if (location != null) {
+      print(location.latitude);  // 19.0991
+      print(location.longitude); // 72.9165
+      final currentPosition = await MapController().getCurrentPosition();
+      // clearRoute();
+      drawRoute(
+        //current position no required we define in route method
+        LatLng(currentPosition.latitude, currentPosition.longitude),
+        // target position
+        // LatLng(chargingHub.latitude ?? 0.0, chargingHub.longitude?? 0.0),
+        location,
+        //   LatLng(19.196262132107243, 72.96296701103056)
+      );
+    }
+    _isRouteLoading = false;
+    notifyListeners();
+  }
+
+
+
 }

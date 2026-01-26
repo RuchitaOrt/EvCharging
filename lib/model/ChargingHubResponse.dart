@@ -32,6 +32,7 @@ class ChargingHubResponse {
     };
   }
 }
+
 class ChargingHub {
   final String? recId;
   final String? chargingHubName;
@@ -42,8 +43,8 @@ class ChargingHub {
   final String? city;
   final String? state;
   final String? pincode;
-  final double? latitude;
-  final double? longitude;
+  final String? latitude;
+  final String? longitude;
   final String? openingTime;
   final String? closingTime;
   final String? typeATariff;
@@ -100,13 +101,14 @@ class ChargingHub {
       pincode: json['pincode'],
 
       // Lat/Long is sent as string, parse safely
-      latitude: json['latitude'] != null
-          ? double.tryParse(json['latitude'].toString())
-          : null,
-      longitude: json['longitude'] != null
-          ? double.tryParse(json['longitude'].toString())
-          : null,
-
+      // latitude: json['latitude'] != null
+      //     ? double.tryParse(json['latitude'].toString())
+      //     : null,
+      // longitude: json['longitude'] != null
+      //     ? double.tryParse(json['longitude'].toString())
+      //     : null,
+      latitude: json['latitude'],
+      longitude: json['longitude'],
       openingTime: json['openingTime'],
       closingTime: json['closingTime'],
       typeATariff: json['typeATariff'],
@@ -146,8 +148,8 @@ class ChargingHub {
       'city': city,
       'state': state,
       'pincode': pincode,
-      'latitude': latitude?.toString(),
-      'longitude': longitude?.toString(),
+      'latitude': latitude,
+      'longitude': longitude,
       'openingTime': openingTime,
       'closingTime': closingTime,
       'typeATariff': typeATariff,

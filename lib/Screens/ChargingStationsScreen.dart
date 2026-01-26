@@ -368,11 +368,10 @@ class ChargingStationsScreen extends StatelessWidget {
         builder: (context, provider, child) {
           // Load data when screen is first built
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (provider.hubs.isEmpty && !provider.loading) {
+            if (provider.recordsStation.isEmpty && !provider.loading) {
               provider.loadHubs(context, reset: true);
             }
           });
-
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(
@@ -408,14 +407,14 @@ class ChargingStationsScreen extends StatelessWidget {
   // Helper method to build the main content
   Widget _buildMainContent(BuildContext context, HubProvider provider) {
     // Show loading
-    if (provider.loading && provider.hubs.isEmpty) {
+    if (provider.loading && provider.recordsStation.isEmpty) {
       return Center(
         child: CircularProgressIndicator(),
       );
     }
 
     // Show empty state
-    if (provider.hubs.isEmpty && !provider.loading) {
+    if (provider.recordsStation.isEmpty && !provider.loading) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -445,9 +444,9 @@ class ChargingStationsScreen extends StatelessWidget {
         await provider.loadHubs(context, reset: true);
       },
       child: ListView.builder(
-        itemCount: provider.hubs.length,
+        itemCount: provider.recordsStation.length,
         itemBuilder: (context, index) {
-          final hub = provider.hubs[index];
+          final hub = provider.recordsStation[index];
           return _stationCard(hub);
         },
       ),
@@ -498,7 +497,7 @@ class ChargingStationsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             padding: const EdgeInsets.all(8),
-            height: 160,
+            height: 180,
             decoration: BoxDecoration(
               color: CommonColors.white,
               borderRadius: BorderRadius.circular(12),

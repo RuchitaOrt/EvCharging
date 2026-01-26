@@ -27,7 +27,7 @@ class MapController {
    /// One-time camera move
   Future<void> moveToCurrentLocation() async {
     final Position position = await _getPosition();
-    print('Current Location: ${position.latitude}, ${position.longitude}');
+    // print('Current Location: ${position.latitude}, ${position.longitude}');
     zoomTo(LatLng(position.latitude, position.longitude));
   }
   void zoomTo(LatLng position) {
@@ -35,7 +35,7 @@ class MapController {
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: position,
-          zoom: 15, // adjust if needed
+          zoom: 12, // adjust if needed
         ),
       ),
     );
