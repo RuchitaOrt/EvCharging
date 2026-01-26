@@ -19,47 +19,36 @@ class HubProvider extends ChangeNotifier {
   final List<dynamic> hubs = []; // Use dynamic or ChargingHub type
   final Set<Marker> markers = {};
 
-    Future<void> loadHubs(
-        BuildContext context, {
-          bool reset = false,
-        }) async {
-      if (loading || !hasMore) return;
-
-      if (reset) {
-        page = 1;
-        hubs.clear();
-        markers.clear();
-        hasMore = true;
-      }
-
-      loading = true;
-      notifyListeners();
-
-      try {
-        final ChargingHubResponse res = await _repo.fetchHubs(
-          context,
-          page: page,
-          size: 10,
-        );
-
-        print('API Response: ${res.hubs?.length} hubs');
-
-        final List<dynamic> data = res.hubs ?? [];
-
-        if (data.isEmpty) {
-          hasMore = false;
-        } else {
-          hubs.addAll(data);
-          _createMarkers(data);
-          page++;
-        }
-      } catch (e) {
-        debugPrint('Error loading hubs: $e');
-      }
-
-      loading = false;
-      notifyListeners();
+  Future<void> loadHubs(BuildContext context, {
+    bool reset = false,
+  }) async {
+    if (loading || !hasMore) return;
+    if (reset) {
+      page = 1;
+      hubs.clear();
+      markers.clear();
+      hasMore = true;
     }
+    loading = true;
+    notifyListeners();
+    try {
+      final ChargingHubResponse res = await _repo.fetchHubs(context);
+      print(res.hubs); // ✅ directly access hubs
+      final List<ChargingHub> data = res.hubs ?? [];
+      if (data.isEmpty) {
+        hasMore = false;
+      } else {
+        hubs.addAll(data);
+        _createMarkers(data,context);
+        page++;
+      }
+    } catch (e) {
+      debugPrint('Error loading hubs: $e');
+    }
+
+    loading = false;
+    notifyListeners();
+  }
 
   void _createMarkers(List<dynamic> hubList) {
     for (final hub in hubList) {
