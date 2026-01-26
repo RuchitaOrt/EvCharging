@@ -1,11 +1,13 @@
 import 'package:ev_charging_app/Provider/WalletProvider.dart';
 import 'package:ev_charging_app/Request/AddWalletRequest.dart';
+import 'package:ev_charging_app/Utils/AuthStorage.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonstrings.dart';
 import 'package:ev_charging_app/widget/TextWithAsterisk.dart';
 import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 void showAddMoneyBottomSheet(BuildContext context) {
   final provider = context.read<WalletProvider>();
   final _amountController = TextEditingController();
@@ -46,7 +48,7 @@ void showAddMoneyBottomSheet(BuildContext context) {
             ),
             const SizedBox(height: 16),
             TextWithAsterisk(text: "Transaction Type", isAstrick: false),
-            
+
             // Row-style radio buttons
             Row(
               children: [
@@ -114,7 +116,7 @@ void showAddMoneyBottomSheet(BuildContext context) {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   final amount = double.tryParse(_amountController.text);
                   if (amount == null || amount <= 0) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -122,11 +124,12 @@ void showAddMoneyBottomSheet(BuildContext context) {
                     );
                     return;
                   }
-
+                  final userId = await AuthStorage.getUserId();
+                  print("UserId: $userId");
                   provider.addCredits(
                     context,
                     AddWalletRequest(
-                      userId: "34b9bfb0-67ad-42c1-a40f-d01ef55fb6bb",
+                      userId: userId!,
                       amount: amount,
                       transactionType: transactionType,
                       paymentRecId: "razorpay_payment_id",
@@ -136,7 +139,10 @@ void showAddMoneyBottomSheet(BuildContext context) {
 
                   Navigator.pop(ctx);
                 },
-                child: const Text("Done,",style: TextStyle(color: CommonColors.white),),
+                child: const Text(
+                  "Done,",
+                  style: TextStyle(color: CommonColors.white),
+                ),
               ),
             ),
             const SizedBox(height: 20),

@@ -2,7 +2,11 @@ import 'package:ev_charging_app/Provider/AuthProvider.dart';
 import 'package:ev_charging_app/Provider/HubProvider.dart';
 import 'package:ev_charging_app/Provider/LoginProvider.dart';
 import 'package:ev_charging_app/Provider/ProfileProvider.dart';
+import 'package:ev_charging_app/Provider/VehicleProvider.dart';
 import 'package:ev_charging_app/Provider/WalletProvider.dart';
+import 'package:ev_charging_app/Provider/car_manufacturer_provider.dart';
+import 'package:ev_charging_app/Provider/hardware_master_provider.dart';
+import 'package:ev_charging_app/Provider/user_vehicle_provider.dart';
 import 'package:ev_charging_app/Routers/routers.dart';
 
 import 'package:ev_charging_app/Screens/SplashScreen.dart';
@@ -46,6 +50,12 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+         ChangeNotifierProvider(create: (_) => VehicleProvider()),
+           ChangeNotifierProvider(create: (_) => UserVehicleProvider()),
+         ChangeNotifierProvider(
+  create: (_) => HardwareMasterProvider(),
+),
+
         ChangeNotifierProvider(
           create: (_) => HubProvider(),
         ),

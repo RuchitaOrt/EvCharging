@@ -8,7 +8,11 @@ class AuthStorage {
     final userId = prefs.getString(_keyUserId);
     return userId != null && userId.isNotEmpty;
   }
-
+ /// 🔥 Get stored userId
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserId);
+  }
   Future<void> clearLocalStorage() async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
