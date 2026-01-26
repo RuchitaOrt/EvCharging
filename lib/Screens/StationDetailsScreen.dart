@@ -226,7 +226,7 @@ Widget chargerDetail() {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      charger.lastMeter.toString() ?? "",
+                                  charger.lastMeter==null?"":    charger.lastMeter.toString() ?? "",
                                       style: const TextStyle(
                                           fontSize: 12,
                                           color:
