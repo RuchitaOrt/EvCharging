@@ -46,7 +46,7 @@ class ChargingHub {
   final String? typeATariff;
   final String? typeBTariff;
   final String? amenities;
-  final double? distanceKm;
+  final String? distanceKm;
   final int totalStations;
   final int totalChargers;
   final int availableChargers;
@@ -90,7 +90,8 @@ class ChargingHub {
       typeATariff: json['typeATariff'],
       typeBTariff: json['typeBTariff'],
       amenities: json['amenities'],
-      distanceKm: json['distanceKm']?.toDouble(),
+      // distanceKm: json['distanceKm']?.toDouble(),
+      distanceKm: json['distanceKm']?? '',
       totalStations: json['totalStations'] ?? 0,
       totalChargers: json['totalChargers'] ?? 0,
       availableChargers: json['availableChargers'] ?? 0,
@@ -142,7 +143,7 @@ class Charger {
   final String connectorName;
   final String lastStatus;
   final String? lastStatusTime;
-  final int? lastMeter;
+  final String? lastMeter;
   final String? lastMeterTime;
 
   Charger({
@@ -162,8 +163,8 @@ class Charger {
       connectorName: json['connectorName'] ?? '',
       lastStatus: json['lastStatus'] ?? '',
       lastStatusTime: json['lastStatusTime'],
-      lastMeter: json['lastMeter'],
-      lastMeterTime: json['lastMeterTime'],
+      lastMeter: json['lastMeter']?.toString(),
+      lastMeterTime: json['lastMeterTime']?.toString(),
     );
   }
 }
