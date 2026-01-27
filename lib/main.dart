@@ -20,7 +20,9 @@ import 'package:provider/provider.dart';
 
 import 'Provider/MapOverViewProvider.dart';
 import 'Provider/NavigationProvider.dart';
+import 'Screens/Controller/driver_map_controller.dart';
 import 'Screens/Controller/map_controller.dart';
+import 'Screens/Controller/map_overview_controller.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
@@ -51,6 +53,8 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final mapController = MapController();
+    final mapDriverController = DriverMapController();
+    final mapOverViewController = OverViewMapController();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
@@ -69,10 +73,10 @@ class _MyAppState extends State<MyApp> {
           create: (_) => WalletProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => NavigationProvider(mapController),
+          create: (_) => NavigationProvider(mapDriverController),
         ),
         ChangeNotifierProvider(
-          create: (_) => MapOverViewProvider(mapController),
+          create: (_) => MapOverViewProvider(mapOverViewController),
         ),
       ],
       child: MaterialApp(

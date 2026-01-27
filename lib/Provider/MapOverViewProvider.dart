@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../Screens/Controller/map_controller.dart';
+import '../Screens/Controller/map_overview_controller.dart';
 import '../Utils/directions_service.dart';
 import '../Utils/iconresizer.dart';
 import '../model/ChargingcomprehensiveHubResponse.dart';
@@ -16,7 +16,7 @@ class MapOverViewProvider extends ChangeNotifier {
   final HubRepository _repo = HubRepository();
   final DirectionsService _directionsService = DirectionsService();
 
-  final MapController mapController;
+  final OverViewMapController mapController;
   MapOverViewProvider(this.mapController);
 
   Set<Marker> markers = {};
