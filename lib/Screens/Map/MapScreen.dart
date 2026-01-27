@@ -24,21 +24,27 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late MapController controller;
-  late String mapsStyle;
+  String? mapsStyle;
 
   @override
   void initState() {
     super.initState();
     controller = MapController();
+    final provider = context.read<HubProvider>();
+    provider.listenToScroll(350);
     print("LOGGED IN init");
     loadData();
   }
 
 
-  loadData() {
+  loadData() async {
+    final style = await DefaultAssetBundle.of(context)
+        .loadString('assets/map_styles/dark_map.json');
+    setState(() {
+      mapsStyle = style;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      mapsStyle = await DefaultAssetBundle.of(context)
-          .loadString('assets/map_styles/dark_map.json');
+
       context.read<HubProvider>().loadHubs(context);
       // if (!widget.isLogin) {
       //   showLoginSheet(context);
@@ -90,7 +96,11 @@ class _MapScreenState extends State<MapScreen> {
                 myLocationEnabled: false,
                 myLocationButtonEnabled: false,
                 markers: hubProvider.markers,
-                onMapCreated: controller.onMapCreated,
+                // onMapCreated: controller.onMapCreated,
+                onMapCreated:(controller){
+                  context.read<HubProvider>().mapController.onMap2Created(controller);
+                  // context.read<HubProvider>().initFirstItem(350); // card width + spacing
+                },
                 onCameraIdle: () {
                   // hubProvider.loadHubs(context);
                 },
@@ -107,10 +117,7 @@ class _MapScreenState extends State<MapScreen> {
                 },
                 onLongPress: (LatLong) async {
                   print('MapScreen Click');
-                  hubProvider.clearRoute();
-                  // final Position position = await MapController().getCurrentPosition();
-                  // // drawRoute(LatLng(19.262147, 72.983966), LatLng(19.193039, 72.953840));
-                  // hubProvider.drawRoute(LatLng(position.latitude, position.longitude), LatLng(19.196262, 72.962967));
+                  // hubProvider.clearRoute();
                 },
               ),
               const Positioned(

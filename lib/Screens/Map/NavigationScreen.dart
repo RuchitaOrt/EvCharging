@@ -27,7 +27,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
 
 
   late MapController controller;
-  late String mapsStyle;
+  String? mapsStyle;
 
   @override
   void initState() {
@@ -41,10 +41,15 @@ class _NavigationScreenState extends State<NavigationScreen> {
     });
   }
 
-  loadData() {
+  loadData() async {
+    final style = await DefaultAssetBundle.of(context)
+        .loadString('assets/map_styles/dark_map.json');
+    setState(() {
+      mapsStyle = style;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      mapsStyle = await DefaultAssetBundle.of(context)
-          .loadString('assets/map_styles/dark_map.json');
+      // mapsStyle = await DefaultAssetBundle.of(context)
+      //     .loadString('assets/map_styles/dark_map.json');
       context.read<NavigationProvider>().drawRouteWithInfo(widget.hub);
     });
   }
@@ -136,7 +141,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
                       children: [
                         Icon(Icons.drive_eta, color: naviProvider.isDriving ? Colors.green: Colors.red,),
                         SizedBox(width: 4,),
-                        Text('Navigating — ${naviProvider.durationText} • ${naviProvider.distanceText}',
+                        Text('Navigating — ${naviProvider.durationText?? ''} • ${naviProvider.distanceText??''}',
                             style: TextStyle(color: Colors.white)),
                       ],
                     ),

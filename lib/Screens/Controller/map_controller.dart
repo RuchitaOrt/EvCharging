@@ -8,11 +8,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../Utils/location_permission_manager.dart';
 
 class MapController {
-  late GoogleMapController googleMapController;
+  // late GoogleMapController googleMapController;
+  GoogleMapController? googleMapController;
   final LatLng center = const LatLng(19.0760, 72.8777);
   LatLng? currentLocation;
   StreamSubscription<Position>? _positionStream;
-
+  bool get isReady => googleMapController != null;
 
   Future<void> onMapCreated(GoogleMapController controller) async {
 
@@ -21,7 +22,13 @@ class MapController {
     // controller.setMapStyle(style);
     googleMapController = controller;
      await moveToCurrentLocation();
-
+  }
+  Future<void> onMap2Created(GoogleMapController controller) async {
+    // String style = await DefaultAssetBundle.of(routeGlobalKey.currentContext!)
+    //     .loadString('assets/map_styles/dark_map.json');
+    // controller.setMapStyle(style);
+    googleMapController = controller;
+     // await moveToCurrentLocation();
   }
    /// One-time camera move
   Future<void> moveToCurrentLocation() async {
@@ -30,8 +37,12 @@ class MapController {
     zoomTo(LatLng(position.latitude, position.longitude));
   }
   void zoomTo(LatLng position) {
+    if (googleMapController == null) {
+      debugPrint("Map not ready yet");
+      return;
+    }
     if (googleMapController == null) return; // safety check
-    googleMapController!.animateCamera(
+    googleMapController?.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: position,

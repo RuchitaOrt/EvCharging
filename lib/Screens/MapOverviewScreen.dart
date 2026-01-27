@@ -1,12 +1,12 @@
 import 'dart:ui';
 
-import 'package:ev_charging_app/Provider/HubProvider.dart';
+import 'package:ev_charging_app/Provider/MapOverViewProvider.dart';
 import 'package:ev_charging_app/Screens/MapStationCardScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-
+import '../Provider/MapOverViewProvider.dart';
 import '../Utils/LocationConvert.dart';
 import '../model/ChargingcomprehensiveHubResponse.dart';
 import 'Controller/map_controller.dart';
@@ -27,7 +27,7 @@ class _MapOverviewScreenState extends State<MapOverviewScreen> {
 
   bool showSheet = false; // controls animation
   late MapController controller;
-  late String mapsStyle;
+  String? mapsStyle;
   @override
   void initState() {
     super.initState();
@@ -42,23 +42,26 @@ class _MapOverviewScreenState extends State<MapOverviewScreen> {
 
   }
 
-  loadData() {
+  loadData() async {
+    final  style = await DefaultAssetBundle.of(context)
+        .loadString('assets/map_styles/dark_map.json');
+    setState(() {
+      mapsStyle=style;
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      mapsStyle = await DefaultAssetBundle.of(context)
-          .loadString('assets/map_styles/dark_map.json');
-      context.read<HubProvider>().loadHubs(context);
-    //
-      LatLng targetLocation = LocationConvert.getLatLngFromHub(widget.hub)!;
-      if (targetLocation != null) {
-        context.read<HubProvider>().drawRoute(LatLng(0.0, 0.0), targetLocation);
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        // mapsStyle = await DefaultAssetBundle.of(context)
+        //     .loadString('assets/map_styles/dark_map.json');
+        context.read<MapOverViewProvider>().drawRouteWithInfo(widget.hub);
+      });
+
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<HubProvider>(
-        builder: (_, hubProvider, __) {
+    return Consumer<MapOverViewProvider>(
+        builder: (_, MapOverViewProvider, __) {
           return Scaffold(
             body: Stack(
               children: [
@@ -68,17 +71,20 @@ class _MapOverviewScreenState extends State<MapOverviewScreen> {
                     initialCameraPosition: CameraPosition(
                       // target location
                       target: LatLng(widget.location.latitude, widget.location.longitude),
-                      // target: hubProvider.firstMarkerPosition!,
+                      // target: MapOverViewProvider.firstMarkerPosition!,
                       zoom: 12,
                       tilt: 45,
                       bearing: 0,
                     ),
                     myLocationEnabled: false,
                     myLocationButtonEnabled: false,
-                    markers: hubProvider.markers,
-                    onMapCreated: controller.onMapCreated,
+                    markers: MapOverViewProvider.markers,
+                    onMapCreated: (controller){
+                      MapOverViewProvider.mapController.onMap2Created(controller);
+                      // context.read<MapOverViewProvider>().mapController.onMapCreated(controller);
+                    },
                     onCameraIdle: () {
-                      // hubProvider.loadHubs(context);
+                      // MapOverViewProvider.loadHubs(context);
                     },
                     zoomControlsEnabled: false,
                     style: mapsStyle,
@@ -86,17 +92,23 @@ class _MapOverviewScreenState extends State<MapOverviewScreen> {
                     mapToolbarEnabled: false,
                     buildingsEnabled: false,
                     trafficEnabled: false,
-                    polylines: hubProvider.polyLines,
+
+                    // zoomGesturesEnabled: false,
+                    // scrollGesturesEnabled: false,
+                    // rotateGesturesEnabled:false,
+                    // tiltGesturesEnabled: false,
+
+                    polylines: MapOverViewProvider.polyLines,
                     onTap: (LatLng) {
                       print('MapScreen Click');
-                      // hubProvider.clearRoute();
+                      // MapOverViewProvider.clearRoute();
                     },
                     onLongPress: (LatLong) async {
                       print('MapScreen Click');
-                      hubProvider.clearRoute();
+                      // MapOverViewProvider.clearRoute();
                       // final Position position = await MapController().getCurrentPosition();
                       // // drawRoute(LatLng(19.262147, 72.983966), LatLng(19.193039, 72.953840));
-                      // hubProvider.drawRoute(LatLng(position.latitude, position.longitude), LatLng(19.196262, 72.962967));
+                      // MapOverViewProvider.drawRoute(LatLng(position.latitude, position.longitude), LatLng(19.196262, 72.962967));
 
                     },
                   ),

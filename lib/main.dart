@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import 'Provider/MapOverViewProvider.dart';
 import 'Provider/NavigationProvider.dart';
 import 'Screens/Controller/map_controller.dart';
 
@@ -62,13 +63,16 @@ class _MyAppState extends State<MyApp> {
           create: (_) => HardwareMasterProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => HubProvider(),
+          create: (_) => HubProvider(mapController),
         ),
         ChangeNotifierProvider(
           create: (_) => WalletProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => NavigationProvider(mapController),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MapOverViewProvider(mapController),
         ),
       ],
       child: MaterialApp(

@@ -30,10 +30,10 @@ class StationCardWidget extends StatelessWidget {
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             // itemBuilder: (BuildContext context, int index) => _StationCard(value.recordsStation[index]),
             itemBuilder: (BuildContext context, int index) {
-              final isSelected = value.selectedIndex == index;
+              final isSelected = value.currentVisibleIndex == index;
               return GestureDetector(
                   onTap: () {
-                    // value.selectStation(index); // 👈 auto scroll here
+                    // value.selectStation(index); // auto scroll here
                   },
                   child: _StationCard(
                     chargingHub: value.recordsStation[index],
@@ -186,8 +186,8 @@ class _StationCard extends StatelessWidget {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      // backgroundColor: isSelected ? Colors.lightGreen : Colors.white,
+                      // backgroundColor: Colors.white,
+                      backgroundColor: isSelected ? Colors.lightGreen : Colors.white,
                       foregroundColor: CommonColors.blue,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -250,7 +250,7 @@ class _InfoTag extends StatelessWidget {
         children: [
           Image.asset(icon, height: 14),
           // const SizedBox(width: 4),
-          Text(text, maxLines: 1,  overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12)),
+          Text(text, maxLines: 1,  overflow: TextOverflow.fade, style: const TextStyle(fontSize: 12)),
         ],
       ),
     );

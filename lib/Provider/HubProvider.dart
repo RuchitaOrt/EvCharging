@@ -14,6 +14,8 @@ import '../model/ChargingcomprehensiveHubResponse.dart';
 class HubProvider extends ChangeNotifier {
   final HubRepository _repo = HubRepository();
   final DirectionsService _directionsService = DirectionsService();
+  final MapController mapController;
+  HubProvider(this.mapController);
   bool hasZoomedToFirst = false;
 
   LatLng? get firstMarkerPosition {
@@ -39,15 +41,11 @@ class HubProvider extends ChangeNotifier {
   BitmapDescriptor? activeMarkerIcon;
   BitmapDescriptor? currentMarkerIcon;
 
-  int selectedIndex = 0;
+
+  int currentVisibleIndex = 0;
 
   final ScrollController scrollController = ScrollController();
 
-  void selectStation(int index) {
-    selectedIndex = index;
-    scrollToIndex(index);
-    notifyListeners();
-  }
 
   void scrollToIndex(int index) {
     const double itemWidth = 350.0; // your card width + separator
@@ -56,6 +54,48 @@ class HubProvider extends ChangeNotifier {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+  void initFirstItem(double itemWidth) {
+    if (recordsStation.isEmpty) return;
+    currentVisibleIndex = 0;
+    ChargingHub hub = recordsStation[0];
+    clearRoute();
+    LatLng? location = LocationConvert.getLatLngFromHub(hub);
+    if (location != null) {
+      print('0 Item Position: ${hub.chargingHubName}');
+      //wait for map to be ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mapController.isReady) return;
+        mapController.zoomTo(location);
+        getDirection(hub.recId);
+      });
+      // mapController.zoomTo(location);
+      // getDirection(hub.recId);
+    }
+    notifyListeners();
+  }
+
+
+  void listenToScroll(double itemWidth) {
+    scrollController.addListener(() {
+      final offset = scrollController.offset;
+      final index = (offset / itemWidth).round();
+      if (index != currentVisibleIndex && index >= 0 && index < recordsStation.length) {
+        currentVisibleIndex = index;
+        ChargingHub hub = recordsStation[index];
+        print('$index Item Position: ${hub.chargingHubName}');
+        clearRoute();
+        // selectMarker(hub.recId);
+        LatLng? location = LocationConvert.getLatLngFromHub(hub);
+        if (location != null) {
+          print(location.latitude);  // 19.0991
+          print(location.longitude); // 72.9165
+          mapController.zoomTo(location);
+          getDirection(hub.recId);
+        }
+        notifyListeners();
+      }
+    });
   }
 
 
@@ -85,6 +125,7 @@ class HubProvider extends ChangeNotifier {
     BuildContext context, {
     bool reset = false,
   }) async {
+    clearRoute();
     if (loading || !hasMore) return;
     if (reset) {
       page = 1;
@@ -93,10 +134,8 @@ class HubProvider extends ChangeNotifier {
       hasMore = true;
       // polyLines.clear(); remove routes
     }
-
     loading = true;
     notifyListeners();
-
    /* try {
       _recordsStation.clear();
       await loadIcons();
@@ -123,21 +162,19 @@ class HubProvider extends ChangeNotifier {
         hasMore = false;
       } else {
         _recordsStation.addAll(data);
-        _createMarkers(context, _recordsStation);
+        _createMarkers( _recordsStation);
         page++;
+        initFirstItem(350);
       }
     } catch (e) {
       debugPrint(e.toString());
     }
-
-
-
     loading = false;
-    notifyListeners();
+    // notifyListeners();
   }
 
 
-  Future<void> _createMarkers(BuildContext context,List<ChargingHub> hubList) async {
+  Future<void> _createMarkers(List<ChargingHub> hubList) async {
     markers.clear();
     //
     for (final hub in hubList) {
@@ -332,10 +369,6 @@ class HubProvider extends ChangeNotifier {
     LatLng start,
     LatLng end,
   ) async {
-    // BitmapDescriptor  normalMarkerIcon = await getResizedMarker(
-    //   'assets/images/currentMarker.png',
-    //   width: 125,
-    // );
     final Position position = await MapController().getCurrentPosition();
     markers.add(
       _buildMarker(
@@ -385,15 +418,15 @@ class HubProvider extends ChangeNotifier {
     polyLines.clear();
     notifyListeners();
   }
-  void getDirection(BuildContext context, String markerId){
+  void getDirection(String markerId){
     selectedMarkerId = markerId;
-    _createMarkers(context, _recordsStation);
+    _createMarkers(_recordsStation);
     notifyListeners();
   }
   Future<void> getDirectionOfRoute(BuildContext context,ChargingHub chargingHub) async {
     selectedMarkerId = chargingHub.recId;
     // selectedMarkerId =  '243243';
-    _createMarkers(context, _recordsStation);
+    _createMarkers(_recordsStation);
     //
     clearRoute();
     _isRouteLoading = true;
