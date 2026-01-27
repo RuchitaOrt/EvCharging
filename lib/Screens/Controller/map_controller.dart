@@ -20,8 +20,7 @@ class MapController {
     //     .loadString('assets/map_styles/dark_map.json');
     // controller.setMapStyle(style);
     googleMapController = controller;
-    // Move camera to current location
-    await moveToCurrentLocation();
+     await moveToCurrentLocation();
 
   }
    /// One-time camera move
@@ -31,17 +30,46 @@ class MapController {
     zoomTo(LatLng(position.latitude, position.longitude));
   }
   void zoomTo(LatLng position) {
-    googleMapController.animateCamera(
+    if (googleMapController == null) return; // safety check
+    googleMapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: position,
+          zoom: 12,
+          // zoom: 17.5,
+          tilt: 55,
+        ),
+      ),
+    );
+    /*googleMapController.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: position,
           zoom: 12, // adjust if needed
         ),
       ),
+    );*/
+  }
+  void zoom(LatLng position, double bearing, double speed) {
+    final zoom = getZoomBySpeed(speed);
+     googleMapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: position,
+          zoom: zoom,
+          tilt: 55,
+          bearing: bearing,
+        ),
+      ),
     );
   }
+  double getZoomBySpeed(double speed) {
+    if (speed < 5) return 18;      // walking / slow
+    if (speed < 15) return 17.5;   // city driving
+    return 16;                     // highway
+  }
 
-   void startLocationTracking() {
+  void startLocationTracking() {
     _positionStream?.cancel(); // safety
     _positionStream = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(

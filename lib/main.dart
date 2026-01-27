@@ -18,6 +18,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
+import 'Provider/NavigationProvider.dart';
+import 'Screens/Controller/map_controller.dart';
+
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
@@ -46,24 +49,27 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final mapController = MapController();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
-         ChangeNotifierProvider(create: (_) => VehicleProvider()),
-           ChangeNotifierProvider(create: (_) => UserVehicleProvider()),
-              ChangeNotifierProvider(create: (_) => ChargingHubProvider()),
-         ChangeNotifierProvider(
-  create: (_) => HardwareMasterProvider(),
-),
-
+        ChangeNotifierProvider(create: (_) => VehicleProvider()),
+        ChangeNotifierProvider(create: (_) => UserVehicleProvider()),
+        ChangeNotifierProvider(create: (_) => ChargingHubProvider()),
+        ChangeNotifierProvider(
+          create: (_) => HardwareMasterProvider(),
+        ),
         ChangeNotifierProvider(
           create: (_) => HubProvider(),
         ),
         ChangeNotifierProvider(
           create: (_) => WalletProvider(),
-        )
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NavigationProvider(mapController),
+        ),
       ],
       child: MaterialApp(
         navigatorObservers: [routeObserver],

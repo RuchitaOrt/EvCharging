@@ -2,10 +2,16 @@ import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' show LatLng, BitmapDescriptor, Marker, MarkerId;
 import 'package:provider/provider.dart';
 
 import '../../Provider/HubProvider.dart';
-import '../../model/ChargingHubResponse.dart';
+import '../../Utils/LocationConvert.dart';
+import '../../Utils/iconresizer.dart';
+import '../../main.dart';
+import '../../model/ChargingcomprehensiveHubResponse.dart';
+import '../StationDetailsScreen.dart';
+// import '../../model/ChargingHubResponse.dart';
 
 class StationCardWidget extends StatelessWidget {
  const StationCardWidget({super.key});
@@ -25,10 +31,9 @@ class StationCardWidget extends StatelessWidget {
             // itemBuilder: (BuildContext context, int index) => _StationCard(value.recordsStation[index]),
             itemBuilder: (BuildContext context, int index) {
               final isSelected = value.selectedIndex == index;
-
               return GestureDetector(
                   onTap: () {
-                    value.selectStation(index); // 👈 auto scroll here
+                    // value.selectStation(index); // 👈 auto scroll here
                   },
                   child: _StationCard(
                     chargingHub: value.recordsStation[index],
@@ -64,7 +69,8 @@ class _StationCard extends StatelessWidget {
         ? '${chargingHub.distanceKm} KM'
         : 'N/A';
 
-    final rating = chargingHub.averageRating?? 'N/A';
+    // final rating = chargingHub.averageRating?? 'N/A';
+    final rating = 'N/A';
 
     final typeAPrice = chargingHub.typeATariff?.isNotEmpty == true
         ? '₹${chargingHub.typeATariff} / kWh'
@@ -158,9 +164,26 @@ class _StationCard extends StatelessWidget {
 
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       // context.read<HubProvider>().getDirection(context, '243245');
-                      context.read<HubProvider>().getDirectionOfRoute(context, chargingHub);
+                      // context.read<HubProvider>().getDirectionOfRoute(context, chargingHub);
+                      LatLng? location = LocationConvert.getLatLngFromHub(chargingHub);
+                      if (location != null) {
+                        BitmapDescriptor?  activeMarkerIcon = await getResizedMarker(
+                          'assets/images/targetMarker.png',
+                          width: 125,
+                        );
+                        Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(builder: (_) => StationDetailsScreen(hub: chargingHub,
+                            marker: Marker(
+                              markerId: MarkerId(chargingHub.recId),
+                              position: location,
+                              icon: activeMarkerIcon,
+                            )
+                            ,location: location,)),
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,

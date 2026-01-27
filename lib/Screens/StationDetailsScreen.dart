@@ -7,22 +7,30 @@ import 'package:ev_charging_app/main.dart';
 import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+import '../Utils/LocationConvert.dart';
+import '../Utils/iconresizer.dart';
+import 'Controller/map_controller.dart';
 
 class StationDetailsScreen extends StatelessWidget {
   final ChargingHub hub;
+  final Marker marker;
+  final LatLng location;
 
   StationDetailsScreen({
     super.key,
     required this.hub,
+    required this.marker,
+    required this.location,
   });
   GoogleMapController? mapController;
-
-  final LatLng center = const LatLng(17.4444, 78.3772);
-
+  // final LatLng center = const LatLng(17.4444, 78.3772);
   Set<Marker> markers = {
-    Marker(
+   /* Marker(
       markerId: MarkerId("station1"),
       position: LatLng(17.4444, 78.3772),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
@@ -31,12 +39,19 @@ class StationDetailsScreen extends StatelessWidget {
       markerId: MarkerId("station2"),
       position: LatLng(17.4500, 78.3800),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-    )
+    )*/
   };
+
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness:Brightness.dark
+    ));
     final w = MediaQuery.of(context).size.width;
+    markers.add(marker);
     return Scaffold(
       backgroundColor: CommonColors.neutral200,
       appBar: CommonAppBar(
@@ -53,17 +68,28 @@ class StationDetailsScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: GoogleMap(
-                initialCameraPosition: CameraPosition(target: center, zoom: 13),
+                initialCameraPosition: CameraPosition(
+                  target: location,
+                  zoom: 16,
+                  tilt: 45,
+                  bearing: 0,
+                ),
+                myLocationEnabled: false,
+                myLocationButtonEnabled: false,
                 onMapCreated: (controller) async {
                   mapController = controller;
-
                   String style = await DefaultAssetBundle.of(context)
                       .loadString('assets/map_styles/dark_map.json');
-
                   mapController!.setMapStyle(style);
                 },
                 markers: markers,
                 zoomControlsEnabled: false,
+                zoomGesturesEnabled: false,
+                compassEnabled: false,
+                mapToolbarEnabled: false,
+                buildingsEnabled: false,
+                trafficEnabled: false,
+                tiltGesturesEnabled: false,
               ),
             ),
 
@@ -329,11 +355,15 @@ Widget _navigateButton() {
   return SizedBox(
     width: double.infinity,
     child: ElevatedButton(
-      onPressed: () {
-        Navigator.push(
-          routeGlobalKey.currentContext!,
-          MaterialPageRoute(builder: (_) => MapOverviewScreen()),
-        );
+      onPressed: () async {
+        final Position position = await MapController().getCurrentPosition();
+        if(position.longitude!=null){
+          Navigator.push(
+            routeGlobalKey.currentContext!,
+            MaterialPageRoute(builder: (_) => MapOverviewScreen(hub: hub, location: position,)),
+          );
+        }
+
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: CommonColors.blue,
@@ -654,4 +684,6 @@ Widget _navigateButton() {
       ),
     );
   }
+
 }
+

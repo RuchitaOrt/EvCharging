@@ -35,7 +35,6 @@ class ChargingHubProvider extends ChangeNotifier {
       message = "Failed to load charging hubs";
       debugPrint("❌ Charging hub error: $e");
     }
-
     loading = false;
     notifyListeners();
   }

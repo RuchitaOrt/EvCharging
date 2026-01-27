@@ -1,6 +1,8 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import '../model/ChargingHubResponse.dart';
+import '../model/ChargingcomprehensiveHubResponse.dart';
+
+// import '../model/ChargingHubResponse.dart';
 
 class LocationConvert{
  static LatLng? getLatLngFromHub(ChargingHub hub) {

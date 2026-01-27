@@ -16,4 +16,18 @@ class HubRepository {
       },
     );
   }
+  Future<dynamic> getChargingHubsMap(
+      BuildContext context, {
+        int pageNumber = 1,
+        int pageSize = 100,
+      }) async {
+    return await _apiManager.apiRequest(
+      context,
+      API.comprehensivelist,
+      jsonval: {
+        "pageNumber": pageNumber,
+        "pageSize": pageSize,
+      },
+    );
+  }
 }

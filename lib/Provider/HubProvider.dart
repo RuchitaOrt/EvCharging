@@ -1,7 +1,7 @@
 import 'dart:ui';
 import 'package:ev_charging_app/Services/hub_repository.dart';
 import 'package:ev_charging_app/Utils/LocationConvert.dart';
-import 'package:ev_charging_app/model/ChargingHubResponse.dart';
+// import 'package:ev_charging_app/model/ChargingHubResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../Screens/Controller/map_controller.dart';
 import '../Utils/directions_service.dart';
 import '../Utils/iconresizer.dart';
+import '../model/ChargingcomprehensiveHubResponse.dart';
 
 class HubProvider extends ChangeNotifier {
   final HubRepository _repo = HubRepository();
@@ -96,7 +97,7 @@ class HubProvider extends ChangeNotifier {
     loading = true;
     notifyListeners();
 
-    try {
+   /* try {
       _recordsStation.clear();
       await loadIcons();
       final ChargingHubResponse res = await _repo.fetchHubs(context);
@@ -111,7 +112,25 @@ class HubProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint(e.toString());
+    }*/
+    try {
+      _recordsStation.clear();
+      await loadIcons();
+      final ChargingcomprehensiveHubResponse res = await _repo.getChargingHubsMap(context);
+      print('Hub Stations Lists: ${res.hubs.length}');
+      final List<ChargingHub> data = res.hubs ?? [];
+      if (data.isEmpty) {
+        hasMore = false;
+      } else {
+        _recordsStation.addAll(data);
+        _createMarkers(context, _recordsStation);
+        page++;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
     }
+
+
 
     loading = false;
     notifyListeners();

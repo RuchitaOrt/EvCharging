@@ -9,8 +9,12 @@ import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/main.dart';
 import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
+
+import '../Utils/LocationConvert.dart';
+import '../Utils/iconresizer.dart';
 
 class ChargingStationsScreen extends StatefulWidget {
   const ChargingStationsScreen({super.key});
@@ -166,11 +170,28 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
     final closing = hub.closingTime ?? 'N/A';
 
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          routeGlobalKey.currentContext!,
-          MaterialPageRoute(builder: (_) => StationDetailsScreen(hub: hub)),
-        );
+      onTap: () async {
+        LatLng? location = LocationConvert.getLatLngFromHub(hub);
+        if (location != null) {
+          BitmapDescriptor?  activeMarkerIcon = await getResizedMarker(
+            'assets/images/targetMarker.png',
+            width: 125,
+          );
+          Navigator.push(
+            routeGlobalKey.currentContext!,
+            MaterialPageRoute(builder: (_) => StationDetailsScreen(hub: hub,
+              marker: Marker(
+                markerId: MarkerId(hub.recId),
+                position: location,
+                icon: activeMarkerIcon,
+              )
+              ,location: location,)),
+          );
+        }
+        // Navigator.push(
+        //   routeGlobalKey.currentContext!,
+        //   MaterialPageRoute(builder: (_) => StationDetailsScreen(hub: hub)),
+        // );
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
