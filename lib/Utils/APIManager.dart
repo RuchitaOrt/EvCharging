@@ -49,10 +49,14 @@ enum API {
   chargerTypeList,
   userVehicleDelete,
   userVehicleUpdate,
+  comprehensivelist,
   startChargingSession,
   endChargingSession,
   unlockConnector,
-  comprehensivelist
+  //
+  charginggunstatus,
+  chargingsessiondetails,
+  chargingsessions
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -67,6 +71,7 @@ class APIManager {
 
   /// 🔒 Singleton
   static final APIManager _instance = APIManager._privateConstructor();
+
   factory APIManager() => _instance;
 
   APIManager._privateConstructor() {
@@ -409,6 +414,7 @@ class APIManager {
         return "/User/user-vehicle-delete";
       case API.userVehicleUpdate:
         return "/User/user-vehicle-update";
+
       case API.startChargingSession:
         return "/ChargingSession/start-charging-session";
 
@@ -417,8 +423,14 @@ class APIManager {
 
       case API.unlockConnector:
         return "/ChargingSession/unlock-connector";
-         case API.comprehensivelist:
+      case API.comprehensivelist:
         return "/ChargingHub/comprehensive-list";
+      case API.charginggunstatus:
+        return "/ChargingSession/charging-gun-status";
+      case API.chargingsessiondetails:
+        return "/ChargingSession/charging-session-details";
+      case API.chargingsessions:
+        return "/ChargingSession/charging-sessions";
     }
   }
 
@@ -484,7 +496,7 @@ class APIManager {
         return EndChargingSessionResponse.fromJson(json);
       case API.unlockConnector:
         return UnlockConnectorResponse.fromJson(json);
- case API.comprehensivelist:
+      case API.comprehensivelist:
         return ChargingcomprehensiveHubResponse.fromJson(json);
       default:
         return json;

@@ -93,7 +93,7 @@ class _MapScreenState extends State<MapScreen> {
                   tilt: 45,
                   bearing: 0,
                 ),
-                myLocationEnabled: false,
+                myLocationEnabled: true,
                 myLocationButtonEnabled: false,
                 markers: hubProvider.markers,
                 // onMapCreated: controller.onMapCreated,
@@ -122,9 +122,28 @@ class _MapScreenState extends State<MapScreen> {
               ),
               const Positioned(
                   top: 60, left: 20, right: 20, child: SearchBarWidget()),
-              const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
+              // const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
+              Positioned(
+                top: 190,
+                right: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(color: Colors.black26, blurRadius: 4),
+                    ],
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.gps_fixed, color: Colors.black),
+                    onPressed: () async {
+                      await context.read<HubProvider>().mapController.moveToCurrentLocation();
+                    },
+                  ),
+                ),
+              ),
               const Positioned(
-                  top: 190, right: 20, child: DiscountWidget(label: "10 %")),
+                  top: 130, right: 20, child: DiscountWidget(label: "10 %")),
               if (hubProvider.isRouteLoading)
                 const Center(
                     child: CircularProgressIndicator(

@@ -9,9 +9,7 @@ import 'package:ev_charging_app/Services/ChargingService.dart';
 class ChargingProvider extends ChangeNotifier {
   bool loading = false;
   StartChargingSessionResponse? sessionResponse;
-
   final ChargingService _service = ChargingService();
-
   Future<bool> startSession({
     required BuildContext context,
     required String chargingGunId,
