@@ -1,4 +1,9 @@
+import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
 import 'package:ev_charging_app/Provider/AuthProvider.dart';
+import 'package:ev_charging_app/Provider/ChargingEstimateProvider.dart';
+import 'package:ev_charging_app/Provider/ChargingGunStatusProvider.dart';
+import 'package:ev_charging_app/Provider/ChargingHubReviewProvider.dart';
+import 'package:ev_charging_app/Provider/ChargingProvider.dart';
 import 'package:ev_charging_app/Provider/HubProvider.dart';
 import 'package:ev_charging_app/Provider/LoginProvider.dart';
 import 'package:ev_charging_app/Provider/ProfileProvider.dart';
@@ -11,6 +16,7 @@ import 'package:ev_charging_app/Provider/user_vehicle_provider.dart';
 import 'package:ev_charging_app/Routers/routers.dart';
 
 import 'package:ev_charging_app/Screens/SplashScreen.dart';
+import 'package:ev_charging_app/Services/ChargingHistorySessionProvider.dart';
 import 'package:ev_charging_app/Utils/UtilityFile.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +69,13 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => VehicleProvider()),
         ChangeNotifierProvider(create: (_) => UserVehicleProvider()),
         ChangeNotifierProvider(create: (_) => ChargingHubProvider()),
+         ChangeNotifierProvider(create: (_) => ChargingHubReviewProvider()),
+         ChangeNotifierProvider(create: (_) => ChargingHistorySessionProvider()),
+          ChangeNotifierProvider(create: (_) => ChargingEstimateProvider()),
+           ChangeNotifierProvider(create: (_) => ChargingGunStatusProvider()),
+          ChangeNotifierProvider(create: (_) => ChargingGunStatusProvider()),
+                ChangeNotifierProvider(create: (_) => ActiveSessionProvider()),
+                  ChangeNotifierProvider(create: (_) => ChargingProvider()),
         ChangeNotifierProvider(
           create: (_) => HardwareMasterProvider(),
         ),
@@ -79,22 +92,28 @@ class _MyAppState extends State<MyApp> {
           create: (_) => MapOverViewProvider(mapOverViewController),
         ),
       ],
-      child: MaterialApp(
-        navigatorObservers: [routeObserver],
-        title: 'Ev Charging',
-        debugShowCheckedModeBanner: false,
-        navigatorKey: routeGlobalKey,
-        theme: ThemeData(
-          textTheme: GoogleFonts.poppinsTextTheme(),
-          textSelectionTheme: TextSelectionThemeData(
-            selectionColor:
-                CommonColors.blue.withOpacity(0.3), // background highlight
-            selectionHandleColor: CommonColors.blue, // draggable handle
-            cursorColor: CommonColors.blue, // fallback cursor
+      child: SafeArea(
+        bottom: true,
+        child: MaterialApp(
+          navigatorObservers: [routeObserver],
+          title: 'Ev Charging',
+          debugShowCheckedModeBanner: false,
+          navigatorKey: routeGlobalKey,
+          theme: ThemeData(
+            textTheme: GoogleFonts.poppinsTextTheme(),
+             progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: CommonColors.blue,
+    ),
+            textSelectionTheme: TextSelectionThemeData(
+              selectionColor:
+                  CommonColors.blue.withOpacity(0.3), // background highlight
+              selectionHandleColor: CommonColors.blue, // draggable handle
+              cursorColor: CommonColors.blue, // fallback cursor
+            ),
           ),
+          initialRoute: SplashScreen.route,
+          onGenerateRoute: Routers.generateRoute,
         ),
-        initialRoute: SplashScreen.route,
-        onGenerateRoute: Routers.generateRoute,
       ),
     );
   }

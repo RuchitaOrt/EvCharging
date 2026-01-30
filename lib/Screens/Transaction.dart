@@ -35,7 +35,7 @@ class _TransactionState extends State<Transaction> {
     return Scaffold(
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(
-          title: "Transaction",
+          title: "Transactions",
           onBack: () {
             Navigator.push(
               context,
@@ -299,11 +299,12 @@ class _AddMoneyButton extends StatelessWidget {
 }
 class _TransactionSection extends StatelessWidget {
   const _TransactionSection();
-
-  @override
+ @override
   Widget build(BuildContext context) {
     return Consumer<WalletProvider>(
       builder: (context, provider, _) {
+        final transactions = provider.filteredTransactions;
+
         if (provider.isLoading) {
           return const Padding(
             padding: EdgeInsets.all(24),
@@ -311,94 +312,200 @@ class _TransactionSection extends StatelessWidget {
           );
         }
 
-        // final transactions =
-        //     provider.walletListResponse?.wallet?.recentTransactions ?? [];
-final transactions = provider.filteredTransactions;
-
-        if (transactions.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.all(24),
-            child: Center(child: Text("No transactions found")),
-          );
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Transactions",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                ),
-
-
-              IntrinsicWidth(
-  child: GestureDetector(
-    onTap: () => _showFilterDialog(context),
-    child: Container(
-      padding: const EdgeInsets.only(bottom: 4, left: 8, right: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: CommonColors.blue,
-            width: 1.5,
+        // Minimum height to fill space even if no data
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: MediaQuery.of(context).size.height * 0.5,
           ),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SvgPicture.asset(
-            CommonImagePath.filterblue,
-            color: CommonColors.blue,
-          ),
-          const SizedBox(width: 5),
-          Consumer<WalletProvider>(
-            builder: (context, provider, _) {
-              return Text(
-               "Filter",
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: CommonColors.blue,
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    ),
-  ),
-)
-
-              ],
-            ),
-             const SizedBox(height: 12),
-            _tabButton( provider.filterLabel, Icons.menu, 0),
-            const SizedBox(height: 16),
-
-            ...transactions.map((tx) {
-              final isCredit = tx.transactionType == "Credit";
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _TransactionTile(
-                  item: _Tx(
-                    _buildTitle("${tx.transactionType} - ${tx.additionalInfo1}"),
-                    "₹${tx.currentCreditBalance ?? "0"}",
-                    _formatDate(tx.createdOn.toString()),
-                    isCredit,
+          child: transactions.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                     
+                      Text(
+                        "No transactions found",
+                       
+                      ),
+                    ],
                   ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Wallet",
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.w700),
+                        ),
+                        IntrinsicWidth(
+                          child: GestureDetector(
+                            onTap: () => _showFilterDialog(context),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                  bottom: 4, left: 8, right: 8),
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: CommonColors.blue,
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SvgPicture.asset(
+                                    CommonImagePath.filterblue,
+                                    color: CommonColors.blue,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    provider.filterLabel,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: CommonColors.blue,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _tabButton(provider.filterLabel, Icons.menu, 0),
+                    const SizedBox(height: 16),
+
+                    ...transactions.map((tx) {
+                      final isCredit = tx!.transactionType == "Credit";
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _TransactionTile(
+                          item: _Tx(
+                            _buildTitle(
+                                "${tx!.transactionType!} - ${tx!.additionalInfo1!}"),
+                            "₹${tx.amount.toString() ?? "0"}",
+                            _formatDate(tx!.createdOn!.toString()),
+                            isCredit,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+
+                    // Optional: Add extra space at bottom
+                    const SizedBox(height: 50),
+                  ],
                 ),
-              );
-            }).toList(),
-          ],
         );
       },
     );
   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Consumer<WalletProvider>(
+//       builder: (context, provider, _) {
+//         if (provider.isLoading) {
+//           return const Padding(
+//             padding: EdgeInsets.all(24),
+//             child: Center(child: CircularProgressIndicator()),
+//           );
+//         }
+
+//         // final transactions =
+//         //     provider.walletListResponse?.wallet?.recentTransactions ?? [];
+// final transactions = provider.filteredTransactions;
+
+//         if (transactions.isEmpty) {
+//           return const Padding(
+//             padding: EdgeInsets.all(24),
+//             child: Center(child: Text("No transactions found")),
+//           );
+//         }
+
+//         return Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 const Text(
+//                   "Wallet",
+//                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+//                 ),
+
+
+//               IntrinsicWidth(
+//   child: GestureDetector(
+//     onTap: () => _showFilterDialog(context),
+//     child: Container(
+//       padding: const EdgeInsets.only(bottom: 4, left: 8, right: 8),
+//       decoration: BoxDecoration(
+//         border: Border(
+//           bottom: BorderSide(
+//             color: CommonColors.blue,
+//             width: 1.5,
+//           ),
+//         ),
+//       ),
+//       child: Row(
+//         mainAxisSize: MainAxisSize.min,
+//         children: [
+//           SvgPicture.asset(
+//             CommonImagePath.filterblue,
+//             color: CommonColors.blue,
+//           ),
+//           const SizedBox(width: 5),
+//           Consumer<WalletProvider>(
+//             builder: (context, provider, _) {
+//               return Text(
+//                "Filter",
+//                 style: TextStyle(
+//                   fontSize: 12,
+//                   fontWeight: FontWeight.w600,
+//                   color: CommonColors.blue,
+//                 ),
+//               );
+//             },
+//           ),
+//         ],
+//       ),
+//     ),
+//   ),
+// )
+
+//               ],
+//             ),
+//              const SizedBox(height: 12),
+//             _tabButton( provider.filterLabel, Icons.menu, 0),
+//             const SizedBox(height: 16),
+
+//             ...transactions.map((tx) {
+//               final isCredit = tx.transactionType == "Credit";
+
+//               return Padding(
+//                 padding: const EdgeInsets.only(bottom: 12),
+//                 child: _TransactionTile(
+//                   item: _Tx(
+//                     _buildTitle("${tx.transactionType} - ${tx.additionalInfo1}"),
+//                     "₹${tx.currentCreditBalance ?? "0"}",
+//                     _formatDate(tx.createdOn.toString()),
+//                     isCredit,
+//                   ),
+//                 ),
+//               );
+//             }).toList(),
+//           ],
+//         );
+//       },
+//     );
+//   }
 void _showFilterDialog(BuildContext context) {
   final provider = context.read<WalletProvider>();
   WalletFilterType tempSelected = provider.selectedFilter;

@@ -6,11 +6,13 @@ import 'package:ev_charging_app/Utils/ShowDialog.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/commonstrings.dart';
+import 'package:ev_charging_app/Utils/regex_helper.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/main.dart';
 import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -34,6 +36,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   );
   TextEditingController firstNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmpasswordController = TextEditingController();
 
@@ -122,6 +125,21 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               autovalidateMode: AutovalidateMode.disabled,
                             ),
                           ),
+                        ],
+                      ),
+                      CustomTextFieldWidget(
+                        title: CommonStrings.strMobileNo,
+                        isMandatory: false,
+                        hintText: CommonStrings.strPhoneNumberHint,
+                        textEditingController: mobileController,
+                        textInputType: const TextInputType.numberWithOptions(
+                          signed: false,
+                          decimal: false,
+                        ),
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(10),
+                          FilteringTextInputFormatter.allow(
+                              RegExp(RegexHelper().numberOnlyRegex)),
                         ],
                       ),
                       CustomTextFieldWidget(
@@ -242,43 +260,52 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                       ),
                       onPressed: () async {
-                        // Login logic
-final request = RegisterRequest(
-  firstName: firstNameController.text.trim(),
-  lastName: lastNameController.text.trim(),
-  eMailID: emailController.text.trim(),
-  phoneNumber: "9029635200",
-  countryCode: "",
-  password: passwordController.text.trim(),
-  confirmPassword: confirmpasswordController.text.trim(),
-  addressLine1: "",
-  addressLine2: "",
-  addressLine3: "",
-  state: "",
-  city: "",
-  pinCode: "",
-);
- final provider = context.read<AuthProvider>();
+                        FocusManager.instance.primaryFocus?.unfocus();
 
-  bool success = await provider.register(context, request);
+                        // Login logic
+                        final request = RegisterRequest(
+                          firstName: firstNameController.text.trim(),
+                          lastName: lastNameController.text.trim(),
+                          eMailID: emailController.text.trim(),
+                          phoneNumber: mobileController.text,
+                          countryCode: "",
+                          password: passwordController.text.trim(),
+                          confirmPassword:
+                              confirmpasswordController.text.trim(),
+                          addressLine1: "",
+                          addressLine2: "",
+                          addressLine3: "",
+                          state: "",
+                          city: "",
+                          pinCode: "",
+                        );
+                        final provider = context.read<AuthProvider>();
+
+                        bool success =
+                            await provider.register(context, request);
 // bool success = await context.read<AuthProvider>().register(context, request);
 
-if (success) {
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    showToast("${provider.message}");
-    Navigator.pushReplacement(
-      routeGlobalKey.currentContext!,
-      MaterialPageRoute(
-        builder: (context) => MainTab(isLoggedIn: GlobalLists.islLogin),
-      ),
-    );
-  });
-}
-
+                        if (success) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            showToast("${provider.message}");
+                            Navigator.pushReplacement(
+                              routeGlobalKey.currentContext!,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MainTab(isLoggedIn: GlobalLists.islLogin),
+                              ),
+                            );
+                          });
+                        }
                       },
                       child: authProvider.isLoading
-                          ? CircularProgressIndicator(
-                              color: CommonColors.white,
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: CommonColors.white,
+                              ),
                             )
                           : Text(
                               "Create an account",

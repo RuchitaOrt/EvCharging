@@ -53,7 +53,7 @@ class _MyVehicleScreenState extends State<MyVehicleScreen> {
                   shrinkWrap: true,
                   children: [
                     ...provider.vehicles.map(
-                      (v) => _vehicleItem(v.carModelVariant!, v.recId!,v),
+                      (v) => _vehicleItem(v.carRegistrationNumber!, v.recId!,v),
                     ),
                     const SizedBox(height: 10),
                     _addVehicleButton(),

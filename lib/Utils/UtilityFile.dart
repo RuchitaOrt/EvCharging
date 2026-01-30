@@ -127,24 +127,24 @@ class Utility extends ChangeNotifier {
     return osName;
   }
 
-  showAlert(BuildContext ctx, String title, String message) {
-    return showDialog(
-        context: ctx,
-        builder: (context) {
-          return AlertDialog(
-            title: Text("$title"),
-            content: Text("$message"),
-            actions: <Widget>[
-              ElevatedButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.pop(context, true);
-                },
-              ),
-            ],
-          );
-        });
-  }
+  // showAlert(BuildContext ctx, String title, String message) {
+  //   return showDialog(
+  //       context: ctx,
+  //       builder: (context) {
+  //         return AlertDialog(
+  //           title: Text("$title"),
+  //           content: Text("$message"),
+  //           actions: <Widget>[
+  //             ElevatedButton(
+  //               child: const Text('OK'),
+  //               onPressed: () {
+  //                 Navigator.pop(context, true);
+  //               },
+  //             ),
+  //           ],
+  //         );
+  //       });
+  // }
 
   logoutUser(BuildContext ctx) {
     // SPManager().clear().then((value) {

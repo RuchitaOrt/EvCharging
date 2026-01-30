@@ -48,6 +48,7 @@ class WalletTransaction {
   final String? currentCreditBalance;
   final String? transactionType;
   final String? paymentRecId;
+  final num? amount;
   final String? chargingSessionId;
   final String? additionalInfo1;
   final String? additionalInfo2;
@@ -59,6 +60,7 @@ class WalletTransaction {
     this.previousCreditBalance,
     this.currentCreditBalance,
     this.transactionType,
+    this.amount,
     this.paymentRecId,
     this.chargingSessionId,
     this.additionalInfo1,
@@ -72,6 +74,7 @@ class WalletTransaction {
       recId: json['recId'],
       previousCreditBalance: json['previousCreditBalance'],
       currentCreditBalance: json['currentCreditBalance'],
+       amount: json['amount'],
       transactionType: json['transactionType'],
       paymentRecId: json['paymentRecId'],
       chargingSessionId: json['chargingSessionId'],

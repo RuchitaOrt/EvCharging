@@ -6,6 +6,21 @@
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
 		<string>Ev Charging App</string>
+		<key>NSLocationWhenInUseUsageDescription</key>
+        <string>We need your location to show nearby charging stations.</string>
+
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>We need location access to improve charging experience.</string>
+
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Location is required to show charging stations on map.</string>
+
+		<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+		<dict>
+		<key>LocationPurpose</key>
+		<string>To find nearby EV charging stations</string>
+		</dict>
+
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>

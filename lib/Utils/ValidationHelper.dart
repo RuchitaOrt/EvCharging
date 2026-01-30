@@ -14,17 +14,24 @@ class ValidationHelper {
     return value != null && value.trim().isNotEmpty;
   }
 
-  static bool isPasswordValid(String password) {
-    return password.trim().isNotEmpty;
-  }
-  static bool isConfirmPassword(String password) {
-    return password.trim().isNotEmpty;
-  }
+
+  // static bool isPasswordValid(String password) {
+  //   return password.trim().isNotEmpty;
+  // }
+  // static bool isConfirmPassword(String password) {
+  //   return password.trim().isNotEmpty;
+  // }
 
   static bool isPanValid(String pan) {
     return RegexHelper().isPanCardValid(pan);
   }
+static bool isPasswordValid(String password) {
+  return password.trim().length >= 6;
+}
 
+static bool isConfirmPassword(String password) {
+  return password.trim().length >= 6;
+}
 
   static bool isAlphaNumeric(String value, {bool withComma = false}) {
     return RegexHelper().isAlphaNumericText(withComma: withComma).hasMatch(value);

@@ -1,15 +1,18 @@
 
 import 'package:ev_charging_app/Provider/charging_hub_provider.dart';
+import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
 import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Screens/StationDetailsScreen.dart';
 import 'package:ev_charging_app/Utils/CommonAppBar.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
+import 'package:ev_charging_app/Utils/googleMap.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/main.dart';
 import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -50,7 +53,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
   Widget _searchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      height: 48,
+      height: 40,
       decoration: BoxDecoration(
         color: CommonColors.neutral50,
         borderRadius: BorderRadius.circular(12),
@@ -72,21 +75,30 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
                 hintStyle: TextStyle(color: CommonColors.hintGrey),
               ),
               onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase().trim();
-                });
-              },
+  context.read<ChargingHubProvider>().searchHub(value);
+},
+
+              // onChanged: (value) {
+              //   setState(() {
+              //     _searchQuery = value.toLowerCase().trim();
+              //   });
+              // },
             ),
           ),
           if (_searchQuery.isNotEmpty)
             IconButton(
               icon: Icon(Icons.clear, size: 18, color: CommonColors.hintGrey),
+              // onPressed: () {
+              //   setState(() {
+              //     _searchQuery = '';
+              //     _searchController.clear();
+              //   });
+              // },
               onPressed: () {
-                setState(() {
-                  _searchQuery = '';
-                  _searchController.clear();
-                });
-              },
+  _searchController.clear();
+  context.read<ChargingHubProvider>().clearSearch();
+},
+
             ),
         ],
       ),
@@ -98,7 +110,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
     return Scaffold(
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(
-        title: "Charging Stations",
+        title: "Charging Hubs",
         onBack: () {
           Navigator.push(
             context,
@@ -110,6 +122,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
       ),
       body: Consumer<ChargingHubProvider>(
         builder: (context, provider, _) {
+            final list = provider.filteredHubs;
           /// FIRST LOAD
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (provider.hubs.isEmpty && !provider.loading) {
@@ -118,9 +131,10 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
             }
           });
 
-          if (provider.loading && provider.hubs.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
+          // if (provider.loading && provider.hubs.isEmpty) {
+          //   return const Center(child: CircularProgressIndicator());
+          // }
+
 
           return Column(
             children: [
@@ -129,7 +143,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
                 child: Row(
                   children: [
                     SizedBox(
-                      width: SizeConfig.blockSizeHorizontal * 73,
+                      width: SizeConfig.blockSizeHorizontal * 78,
                       child: _searchBar(),
                     ),
                     SizedBox(width: 10),
@@ -137,23 +151,45 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
                   ],
                 ),
               ),
-              Expanded(
+            (!provider.loading && provider.filteredHubs.isEmpty) ? Expanded(
+    child: Center(
+      child: Text(
+        'No charging hubs found',
+        style: TextStyle(color: Colors.grey),
+      ),
+    ),
+  ):   Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
-                  itemCount: provider.hubs.length + 1,
-                  itemBuilder: (context, index) {
-                    if (index == provider.hubs.length) {
-                      return provider.loading
-                          ? const Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Center(child: CircularProgressIndicator()),
-                            )
-                          : const SizedBox(height: 80);
-                    }
+                
 
-                    final hub = provider.hubs[index];
-                    return _stationBottomCard(hub);
-                  },
+itemCount: list.length + (provider.loading ? 1 : 0),
+
+itemBuilder: (context, index) {
+  if (index == list.length) {
+    return const Padding(
+      padding: EdgeInsets.all(16),
+      child: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  final hub = list[index];
+  return _stationBottomCard(hub);
+},
+                  // itemCount: provider.hubs.length + 1,
+                  // itemBuilder: (context, index) {
+                  //   if (index == provider.hubs.length) {
+                  //     return provider.loading
+                  //         ? const Padding(
+                  //             padding: EdgeInsets.all(16),
+                  //             child: Center(child: CircularProgressIndicator()),
+                  //           )
+                  //         : const SizedBox(height: 80);
+                  //   }
+
+                  //   final hub = provider.hubs[index];
+                  //   return _stationBottomCard(hub);
+                  // },
                 ),
               ),
             ],
@@ -164,11 +200,33 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
   }
 
   // ---------------- Station Card ----------------
-
+   Position? _currentPosition;
+    void _fetchCurrentLocation() async {
+    Position? position = await MapController().getCurrentPosition();
+    if (position != null) {
+      setState(() {
+        _currentPosition = position;
+      });
+      // print(
+      //     "Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}");
+    }
+  }
+  double distance=0.0;
   Widget _stationBottomCard(dynamic hub) {
+    _fetchCurrentLocation();
     final opening = hub.openingTime ?? 'N/A';
     final closing = hub.closingTime ?? 'N/A';
+  
 
+    LatLng? location = LocationConvert.getLatLngFromHub(hub);
+ if (_currentPosition != null) {
+       distance  = Geolocator.distanceBetween(
+              _currentPosition!.latitude,
+              _currentPosition!.longitude,
+            location!.latitude,
+              location!.longitude) /
+          1000;
+    }
     return GestureDetector(
       onTap: () async {
         LatLng? location = LocationConvert.getLatLngFromHub(hub);
@@ -232,22 +290,22 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
                                   ),
                                 ),
                               ),
-                              const Icon(Icons.more_vert,
-                                  color: CommonColors.blue),
+                              // const Icon(Icons.more_vert,
+                              //     color: CommonColors.blue),
                             ],
                           ),
                           Row(
                             children: [
                               _infoTag(
                                   CommonImagePath.redpin,
-                                  hub.distanceKm != null
-                                      ? "${hub.distanceKm} KM"
+                                  distance != null
+                                      ? "${distance.toStringAsFixed(2)} KM"
                                       : "N/A"),
                               const SizedBox(width: 4),
                               _infoTag(
                                   CommonImagePath.star,
-                                  // hub.averageRating?.toString() ??
-                                  "0"),
+                                   hub.averageRating.toStringAsFixed(0) ?? 0.0
+                                  ),
                               const SizedBox(width: 4),
                               _infoTag(
                                   CommonImagePath.clock, "$opening - $closing"),
@@ -264,7 +322,7 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
 
               // Amenities
               Text(
-                hub.amenities ?? "4 Plugs • Wifi • Cafe • Restaurant",
+                hub.amenities ?? "",
                 style: const TextStyle(
                     fontSize: 12, color: CommonColors.neutral500),
               ),
@@ -279,7 +337,19 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
                   Expanded(
                       child: _typeInfo(
                           "Type B", "₹${hub.typeBTariff ?? '--'} / kWh")),
-                  SvgPicture.asset(CommonImagePath.direction),
+                  GestureDetector(
+                    onTap: ()
+                    {
+                     LatLng? location =
+                              LocationConvert.getLatLngFromHub(hub);
+                          print(location!.latitude);
+                          print(location!.longitude);
+                          openGoogleMaps(
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                          );
+                    },
+                    child: SvgPicture.asset(CommonImagePath.direction)),
                 ],
               ),
             ],

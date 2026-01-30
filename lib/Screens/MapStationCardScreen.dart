@@ -66,7 +66,7 @@ class _MapStationCardScreenState extends State<MapStationCardScreen> {
                           const SizedBox(width: 8),
 
                           Text(
-                            widget.hub.chargingHubName,
+                            widget.hub.chargingHubName!,
                             style: TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 16),
                           ),

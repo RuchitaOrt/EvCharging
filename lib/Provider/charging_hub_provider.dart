@@ -29,13 +29,53 @@ class ChargingHubProvider extends ChangeNotifier {
       if (res.success) {
         hubs = res.hubs;
       }
-
+ _applySearch(); 
       message = res.message;
     } catch (e) {
       message = "Failed to load charging hubs";
       debugPrint("❌ Charging hub error: $e");
     }
     loading = false;
+    notifyListeners();
+  }
+  void searchHub(String query) {
+  _searchQuery = query.toLowerCase().trim();
+  _applySearch();
+}
+
+void clearSearch() {
+  _searchQuery = '';
+  filteredHubs = List.from(hubs);
+  notifyListeners();
+}
+
+void _applySearch() {
+  if (_searchQuery.isEmpty) {
+    filteredHubs = List.from(hubs);
+  } else {
+    filteredHubs = hubs.where((hub) {
+      final name = hub.chargingHubName?.toLowerCase() ?? '';
+      final amenities = hub.amenities?.toLowerCase() ?? '';
+      return name.contains(_searchQuery) ||
+          amenities.contains(_searchQuery);
+    }).toList();
+  }
+  notifyListeners();
+}
+
+  List<dynamic> filteredHubs = [];
+ bool get isSearching => _searchQuery.isNotEmpty;
+  String _searchQuery = '';
+  /// 🔍 SEARCH
+  void searchHubs(String query) {
+    if (query.isEmpty) {
+      filteredHubs = hubs;
+    } else {
+      filteredHubs = hubs.where((hub) {
+        final name = hub.chargingHubName?.toLowerCase() ?? '';
+        return name.contains(query.toLowerCase());
+      }).toList();
+    }
     notifyListeners();
   }
 }

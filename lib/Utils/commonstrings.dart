@@ -46,6 +46,7 @@ static const String strPasswordHint = "Enter your password";
 static const String strconfirmpassword = "Confirm Password";
 static const String strConfirmPasswordHint = "Enter your confirm password";
 
-static const String strPhoneNumber = "Enter Phone Number";
+static const String strPhoneNumberHint = "Enter Mobile Number";
+static const String strMobileNo = "Mobile Number";
     
 }

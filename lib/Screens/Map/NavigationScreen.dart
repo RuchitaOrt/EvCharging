@@ -197,50 +197,50 @@ class _NavigationScreenState extends State<NavigationScreen> {
                                       children: [
                                         Text('${convertDistanceToMeters(naviProvider.distanceText??'')} meters',
                                             style: TextStyle(
-                                                fontSize: 16,
+                                                fontSize: 14,
                                                 color:
                                                 CommonColors.black.withOpacity(0.6),
                                                 fontWeight: FontWeight.w800)),
-                                        SizedBox(width: 4),
+                                         SizedBox(width: 10),
                                         SvgPicture.asset(
                                           CommonImagePath.arrowup,
-                                          width: 30,
-                                          height: 30,
+                                          width: 25,
+                                          height: 25,
                                         )
                                       ],
                                     ),
                                   ]),
                             ),
-                            SvgPicture.asset(CommonImagePath.greydirection),
+                            SvgPicture.asset(CommonImagePath.greydirection,
+                            width: 30,
+                                          height: 30,),
                             SizedBox(
                               width: 10,
                             ),
-                            ElevatedButton(
-                              onPressed: () {
-                                // show reached popup for demo
-                                naviProvider.isDriving ? naviProvider.stopDriving : null;
-                                showDialog(
-                                    context: context,
-                                    builder: (_) => const ReachedPopup());
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CommonColors.red,
-                                foregroundColor: CommonColors.red,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                  // side: BorderSide(
-                                  //   // color: CommonColors.blue.withOpacity(0.4),
-                                  //   // width: 0.8,
-                                  // ),
-                                ),
-                              ),
-                              child: const Text(
-                                'Exit',
-                                style: TextStyle(
-                                    color: CommonColors.white,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            )
+                           ElevatedButton(
+  onPressed: () {
+    naviProvider.isDriving ? naviProvider.stopDriving() : null;
+    showDialog(
+      context: context,
+      builder: (_) => const ReachedPopup(),
+    );
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: CommonColors.red,
+    foregroundColor: CommonColors.red,
+    minimumSize: const Size(40, 30), // 👈 height here
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+  child: const Text(
+    'Exit',
+    style: TextStyle(
+      color: CommonColors.white,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+)
                           ],
                         ),
                       ],

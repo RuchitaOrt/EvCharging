@@ -25,6 +25,7 @@ class LoginProvider extends ChangeNotifier {
       notifyListeners();
 
       loginResponse = await _loginService.loginUser(context, request);
+      
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("userId", loginResponse!.user!.recId!); // or token
     } catch (e) {

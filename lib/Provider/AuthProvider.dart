@@ -36,19 +36,22 @@ class AuthProvider extends ChangeNotifier {
     showToast("Please enter a valid email address");
     return false;
   }
+   if (!ValidationHelper.isValidPhone(request.phoneNumber)) {
+    showToast("Please enter a valid mobile number");
+    return false;
+  }
   if (!ValidationHelper.isPasswordValid(request.password)) {
-    showToast("Please enter password");
+    showToast("Password must be at least 6 characters");
     return false;
   }
+  
   if (!ValidationHelper.isPasswordValid(request.confirmPassword)) {
-    showToast("Please enter confirm password");
-    return false;
-  }
+ 
   if (request.password != request.confirmPassword) {
     showToast("Password and Confirm Password do not match");
     return false;
   }
-
+  }
   // 🔹 API call
   isLoading = true;
   notifyListeners();

@@ -123,4 +123,21 @@ class MapController {
       desiredAccuracy: LocationAccuracy.high,
     );
   }
+
+  Future<void> moveToLocation(LatLng target, {double zoom = 15}) async {
+    if (googleMapController == null) return;
+
+    await googleMapController!.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: target,
+          zoom: zoom,
+          tilt: 45,
+          bearing: 0,
+        ),
+      ),
+    );
+  }
+
+
 }

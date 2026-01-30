@@ -1,12 +1,15 @@
+import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
 import 'package:ev_charging_app/Provider/HubProvider.dart';
-import 'package:ev_charging_app/Screens/Controller/discount_widget.dart';
+import 'package:ev_charging_app/Screens/ActiveSessionsScreen.dart';
 import 'package:ev_charging_app/Screens/Controller/filter_chips_widget.dart';
-import 'package:ev_charging_app/Screens/Controller/mapMarkers.dart';
+
 import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
 import 'package:ev_charging_app/Screens/Controller/station_card_widget.dart';
+import 'package:ev_charging_app/Screens/Map/ActiveSessionCardWidget.dart';
 import 'package:ev_charging_app/Screens/SearchBarWidget.dart';
 import 'package:ev_charging_app/Screens/auth/login_bottom_sheet.dart';
 import 'package:ev_charging_app/Utils/AuthStorage.dart';
+import 'package:ev_charging_app/main.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
@@ -36,7 +39,6 @@ class _MapScreenState extends State<MapScreen> {
     loadData();
   }
 
-
   loadData() async {
     final style = await DefaultAssetBundle.of(context)
         .loadString('assets/map_styles/dark_map.json');
@@ -44,7 +46,6 @@ class _MapScreenState extends State<MapScreen> {
       mapsStyle = style;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-
       context.read<HubProvider>().loadHubs(context);
       // if (!widget.isLogin) {
       //   showLoginSheet(context);
@@ -53,7 +54,12 @@ class _MapScreenState extends State<MapScreen> {
       print("LOGGED IN ${isLoggedIn}");
       if (!isLoggedIn) {
         showLoginSheet(context);
+      }else{
+         final provider = context.read<ActiveSessionProvider>();
+      provider.fetchActiveSessions(context,"Active");
       }
+
+     
     });
   }
 
@@ -82,6 +88,7 @@ class _MapScreenState extends State<MapScreen> {
     return Consumer<HubProvider>(
       builder: (_, hubProvider, __) {
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           body: Stack(
             children: [
               GoogleMap(
@@ -97,8 +104,11 @@ class _MapScreenState extends State<MapScreen> {
                 myLocationButtonEnabled: false,
                 markers: hubProvider.markers,
                 // onMapCreated: controller.onMapCreated,
-                onMapCreated:(controller){
-                  context.read<HubProvider>().mapController.onMap2Created(controller);
+                onMapCreated: (controller) {
+                  context
+                      .read<HubProvider>()
+                      .mapController
+                      .onMap2Created(controller);
                   // context.read<HubProvider>().initFirstItem(350); // card width + spacing
                 },
                 onCameraIdle: () {
@@ -120,11 +130,16 @@ class _MapScreenState extends State<MapScreen> {
                   // hubProvider.clearRoute();
                 },
               ),
-              const Positioned(
-                  top: 60, left: 20, right: 20, child: SearchBarWidget()),
-              // const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
               Positioned(
-                top: 190,
+                  top: 20,
+                  left: 20,
+                  right: 20,
+                  child: SearchBarWidget(
+                    onSearch: _onSearchHub,
+                  )),
+             //  const Positioned(top: 130, left: 20, child: FilterChipsWidget()),
+              Positioned(
+                top: 100,
                 right: 20,
                 child: Container(
                   decoration: BoxDecoration(
@@ -137,18 +152,44 @@ class _MapScreenState extends State<MapScreen> {
                   child: IconButton(
                     icon: const Icon(Icons.gps_fixed, color: Colors.black),
                     onPressed: () async {
-                      await context.read<HubProvider>().mapController.moveToCurrentLocation();
+                      await context
+                          .read<HubProvider>()
+                          .mapController
+                          .moveToCurrentLocation();
                     },
                   ),
                 ),
               ),
-              const Positioned(
-                  top: 130, right: 20, child: DiscountWidget(label: "10 %")),
+              // const Positioned(
+              //     top: 130, right: 20, child: DiscountWidget(label: "10 %")),
               if (hubProvider.isRouteLoading)
                 const Center(
                     child: CircularProgressIndicator(
                   color: Colors.green,
                 )),
+              Consumer<ActiveSessionProvider>(
+                builder: (_, sessionProvider, __) {
+                  if (sessionProvider.loading ||
+                      sessionProvider.sessions.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Positioned(
+                    bottom: 190,
+                    left: 20,
+                    child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              routeGlobalKey.currentContext!,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      ActiveSessionsScreen()));
+                        },
+                        child: ActiveSessionCardWidget()),
+                  );
+                },
+              ),
+
               if (hubProvider.loading)
                 const Center(child: CircularProgressIndicator()),
               const Positioned(
@@ -162,5 +203,9 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+  }
+
+  void _onSearchHub(String value) {
+    context.read<HubProvider>().searchAndFocusHub(value);
   }
 }

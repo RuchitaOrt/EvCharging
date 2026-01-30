@@ -95,7 +95,7 @@ class _MainTabState extends State<MainTab> {
            const SizedBox(width: 10),
           navItem(1, CommonImagePath.station, "Hubs"),
           const SizedBox(width: 40),
-          navItem(3, CommonImagePath.transaction, "Transactions"),
+          navItem(3, CommonImagePath.transaction, "Wallet"),
           navItem(4, CommonImagePath.profile, "Profile"),
         ],
       ),

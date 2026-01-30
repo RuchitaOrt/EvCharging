@@ -4,9 +4,17 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
+import 'package:ev_charging_app/model/AddReviewResponse.dart';
+import 'package:ev_charging_app/model/ChargingGunStatusRefreshResponse.dart';
+import 'package:ev_charging_app/model/ChargingGunStatusResponse.dart';
+import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
+import 'package:ev_charging_app/model/ChargingHistorySessionResponse.dart';
 import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:ev_charging_app/model/DeleteReviewResponse.dart';
 import 'package:ev_charging_app/model/DeleteVehicleResponse.dart';
 import 'package:ev_charging_app/model/EndChargingSessionResponse.dart';
+import 'package:ev_charging_app/model/SessionDetailResponse.dart';
 import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
 import 'package:ev_charging_app/model/UnlockConnectorResponse.dart';
 import 'package:ev_charging_app/model/VehicleListResponse.dart';
@@ -56,7 +64,11 @@ enum API {
   //
   charginggunstatus,
   chargingsessiondetails,
-  chargingsessions
+  chargingsessions,
+  chargingHubReviewList,
+  chargingHubReviewAdd,
+  charginghubreviewupdate,
+  charginghubreviewdelete
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -431,6 +443,17 @@ class APIManager {
         return "/ChargingSession/charging-session-details";
       case API.chargingsessions:
         return "/ChargingSession/charging-sessions";
+
+      case API.chargingHubReviewList:
+        return "/ChargingHub/charging-hub-review-list";
+        case API.chargingHubReviewAdd:
+        return "/ChargingHub/charging-stn-review-add";
+         case API.charginghubreviewupdate:
+          return "/ChargingHub/charging-hub-review-update";
+           case API.charginghubreviewdelete:
+          return "/ChargingHub/charging-hub-review-delete";
+        
+        
     }
   }
 
@@ -448,12 +471,18 @@ class APIManager {
       case API.batteryTypeList:
       case API.chargerTypeList:
       case API.evModelList:
+      case API.chargingsessiondetails:
+      case API.chargingHubReviewList:
+       case API.chargingsessions:
+         case API.charginggunstatus:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:
+       case API.charginghubreviewupdate:
         return HTTPMethod.PUT;
       case API.profileDelete:
       case API.userVehicleDelete:
+      case API.charginghubreviewdelete:
         return HTTPMethod.DELETE;
       default:
         return HTTPMethod.POST;
@@ -495,9 +524,25 @@ class APIManager {
       case API.endChargingSession:
         return EndChargingSessionResponse.fromJson(json);
       case API.unlockConnector:
-        return UnlockConnectorResponse.fromJson(json);
+        return UnlockResponse.fromJson(json);
       case API.comprehensivelist:
         return ChargingcomprehensiveHubResponse.fromJson(json);
+      case API.chargingsessiondetails:
+        return SessionDetailResponse.fromJson(json);
+      case API.chargingHubReviewList:
+        return ChargingHubReviewResponse.fromJson(json);
+      case API.charginggunstatus:
+        return ChargingGunStatusResponse.fromJson(json);
+
+         case API.chargingsessions:
+         return ActiveSessionResponse.fromJson(json);
+         case API.chargingHubReviewAdd:
+          case API.charginghubreviewupdate:
+         return AddReviewResponse.fromJson(json);
+         case API.charginghubreviewdelete:
+  return DeleteReviewResponse.fromJson(json);
+
+
       default:
         return json;
     }

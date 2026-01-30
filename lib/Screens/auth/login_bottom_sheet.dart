@@ -68,7 +68,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
   }
 
   if (!ValidationHelper.isPasswordValid(password)) {
-    showToast("Please enter password");
+    showToast("Password must be at least 6 characters");
     return;
   }
 
@@ -101,6 +101,9 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
           context,
           MaterialPageRoute(builder: (_) => MainTab(isLoggedIn: true,)),
         );
+      }else if(loginProvider.loginResponse?.success==false)
+      {
+ showToast(loginProvider.loginResponse!.message);
       } else if (loginProvider.error != null) {
         showToast(loginProvider.error.toString());
       } else {
@@ -114,7 +117,24 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginProvider>(
+     
+    return AnimatedPadding(
+  duration: const Duration(milliseconds: 100),
+  padding: EdgeInsets.only(
+    bottom: MediaQuery.of(context).viewInsets.bottom,
+  ),
+  child: SingleChildScrollView(
+    child: Container(
+     
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 👇 your existing widgets
+           Consumer<LoginProvider>(
       builder: (context, loginProvider, _) {
         return Padding(
           padding: EdgeInsets.only(
@@ -278,6 +298,14 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
           ),
         );
       },
-    );
+    )
+        ],
+      ),
+    ),
+  ),
+);
+
+    
+   
   }
 }

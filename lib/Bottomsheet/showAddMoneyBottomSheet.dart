@@ -1,6 +1,7 @@
 import 'package:ev_charging_app/Provider/WalletProvider.dart';
 import 'package:ev_charging_app/Request/AddWalletRequest.dart';
 import 'package:ev_charging_app/Utils/AuthStorage.dart';
+import 'package:ev_charging_app/Utils/ShowDialog.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonstrings.dart';
 import 'package:ev_charging_app/widget/TextWithAsterisk.dart';
@@ -16,8 +17,10 @@ void showAddMoneyBottomSheet(BuildContext context) {
 
   showModalBottomSheet(
     context: context,
+    backgroundColor: CommonColors.white,
     isScrollControlled: true, // keyboard won't cover
     shape: const RoundedRectangleBorder(
+
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (ctx) {
@@ -36,6 +39,32 @@ void showAddMoneyBottomSheet(BuildContext context) {
               "Add Money",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
+            const Text(
+              "Adding to Ev-Charging wallet",
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w200),
+            ),
+            // Dotted line
+    SizedBox(
+      height: 20, // spacing
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final boxWidth = 4.0; // width of each dash
+          final dashWidth = 4.0; // spacing between dashes
+          final dashCount = (constraints.maxWidth / (boxWidth + dashWidth)).floor();
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(dashCount, (_) {
+              return Container(
+                width: boxWidth,
+                height: 1,
+                color: Colors.grey, // dotted color
+              );
+            }),
+          );
+        },
+      ),
+    ),
+             
             const SizedBox(height: 16),
             CustomTextFieldWidget(
               isMandatory: false,
@@ -117,11 +146,11 @@ void showAddMoneyBottomSheet(BuildContext context) {
                   ),
                 ),
                 onPressed: () async {
+                   print("UserId: ");
                   final amount = double.tryParse(_amountController.text);
                   if (amount == null || amount <= 0) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Enter valid amount")),
-                    );
+                    showToast("Please enter an amount ₹1 or more to proceed");
+                  
                     return;
                   }
                   final userId = await AuthStorage.getUserId();
@@ -140,7 +169,7 @@ void showAddMoneyBottomSheet(BuildContext context) {
                   Navigator.pop(ctx);
                 },
                 child: const Text(
-                  "Done,",
+                  "Proceed to Pay",
                   style: TextStyle(color: CommonColors.white),
                 ),
               ),
