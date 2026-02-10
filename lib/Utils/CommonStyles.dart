@@ -10,6 +10,11 @@ class CommonStyles {
     fontWeight: FontWeight.bold,
     fontSize: 24.0,
   );
+    static const TextStyle tsbllueHeading = TextStyle(
+    color: CommonColors.blackshade,
+    fontWeight: FontWeight.w400,
+    fontSize: 16.0,
+  );
       static const TextStyle textFieldHeading = TextStyle(
     color: CommonColors.mapDark,
     fontWeight: FontWeight.w400,

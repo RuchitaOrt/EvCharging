@@ -22,7 +22,7 @@ class WalletListResponse {
 class WalletDetails {
   final String? userId;
   final num? currentBalance;
-  final List<WalletTransaction> recentTransactions;
+   List<WalletTransaction> recentTransactions;
 
   WalletDetails({
     this.userId,

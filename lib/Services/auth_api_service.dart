@@ -1,4 +1,5 @@
 import 'package:ev_charging_app/model/LogoutResponse.dart';
+import 'package:ev_charging_app/model/ResetPasswordResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:ev_charging_app/Request/RegisterRequest.dart';
 import 'package:ev_charging_app/Utils/APIManager.dart';
@@ -58,6 +59,25 @@ class AuthApiService {
 
   return response as LogoutResponse; // ✅ JUST CAST
 }
+ Future<ResetPasswordResponse> resetPassword(
+    BuildContext context, {
+    required String emailOrPhone,
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final response = await APIManager().apiRequest(
+      context,
+      API.resetPassword,
+      jsonval: {
+        "emailOrPhone": emailOrPhone,
+        "oldPassword": oldPassword,
+        "newPassword": newPassword,
+        "confirmPassword": confirmPassword,
+      },
+    );
 
+    return response as ResetPasswordResponse;
+  }
   
 }

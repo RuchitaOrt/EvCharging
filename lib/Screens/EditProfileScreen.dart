@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  final UserProfile user;
-  const EditProfileScreen({super.key, required this.user});
+  final UserProfile? user;
+  const EditProfileScreen({super.key,  this.user});
 
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
@@ -26,21 +26,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-
-    firstNameController =
-        TextEditingController(text: widget.user.firstName ?? "");
+if(widget.user!=null)
+{
+ firstNameController =
+        TextEditingController(text: widget.user!.firstName ?? "");
     lastNameController =
-        TextEditingController(text: widget.user.lastName ?? "");
+        TextEditingController(text: widget.user!.lastName ?? "");
     emailController =
-        TextEditingController(text: widget.user.email ?? "");
+        TextEditingController(text: widget.user!.email ?? "");
     phoneController =
-        TextEditingController(text: widget.user.phoneNumber ?? "");
+        TextEditingController(text: widget.user!.phoneNumber ?? "");
     addressController = TextEditingController(
       text:
-          "${widget.user.addressLine1 ?? ''} "
-          "${widget.user.addressLine2 ?? ''} "
-          "${widget.user.addressLine3 ?? ''}",
+          "${widget.user!.addressLine1 ?? ''} "
+          "${widget.user!.addressLine2 ?? ''} "
+          "${widget.user!.addressLine3 ?? ''}",
     );
+}
+   
   }
 
   @override

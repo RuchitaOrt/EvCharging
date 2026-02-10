@@ -1,15 +1,27 @@
+import 'dart:io';
+
 import 'package:ev_charging_app/Provider/AuthProvider.dart';
+import 'package:ev_charging_app/Provider/DeleteAccountProvider.dart';
+import 'package:ev_charging_app/Provider/FileUploadProvider.dart';
+import 'package:ev_charging_app/Provider/ImageCacheProvider.dart';
 import 'package:ev_charging_app/Provider/ProfileProvider.dart';
+import 'package:ev_charging_app/Screens/ChargingEstimateScreen.dart';
 import 'package:ev_charging_app/Screens/ChargingHistoryScreen.dart';
 import 'package:ev_charging_app/Screens/EditProfileScreen.dart';
 import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Screens/MyVehicleScreen.dart';
 import 'package:ev_charging_app/Screens/NotificationScreen.dart';
+import 'package:ev_charging_app/Screens/ResetPassword.dart';
 import 'package:ev_charging_app/Screens/SupportScreen.dart';
+import 'package:ev_charging_app/Utils/APIManager.dart';
 import 'package:ev_charging_app/Utils/CommonAppBar.dart';
+import 'package:ev_charging_app/Utils/ImageHelper.dart';
+import 'package:ev_charging_app/Utils/InternetConnection.dart';
+import 'package:ev_charging_app/Utils/ShowDialog.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/main.dart';
+import 'package:ev_charging_app/model/UploadResponse.dart';
 import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:ev_charging_app/widget/LogoutConfirmationSheet.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +38,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProfileProvider>().loadProfile(context);
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   context.read<ProfileProvider>().loadProfile(context);
+    // });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final profileProvider = context.read<ProfileProvider>();
+      await profileProvider.loadProfile(context);
+
+      final imageId = profileProvider.profile?.user?.profileImageID;
+      print(imageId);
+      context.read<ImageCacheProvider>().loadProfileImage(imageId);
     });
   }
 
@@ -43,7 +64,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onBack: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => MainTab(isLoggedIn: GlobalLists.islLogin)),
+            MaterialPageRoute(
+                builder: (context) =>
+                    MainTab(isLoggedIn: GlobalLists.islLogin)),
           );
         },
       ),
@@ -59,37 +82,138 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: CommonColors.neutral50,
                       borderRadius: BorderRadius.circular(12)),
                   child: Column(children: [
-                    Stack(
-                      clipBehavior: Clip.none, // allows edit button to overflow
-                      children: [
-                        // Profile Image
-                        ClipRRect(
-                          borderRadius:
-                              BorderRadius.circular(60), // make circular
-                          child: Image.asset(
-                            CommonImagePath.profileImage,
-                            width: 120,
-                            height: 120,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                    GestureDetector(
+                      onTap: () async {
+                        final File? file = await pickProfileImage(context);
+                        final uploadProvider = context.read<UploadProvider>();
 
-                        // Edit Icon bottom-right
-                        Positioned(
-                          bottom: -4,
-                          right: -4,
-                          child: Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: CommonColors.neutral50,
-                                shape: BoxShape.circle,
-                                border:
-                                    Border.all(color: Colors.white, width: 3),
+                        final UploadResponse? resultResponse =
+                            await uploadProvider.upload(file: file!);
+
+                        if (resultResponse?.success == true) {
+                          print("✅ Uploaded: ${resultResponse!.fileId}");
+                          final provider = context.read<ProfileProvider>();
+
+                          final success = await provider.updateProfile(
+                            context,
+                            body: {
+                              "firstName": "${user?.firstName ?? ''}",
+                              "lastName": "${user?.lastName ?? ''}",
+                              "eMailID": "${user?.email ?? ''}",
+                              "phoneNumber": "${user?.phoneNumber ?? ''}",
+                              "countryCode": "+91",
+                              "addressLine1": "${user?.addressLine1 ?? ''}",
+                              "profileImageID": resultResponse.fileId
+                            },
+                          );
+
+                          if (success) {
+                            context.read<UploadProvider>().setImage(file);
+                            showToast("${provider.message}");
+                            // ScaffoldMessenger.of(context).showSnackBar(
+                            //   const SnackBar(content: Text("Profile updated successfully")),
+                            // );
+                            // Navigator.pop(context);
+                          }
+                        } else {
+                          print("❌ Upload failed: ${resultResponse?.message}");
+                        }
+
+//     if (file != null) {
+//       final uploadProvider = context.read<UploadProvider>();
+
+// final result = await uploadProvider.upload(
+//   file: file,
+//   remarks: "profile image",
+// );
+
+// if (result.success) {
+//   print("✅ Uploaded, fileId: ${result.fileId}");
+// } else {
+//   print("❌ Upload failed: ${result.message}");
+// }
+
+//       context.read<UploadProvider>().setImage(file);
+//       final response=  context.read<UploadProvider>().upload(file: file,remarks: "Profile Image").then((onValue) async {
+//      final provider = context.read<ProfileProvider>();
+
+//           final success = await provider.updateProfile(
+//             context,
+//             body: {
+//               "firstName": "${user?.firstName ?? ''}",
+//               "lastName": "${user?.lastName ?? ''}",
+//               "eMailID":"${user?.email ?? ''}",
+//               "phoneNumber": "${user?.phoneNumber ?? ''}",
+//               "countryCode": "+91",
+//               "addressLine1":"${user?.addressLine1 ?? ''}",
+//               "profileImageID": response.
+//             },
+//           );
+
+//           if (success) {
+//             showToast("${provider.message}");
+//             // ScaffoldMessenger.of(context).showSnackBar(
+//             //   const SnackBar(content: Text("Profile updated successfully")),
+//             // );
+//             // Navigator.pop(context);
+//           }
+//         });
+//     }
+                      },
+                      child: Consumer<UploadProvider>(
+                        builder: (_, provider, __) {
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Consumer2<UploadProvider, ImageCacheProvider>(
+                                builder: (_, upload, cache, __) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(60),
+                                    child: upload.selectedImage != null
+                                        ? Image.file(
+                                            upload.selectedImage!,
+                                            width: 120,
+                                            height: 120,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : cache.image != null
+                                            ? Image.memory(
+                                                cache.image!,
+                                                width: 120,
+                                                height: 120,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : Image.asset(
+                                                CommonImagePath.profileImage,
+                                                width: 120,
+                                                height: 120,
+                                                fit: BoxFit.cover,
+                                              ),
+                                  );
+                                },
                               ),
-                              child: Image.asset(CommonImagePath.edit)),
-                        ),
-                      ],
+                              Positioned(
+                                bottom: -4,
+                                right: -4,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: CommonColors.neutral50,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: Colors.white, width: 3),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Image.asset(CommonImagePath.edit),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text("${user?.firstName ?? ''} ${user?.lastName ?? ''}",
@@ -109,12 +233,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     _profileTile(
                       CommonImagePath.profileIcon,
                       'Edit Profile',
+                      () async {
+                        final hasInternet = await hasInternetConnection();
+                        if (hasInternet) {
+                          Navigator.push(
+                            routeGlobalKey.currentContext!,
+                            MaterialPageRoute(
+                                builder: (context) => EditProfileScreen(
+                                    user: provider.profile!.user!)),
+                          );
+                        } else {
+                          infoNormalDialog(
+                            routeGlobalKey.currentContext!,
+                            message:
+                                "No internet connection. Please check your network.",
+                          );
+                        }
+                      },
+                    ),
+                    _profileTile(
+                      CommonImagePath.edit,
+                      'Reset Password',
                       () {
                         Navigator.push(
                           routeGlobalKey.currentContext!,
                           MaterialPageRoute(
-                              builder: (context) => EditProfileScreen(
-                                  user: provider.profile!.user!)),
+                              builder: (context) => ResetPassword(
+                                    email: "${user?.email ?? ''}",
+                                    mobile: "${user?.phoneNumber ?? ''}",
+                                  )),
                         );
                       },
                     ),
@@ -129,16 +276,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                    _profileTile(
-                      CommonImagePath.paymentOption,
-                      'Payment Options',
-                      () {
-                        // Navigator.push(
-                        //   routeGlobalKey.currentContext!,
-                        //   MaterialPageRoute(builder: (context) => EditProfileScreen()),
-                        // );
-                      },
-                    ),
+                    // _profileTile(
+                    //   CommonImagePath.paymentOption,
+                    //   'Payment Options',
+                    //   () {
+                    //     // Navigator.push(
+                    //     //   routeGlobalKey.currentContext!,
+                    //     //   MaterialPageRoute(builder: (context) => ChargingEstimateScreen()),
+                    //     // );
+                    //   },
+                    // ),
                     _profileTile(
                       CommonImagePath.vehicle,
                       'Vehicle Information',
@@ -161,16 +308,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                    _profileTile(
-                      CommonImagePath.share,
-                      'Share',
-                      () {
-                        // Navigator.push(
-                        //   routeGlobalKey.currentContext!,
-                        //   MaterialPageRoute(builder: (context) => EditProfileScreen()),
-                        // );
-                      },
-                    ),
+                    // _profileTile(
+                    //   CommonImagePath.share,
+                    //   'Share',
+                    //   () {
+                    //     // Navigator.push(
+                    //     //   routeGlobalKey.currentContext!,
+                    //     //   MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                    //     // );
+                    //   },
+                    // ),
                     _profileTile(
                       CommonImagePath.setting,
                       'Settings',
@@ -179,6 +326,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           routeGlobalKey.currentContext!,
                           MaterialPageRoute(
                               builder: (context) => SupportScreen()),
+                        );
+                      },
+                    ),
+                    _profileTile(
+                      CommonImagePath.delete,
+                      'Delete Account',
+                      () {
+                        showModalBottomSheet(
+                          backgroundColor: CommonColors.white,
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(20)),
+                          ),
+                          isScrollControlled: true,
+                          builder: (_) => ConfirmationSheet(
+                            title: "Are you sure you want to Delete Account?",
+                            singleButton: "",
+                            imagePath: CommonImagePath.delete, // Your SVG/PNG
+                            isSingleButton: false,
+                            onBackToHome: () {},
+                            onCancel: () => Navigator.pop(context),
+                            onLogout: () async {
+                              print("LOGOUT CLICKED");
+                              context
+                                  .read<DeleteAccountProvider>()
+                                  .deleteAccount(context);
+                            },
+                            firstbutton: 'Cancel',
+                            secondButton: 'Delete',
+                            subHeading: '',
+                          ),
                         );
                       },
                     ),
@@ -242,6 +421,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon,
               width: 20,
               height: 20,
+              color: CommonColors.black,
             ),
             const SizedBox(width: 16),
             Expanded(

@@ -28,6 +28,7 @@ class ChargingHubReviewResponse {
 }
 class ChargingHubReview {
   final String recId;
+  final String? userId;
   final String chargingHubId;
   final String chargingStationId;
   final int rating;
@@ -44,6 +45,7 @@ class ChargingHubReview {
 
   ChargingHubReview({
     required this.recId,
+    required this.userId,
     required this.chargingHubId,
     required this.chargingStationId,
     required this.rating,
@@ -63,6 +65,7 @@ class ChargingHubReview {
     return ChargingHubReview(
       recId: json['recId'] ?? '',
       chargingHubId: json['chargingHubId'] ?? '',
+      userId: json['userId'], // nullable
       chargingStationId: json['chargingStationId'] ?? '',
       rating: json['rating'] ?? 0,
       description: json['description'] ?? '',

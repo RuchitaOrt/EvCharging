@@ -1,9 +1,11 @@
 
 import 'package:ev_charging_app/Provider/charging_hub_provider.dart';
 import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
+import 'package:ev_charging_app/Screens/Controller/station_card_widget.dart';
 import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Screens/StationDetailsScreen.dart';
 import 'package:ev_charging_app/Utils/CommonAppBar.dart';
+import 'package:ev_charging_app/Utils/InternetConnection.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/googleMap.dart';
@@ -28,23 +30,70 @@ class ChargingStationsScreen extends StatefulWidget {
 
 class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
   final ScrollController _scrollController = ScrollController();
-
+bool  hasInternet=false;
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    resetPaginationBlock();
+    
   }
+  resetPaginationBlock() async {
+  final result = await hasInternetConnection();
 
-  void _onScroll() {
+  setState(() {
+    hasInternet = result;
+  });
+
+  if (hasInternet) {
     final provider = context.read<ChargingHubProvider>();
-
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        !provider.loading) {
-      provider.pageNumber++;
-      provider.loadChargingHubs(context);
-    }
+    provider.resetPagination();
+    _scrollController.addListener(_onScroll);
+    _fetchCurrentLocation();
   }
+}
+
+// resetPaginationBlock()
+// async {
+//      hasInternet = await hasInternetConnection();
+//      print("hasInterne");
+//     print("hasInterne ${hasInternet}");
+//                       if(hasInternet==true)
+//                       {
+//                          print("hasInternet1");
+//   final provider = context.read<ChargingHubProvider>();
+//   provider.resetPagination();
+//   _scrollController.addListener(_onScroll);
+//       _fetchCurrentLocation();
+//                       }
+// }
+  // void _onScroll() {
+  //   final provider = context.read<ChargingHubProvider>();
+
+  //   if (_scrollController.position.pixels >=
+  //           _scrollController.position.maxScrollExtent - 200 &&
+  //       !provider.loading) {
+  //     provider.pageNumber++;
+  //     provider.loadChargingHubs(context);
+  //   }
+  // }
+Future<void> _onScroll() async {
+  final provider = context.read<ChargingHubProvider>();
+
+  if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+      !provider.loading &&
+      provider.hasMore) {
+          hasInternet = await hasInternetConnection();
+     print("hasInterne");
+    print("hasInterne ${hasInternet}");
+                      if(hasInternet==true)
+                      {
+                         print("hasInternet1");
+    provider.pageNumber++;
+    provider.loadChargingHubs(context);
+                      }
+  }
+}
 
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -125,15 +174,15 @@ class _ChargingStationsScreenState extends State<ChargingStationsScreen> {
             final list = provider.filteredHubs;
           /// FIRST LOAD
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (provider.hubs.isEmpty && !provider.loading) {
+            if (provider.hubs.isEmpty && !provider.loading && hasInternet) {
               provider.pageNumber = 1;
               provider.loadChargingHubs(context);
             }
           });
 
-          // if (provider.loading && provider.hubs.isEmpty) {
-          //   return const Center(child: CircularProgressIndicator());
-          // }
+          if (provider.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
 
           return Column(
@@ -192,6 +241,7 @@ itemBuilder: (context, index) {
                   // },
                 ),
               ),
+              SizedBox(height: 20,)
             ],
           );
         },
@@ -213,7 +263,7 @@ itemBuilder: (context, index) {
   }
   double distance=0.0;
   Widget _stationBottomCard(dynamic hub) {
-    _fetchCurrentLocation();
+  
     final opening = hub.openingTime ?? 'N/A';
     final closing = hub.closingTime ?? 'N/A';
   
@@ -255,7 +305,7 @@ itemBuilder: (context, index) {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Container(
           padding: const EdgeInsets.all(10),
-          height: 160,
+          // height: 170,
           decoration: BoxDecoration(
             color: CommonColors.white,
             borderRadius: BorderRadius.circular(12),
@@ -272,7 +322,17 @@ itemBuilder: (context, index) {
                 padding: const EdgeInsets.all(4),
                 child: Row(
                   children: [
-                    Image.asset(CommonImagePath.frame, height: 50),
+                     hub.chargingHubImage != null
+    ? HubImage(
+        imageId: hub.chargingHubImage!,
+        height: SizeConfig.blockSizeVertical * 5,
+        width: SizeConfig.blockSizeVertical * 5,
+      )
+    : Image.asset(
+        CommonImagePath.frame,
+        height: SizeConfig.blockSizeVertical * 6,
+      ),
+                    // Image.asset(CommonImagePath.frame, height: 50),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
@@ -321,11 +381,21 @@ itemBuilder: (context, index) {
               const SizedBox(height: 8),
 
               // Amenities
-              Text(
-                hub.amenities ?? "",
-                style: const TextStyle(
-                    fontSize: 12, color: CommonColors.neutral500),
-              ),
+              // Text(
+              //   hub.amenities ?? "",
+              //   maxLines: 2,
+              //   overflow: TextOverflow.ellipsis,
+              //   style: const TextStyle(
+              //       fontSize: 12, color: CommonColors.neutral500),
+              // ),
+ExpandableText(
+  text: hub.amenities ?? "",
+  trimLines: 2,
+  style: const TextStyle(
+    fontSize: 12,
+    color: CommonColors.neutral500,
+  ),
+),
 
               const SizedBox(height: 14),
 
@@ -386,6 +456,76 @@ itemBuilder: (context, index) {
           ),
         ),
       ],
+    );
+  }
+}
+class ExpandableText extends StatefulWidget {
+  final String text;
+  final int trimLines;
+  final TextStyle? style;
+
+  const ExpandableText({
+    super.key,
+    required this.text,
+    this.trimLines = 2,
+    this.style,
+  });
+
+  @override
+  State<ExpandableText> createState() => _ExpandableTextState();
+}
+
+class _ExpandableTextState extends State<ExpandableText>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final textSpan = TextSpan(text: widget.text, style: widget.style);
+        final tp = TextPainter(
+          text: textSpan,
+          maxLines: widget.trimLines,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: constraints.maxWidth);
+
+        final isOverflowing = tp.didExceedMaxLines;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedSize(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeInOut,
+              child: Text(
+                widget.text,
+                style: widget.style,
+                maxLines: _expanded ? null : widget.trimLines,
+                overflow:
+                    _expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+              ),
+            ),
+            if (isOverflowing)
+              GestureDetector(
+                onTap: () {
+                  setState(() => _expanded = !_expanded);
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    _expanded ? "Read less" : "Read more",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: CommonColors.blue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

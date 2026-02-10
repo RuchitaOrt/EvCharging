@@ -4,12 +4,16 @@ import 'package:ev_charging_app/Provider/ChargingEstimateProvider.dart';
 import 'package:ev_charging_app/Provider/ChargingGunStatusProvider.dart';
 import 'package:ev_charging_app/Provider/ChargingHubReviewProvider.dart';
 import 'package:ev_charging_app/Provider/ChargingProvider.dart';
+import 'package:ev_charging_app/Provider/DeleteAccountProvider.dart';
+import 'package:ev_charging_app/Provider/FileUploadProvider.dart';
 import 'package:ev_charging_app/Provider/HubProvider.dart';
+import 'package:ev_charging_app/Provider/ImageCacheProvider.dart';
 import 'package:ev_charging_app/Provider/LoginProvider.dart';
+import 'package:ev_charging_app/Provider/PaymentProvider.dart';
 import 'package:ev_charging_app/Provider/ProfileProvider.dart';
 import 'package:ev_charging_app/Provider/VehicleProvider.dart';
 import 'package:ev_charging_app/Provider/WalletProvider.dart';
-import 'package:ev_charging_app/Provider/car_manufacturer_provider.dart';
+
 import 'package:ev_charging_app/Provider/charging_hub_provider.dart';
 import 'package:ev_charging_app/Provider/hardware_master_provider.dart';
 import 'package:ev_charging_app/Provider/user_vehicle_provider.dart';
@@ -19,6 +23,7 @@ import 'package:ev_charging_app/Screens/SplashScreen.dart';
 import 'package:ev_charging_app/Services/ChargingHistorySessionProvider.dart';
 import 'package:ev_charging_app/Utils/UtilityFile.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,8 +42,10 @@ final GlobalKey<NavigatorState> routeGlobalKey = GlobalKey();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
   await Utility().loadAPIConfig();
-//await DatabaseHelper.instance.deleteOldDatabase();
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -69,13 +76,18 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => VehicleProvider()),
         ChangeNotifierProvider(create: (_) => UserVehicleProvider()),
         ChangeNotifierProvider(create: (_) => ChargingHubProvider()),
-         ChangeNotifierProvider(create: (_) => ChargingHubReviewProvider()),
-         ChangeNotifierProvider(create: (_) => ChargingHistorySessionProvider()),
-          ChangeNotifierProvider(create: (_) => ChargingEstimateProvider()),
-           ChangeNotifierProvider(create: (_) => ChargingGunStatusProvider()),
-          ChangeNotifierProvider(create: (_) => ChargingGunStatusProvider()),
-                ChangeNotifierProvider(create: (_) => ActiveSessionProvider()),
-                  ChangeNotifierProvider(create: (_) => ChargingProvider()),
+        ChangeNotifierProvider(create: (_) => ChargingHubReviewProvider()),
+        // ChangeNotifierProvider(create: (_) => ChargingHistorySessionProvider()),
+        ChangeNotifierProvider(create: (_) => ChargingEstimateProvider()),
+        ChangeNotifierProvider(create: (_) => ChargingGunStatusProvider()),
+        ChangeNotifierProvider(create: (_) => ChargingGunStatusProvider()),
+        ChangeNotifierProvider(create: (_) => ActiveSessionProvider()),
+        ChangeNotifierProvider(create: (_) => ChargingProvider()),
+        ChangeNotifierProvider(create: (_) => DeleteAccountProvider()),
+        ChangeNotifierProvider(create: (_) => UploadProvider()),
+        ChangeNotifierProvider(create: (_) => ImageCacheProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentProvider()),
+        ChangeNotifierProvider(create: (_) => WalletProvider()),
         ChangeNotifierProvider(
           create: (_) => HardwareMasterProvider(),
         ),
@@ -101,9 +113,9 @@ class _MyAppState extends State<MyApp> {
           navigatorKey: routeGlobalKey,
           theme: ThemeData(
             textTheme: GoogleFonts.poppinsTextTheme(),
-             progressIndicatorTheme: ProgressIndicatorThemeData(
-      color: CommonColors.blue,
-    ),
+            progressIndicatorTheme: ProgressIndicatorThemeData(
+              color: CommonColors.blue,
+            ),
             textSelectionTheme: TextSelectionThemeData(
               selectionColor:
                   CommonColors.blue.withOpacity(0.3), // background highlight

@@ -38,32 +38,53 @@ class MapController {
     // print('Current Location: ${position.latitude}, ${position.longitude}');
     zoomTo(LatLng(position.latitude, position.longitude));
   }
+ /// 🔥 ADD THIS METHOD
+  Future<void> animateCamera(CameraUpdate update) async {
+    if (googleMapController == null) return;
+    await googleMapController!.animateCamera(update);
+  }
 
-  void zoomTo(LatLng position) {
-    if (googleMapController == null) {
-      debugPrint("Map not ready yet");
-      return;
-    }
-    if (googleMapController == null) return; // safety check
-    googleMapController?.animateCamera(
+  /// Optional helper
+  Future<void> zoomTo(LatLng target,
+      {double zoom = 15, double tilt = 0, double bearing = 0}) async {
+    if (googleMapController == null) return;
+    await googleMapController!.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: position,
-          zoom: 12,
-          // zoom: 17.5,
-          tilt: 55,
+          target: target,
+          zoom: zoom,
+          tilt: tilt,
+          bearing: bearing,
         ),
       ),
     );
-    /*googleMapController.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: position,
-          zoom: 12, // adjust if needed
-        ),
-      ),
-    );*/
   }
+
+  // void zoomTo(LatLng position) {
+  //   if (googleMapController == null) {
+  //     debugPrint("Map not ready yet");
+  //     return;
+  //   }
+  //   if (googleMapController == null) return; // safety check
+  //   googleMapController?.animateCamera(
+  //     CameraUpdate.newCameraPosition(
+  //       CameraPosition(
+  //         target: position,
+  //         zoom: 12,
+  //         // zoom: 17.5,
+  //         tilt: 55,
+  //       ),
+  //     ),
+  //   );
+  //   /*googleMapController.animateCamera(
+  //     CameraUpdate.newCameraPosition(
+  //       CameraPosition(
+  //         target: position,
+  //         zoom: 12, // adjust if needed
+  //       ),
+  //     ),
+  //   );*/
+  // }
 
   void zoom(LatLng position, double bearing, double speed) {
     final zoom = getZoomBySpeed(speed);

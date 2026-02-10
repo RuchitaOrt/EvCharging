@@ -1,6 +1,8 @@
 import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
+import 'package:ev_charging_app/Provider/PaymentProvider.dart';
 import 'package:ev_charging_app/Utils/CommonAppBar.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,10 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen> {
     Future.microtask(() {
       context
           .read<ActiveSessionProvider>()
-          .fetchActiveSessions(context, "Complete");
+          .fetchActiveSessions(context, "");
+
+
+          
     });
   }
 
@@ -37,7 +42,7 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen> {
             _scrollController.position.maxScrollExtent - 200 &&
         provider.hasMore &&
         !provider.loadingMore) {
-      provider.loadMore(context, "Complete");
+      provider.loadMore(context, "");
     }
   }
 
@@ -73,7 +78,7 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen> {
                 const SizedBox(height: 20),
                 ...provider.sessions.map(
                   (session) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.only(bottom: 12,top: 12),
                     child: _historyCard(session),
                   ),
                 ),
@@ -91,29 +96,35 @@ Widget _summaryRow() {
   return Consumer<ActiveSessionProvider>(
     builder: (context, provider, _) {
       // Calculate summary values
+     
+
+
       final totalSessions = provider.totalSessions;
-      final totalEnergy = provider.sessions.fold<double>(
-        0,
-        (sum, s) => sum + (double.tryParse(s.energyTransmitted) ?? 0),
-      );
-      final totalSpent = provider.sessions.fold<double>(
-        0,
-        (sum, s) => sum + (double.tryParse(s.chargingTotalFee) ?? 0),
-      );
-      final totalDuration = provider.sessions.fold<Duration>(
-        Duration.zero,
-        (sum, s) {
-          // assuming s.duration is "hh:mm" or "h:mm"
-          final parts = s.duration.split(':');
-          final hours = int.tryParse(parts[0]) ?? 0;
-          final minutes = int.tryParse(parts[1]) ?? 0;
-          return sum + Duration(hours: hours, minutes: minutes);
-        },
-      );
+      final totalEnergy =provider.totalEnergy;
+      //  provider.sessions.fold<double>(
+      //   0,
+      //   (sum, s) => sum + (double.tryParse(s!.energyTransmitted!) ?? 0),
+      // );
+      final totalSpent =provider.totalSpent;
+      //  provider.sessions.fold<double>(
+      //   0,
+      //   (sum, s) => sum + (double.tryParse(s.chargingTotalFee) ?? 0),
+      // );
+      final durationString = provider.totalTime;
+      // provider.sessions.fold<Duration>(
+      //   Duration.zero,
+      //   (sum, s) {
+      //     // assuming s.duration is "hh:mm" or "h:mm"
+      //     final parts = s.duration.split(':');
+      //     final hours = int.tryParse(parts[0]) ?? 0;
+      //     final minutes = int.tryParse(parts[1]) ?? 0;
+      //     return sum + Duration(hours: hours, minutes: minutes);
+      //   },
+      // );
 
       // Format total duration as Hh Mm
-      final durationString =
-          "${totalDuration.inHours}h ${totalDuration.inMinutes.remainder(60)}m";
+      // final durationString =
+      //     "${totalDuration.inHours}h ${totalDuration.inMinutes.remainder(60)}m";
 
       return Column(
         children: [
@@ -121,13 +132,13 @@ Widget _summaryRow() {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _summaryBox("$totalSessions", "Sessions"),
-              _summaryBox("${totalEnergy.toStringAsFixed(1)} kW", "Total Energy"),
+              _summaryBox("${totalEnergy} kW", "Total Energy"),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _summaryBox("₹ ${totalSpent.toStringAsFixed(2)}", "Total Spent"),
+              _summaryBox("₹ ${totalSpent}", "Total Spent"),
               _summaryBox(durationString, "Total Time"),
             ],
           ),
@@ -168,12 +179,14 @@ Widget _summaryRow() {
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.only(left: 8,right: 8,top: 10,bottom: 10),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(value,
                   style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: CommonColors.blue)),
               const SizedBox(height: 4),
@@ -234,170 +247,298 @@ Widget _summaryRow() {
   String formatTime(String dateTimeString) {
     final dateTime = DateTime.parse(dateTimeString);
 
-    return DateFormat('EEE ddMMM yyyy, HH.mm').format(dateTime);
+    return DateFormat('EEE ddMMM yyyy').format(dateTime);
   }
 
-  Widget _historyCard(Session data) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CommonColors.white,
-        border: Border.all(color: CommonColors.neutral200),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-              width: SizeConfig.blockSizeHorizontal * 90,
+  Widget _historyCard(ChargingSession data) {
+    return Column(
+      children: [
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: CommonColors.neutral50,
-                borderRadius: BorderRadius.circular(8),
+                color: CommonColors.white,
+                border: Border.all(color: CommonColors.neutral200),
+                borderRadius: BorderRadius.circular(14),
               ),
-              child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("${data.chargingStationName}",
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    Text("${formatTime("${data.createdOn}")}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                  ],
-                ),
-              )),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Energy",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                    Text("${data.energyTransmitted} kW",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text("Duration",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                    Text("${data.duration}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text("Plug Type",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                    Text("${data.chargingTariff}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Speed",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                    Text("${data.chargingSpeed}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text("Fee",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                    Text("₹${data.chargingTotalFee}",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  children: [
-                    Text("Location",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            color: CommonColors.neutral500,
-                            fontSize: 12)),
-                    Text("Mulunf",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 12)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: SizeConfig.blockSizeHorizontal * 90,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CommonColors.white,
-                foregroundColor: CommonColors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: CommonColors.blue.withOpacity(0.4),
-                    width: 0.8,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 8,),
+                 Container(
+  width: SizeConfig.blockSizeHorizontal * 90,
+  decoration: BoxDecoration(
+    color: CommonColors.neutral50,
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          
+          children: [
+        
+            /// LEFT SIDE (FIXED)
+            Expanded( // ✅ KEY FIX
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                
+                children: [
+                  Text(
+                    "${data.chargingStationName}",
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
-                ),
-              ),
-              child: const Text(
-                "Download Receipt",
-                style: TextStyle(
-                    fontSize: 12,
-                    color: CommonColors.blue,
-                    fontWeight: FontWeight.w600),
+                  const SizedBox(height: 4),
+                  // Row(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   mainAxisAlignment: MainAxisAlignment.start,
+                  //   children: [
+                  //    Padding(
+                  //      padding: const EdgeInsets.only(top: 4),
+                  //      child: Image.asset( CommonImagePath.redpin,),
+                  //    ),
+                  //     const SizedBox(width: 4),
+                     
+                  //   ],
+                  // ),
+                ],
               ),
             ),
-          ),
-        ],
+        
+            const SizedBox(width: 8),
+        
+            /// RIGHT SIDE (AUTO WIDTH)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  formatTime("${data.createdOn}"),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w400,
+                    color: CommonColors.black,
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  data.status == "Active"
+                      ? formatonlyTime("${data.startTime}")
+                      : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w400,
+                    color: CommonColors.neutral500,
+                    fontSize: 12,
+                  ),
+                ),
+        
+                
+              ],
+            ),
+          ],
+        ),
+        
+      ],
+    ),
+  ),
+),
+                  const SizedBox(height: 6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Energy",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: CommonColors.neutral500,
+                                    fontSize: 12)),
+                            Text("${data.energyTransmitted} kW",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text("Duration",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: CommonColors.neutral500,
+                                    fontSize: 12)),
+                            Text("${data.duration}",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text("Plug Type",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: CommonColors.neutral500,
+                                    fontSize: 12)),
+                            Text("${data.chargingTariff}",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                              Text("Start Battery",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: CommonColors.neutral500,
+                                    fontSize: 12)),
+                            Text(
+                              
+                              
+                              data.soCStart==null?"-":"${data.soCStart} %",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12)),
+                           
+                          ],
+                        ),
+                      ),
+                       Expanded(
+                        child: Column(
+                          children: [
+                            Text("End Battery",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: CommonColors.neutral500,
+                                    fontSize: 12)),
+                            Text(
+                              
+                             data.soCEnd==null?"-": "${data.soCEnd} %",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Text("Fee",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w400,
+                                    color: CommonColors.neutral500,
+                                    fontSize: 12)),
+                            Text("₹${data.chargingTotalFee}",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 12)),
+                          ],
+                        ),
+                      ),
+                     
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                   Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                     children: [
+                       Text("Location",
+                           style: TextStyle(
+                               fontWeight: FontWeight.w400,
+                               color: CommonColors.neutral500,
+                               fontSize: 12)),
+                      Text(
+                             "${data.chargingHubName}",
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                     ],
+                   ),
+                    const SizedBox(height: 16),
+                  Container(
+                    width: SizeConfig.blockSizeHorizontal * 90,
+                    child: ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: CommonColors.white,
+                        foregroundColor: CommonColors.blue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(
+                            color: CommonColors.blue.withOpacity(0.4),
+                            width: 0.8,
+                          ),
+                        ),
+                      ),
+                      child: const Text(
+                        "Download Receipt",
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: CommonColors.blue,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+             Positioned(
+        top: -10,
+        left: 16,
+        child: _statusChip(data.status,data.recId),
       ),
+          ],
+        ),
+      ],
     );
   }
+  String formatonlyTime(String dateTimeString) {
+  final dateTime = DateTime.parse(dateTimeString);
+  return DateFormat('hh.mm a').format(dateTime);
+}
+Widget _statusChip(String isActive,String recId,) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+    decoration: BoxDecoration(
+      color: isActive=="Completed"
+          ? Colors.green.shade50
+          : Colors.red.shade100,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(
+        color:  isActive=="Completed" ? Colors.green : CommonColors.red,
+        width: 0.8,
+      ),
+    ),
+    child: Text(
+      "${isActive} " ,
+      style: TextStyle(
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+        color:  isActive=="Completed" ? Colors.green : CommonColors.red,
+      ),
+    ),
+  );
+}
+
 }
 
 class FilterTabsWidget extends StatefulWidget {
@@ -421,7 +562,7 @@ class _FilterTabsWidgetState extends State<FilterTabsWidget> {
           const SizedBox(width: 10),
           _tabButton("Last 7 Days", Icons.bolt, 1),
           const SizedBox(width: 10),
-          _tabButton("All", Icons.all_out, 2), // NEW
+          _tabButton("All", Icons.apps, 2), // NEW
           SizedBox(width: 10),
           // _tabButton("Filter", Icons.filter, 2),
         ],
@@ -474,12 +615,13 @@ class _FilterTabsWidgetState extends State<FilterTabsWidget> {
           children: [
             Icon(
               icon,
-              color: isSelected ? CommonColors.blue : Colors.black,
+              color: isSelected ? CommonColors.blue : Colors.black,size: 20,
             ),
             const SizedBox(width: 5),
             Text(
               title,
               style: TextStyle(
+                fontSize: 12,
                 color: isSelected ? CommonColors.blue : Colors.black,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),

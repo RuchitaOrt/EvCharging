@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'package:dio/dio.dart';
 import 'package:ev_charging_app/Screens/StationDetailsScreen.dart';
 import 'package:ev_charging_app/Services/hub_repository.dart';
+import 'package:ev_charging_app/Utils/APIManager.dart';
 import 'package:ev_charging_app/Utils/LocationConvert.dart';
 import 'package:ev_charging_app/main.dart';
 // import 'package:ev_charging_app/model/ChargingHubResponse.dart';
@@ -48,7 +50,24 @@ class HubProvider extends ChangeNotifier {
 
   final ScrollController scrollController = ScrollController();
 
+ final Map<String, Uint8List> _imageCache = {};
+final APIManager _api = APIManager();
+  Future<Uint8List> downloadImage(String imageId) async {
+    if (_imageCache.containsKey(imageId)) {
+      return _imageCache[imageId]!;
+    }
 
+    final res = await _api.dio.get(
+      "/FileStorage/download/$imageId",
+       options: Options(
+        responseType: ResponseType.bytes, // important
+      ),
+    );
+
+    final bytes = Uint8List.fromList(res.data);
+    _imageCache[imageId] = bytes;
+    return bytes;
+  }
   void scrollToIndex(int index) {
     const double itemWidth = 350.0; // your card width + separator
     scrollController.animateTo(
@@ -78,27 +97,56 @@ class HubProvider extends ChangeNotifier {
   }
 
 
-  void listenToScroll(double itemWidth) {
-    scrollController.addListener(() {
-      final offset = scrollController.offset;
-      final index = (offset / itemWidth).round();
-      if (index != currentVisibleIndex && index >= 0 && index < recordsStation.length) {
-        currentVisibleIndex = index;
-        ChargingHub hub = recordsStation[index];
-        print('$index Item Position: ${hub.chargingHubName}');
-        clearRoute();
-        // selectMarker(hub.recId);
-        LatLng? location = LocationConvert.getLatLngFromHub(hub);
-        if (location != null) {
-          print(location.latitude);  // 19.0991
-          print(location.longitude); // 72.9165
-          mapController.zoomTo(location);
-          getDirection(hub.recId!);
-        }
-        notifyListeners();
+  // void listenToScroll(double itemWidth) {
+  //   scrollController.addListener(() {
+  //     final offset = scrollController.offset;
+  //     final index = (offset / itemWidth).round();
+  //     if (index != currentVisibleIndex && index >= 0 && index < recordsStation.length) {
+  //       currentVisibleIndex = index;
+  //       ChargingHub hub = recordsStation[index];
+  //       print('$index Item Position: ${hub.chargingHubName}');
+  //       clearRoute();
+  //       // selectMarker(hub.recId);
+  //       LatLng? location = LocationConvert.getLatLngFromHub(hub);
+  //       if (location != null) {
+  //         print(location.latitude);  // 19.0991
+  //         print(location.longitude); // 72.9165
+  //         mapController.zoomTo(location);
+  //         getDirection(hub.recId!);
+  //       }
+  //       notifyListeners();
+  //     }
+  //   });
+  // }
+void listenToScroll(double itemWidth) {
+  scrollController.addListener(() {
+    final offset = scrollController.offset;
+    final maxScroll = scrollController.position.maxScrollExtent;
+
+    // 🔹 Load more when user reaches end
+    if (offset >= maxScroll - itemWidth * 0.5) {
+      loadHubs(routeGlobalKey.currentContext!);
+    }
+
+    // 🔹 Existing visible index logic (unchanged)
+    final index = (offset / itemWidth).round();
+    if (index != currentVisibleIndex &&
+        index >= 0 &&
+        index < recordsStation.length) {
+      currentVisibleIndex = index;
+
+      final hub = recordsStation[index];
+      clearRoute();
+      final location = LocationConvert.getLatLngFromHub(hub);
+      if (location != null) {
+        mapController.zoomTo(location);
+        getDirection(hub.recId!);
       }
-    });
-  }
+
+      notifyListeners();
+    }
+  });
+}
 
 
   @override
@@ -123,57 +171,102 @@ class HubProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> loadHubs(
-    BuildContext context, {
-    bool reset = false,
-  }) async {
-    clearRoute();
-    if (loading || !hasMore) return;
-    if (reset) {
-      page = 1;
-      _recordsStation.clear();
-      markers.clear();
-      hasMore = true;
-      // polyLines.clear(); remove routes
-    }
-    loading = true;
-    notifyListeners();
-   /* try {
-      _recordsStation.clear();
-      await loadIcons();
-      final ChargingHubResponse res = await _repo.fetchHubs(context);
-      print('Hub Stations Lists: ${res.hubs.length}');
-      final List<ChargingHub> data = res.hubs ?? [];
-      if (data.isEmpty) {
-        hasMore = false;
-      } else {
-        _recordsStation.addAll(data);
-        _createMarkers(context, _recordsStation);
-        page++;
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }*/
-    try {
-      _recordsStation.clear();
-      await loadIcons();
-      final ChargingcomprehensiveHubResponse res = await _repo.getChargingHubsMap(context);
-      print('Hub Stations Lists: ${res.hubs!.length}');
-      final List<ChargingHub> data = res.hubs ?? [];
-      if (data.isEmpty) {
-        hasMore = false;
-      } else {
-        _recordsStation.addAll(data);
-        _createMarkers( _recordsStation,);
-        page++;
-        initFirstItem(350);
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-    }
-    loading = false;
-    // notifyListeners();
+  
+  final int _pageSize = 6;
+
+
+  bool loadingMore = false;
+int _pageNumber = 1;
+
+
+bool isMoreLoading = false;
+bool hasMoreData = true;
+Future<void> loadHubs(
+  BuildContext context, {
+  bool reset = false,
+}) async {
+  if (loading || isMoreLoading || !hasMoreData) return;
+
+  if (reset) {
+    _pageNumber = 1;
+    _recordsStation.clear();
+    markers.clear();
+    hasMoreData = true;
   }
+
+  loading = _pageNumber == 1;
+  isMoreLoading = _pageNumber > 1;
+  notifyListeners();
+
+  try {
+    await loadIcons();
+
+    final ChargingcomprehensiveHubResponse res =
+        await _repo.getChargingHubsMap(
+      context,
+      pageNumber: _pageNumber,
+      pageSize: _pageSize,
+    );
+
+    final List<ChargingHub> data = res.hubs ?? [];
+
+    if (data.isEmpty) {
+      hasMoreData = false;
+    } else {
+      _recordsStation.addAll(data);
+      _createMarkers(_recordsStation);
+      _pageNumber++;
+    }
+
+    if (_pageNumber == 2 && _recordsStation.isNotEmpty) {
+      initFirstItem(350);
+    }
+  } catch (e) {
+    debugPrint("loadHUB Error: $e");
+  }
+
+  loading = false;
+  isMoreLoading = false;
+  notifyListeners();
+}
+
+  // Future<void> loadHubs(
+  //   BuildContext context, {
+  //   bool reset = false,
+  // }) async {
+  //   clearRoute();
+  //   if (loading || !hasMore) return;
+  //   if (reset) {
+  //     page = 1;
+  //     _recordsStation.clear();
+  //     markers.clear();
+  //     hasMore = true;
+  //     // polyLines.clear(); remove routes
+  //   }
+  //   loading = true;
+  //   notifyListeners();
+  
+  //   try {
+  //     _recordsStation.clear();
+  //     await loadIcons();
+  //     final ChargingcomprehensiveHubResponse res = await _repo.getChargingHubsMap(context);
+  //     print('Hub Stations Lists: ${res.hubs!.length}');
+  //     final List<ChargingHub> data = res.hubs ?? [];
+  //     if (data.isEmpty) {
+  //       hasMore = false;
+  //     } else {
+  //       _recordsStation.addAll(data);
+  //       _createMarkers( _recordsStation,);
+  //       page++;
+  //       initFirstItem(350);
+  //     }
+  //   } catch (e) {
+  //      debugPrint("loadHUB Error");
+  //     debugPrint(e.toString());
+  //   }
+  //   loading = false;
+  //   // notifyListeners();
+  // }
 
 
   Future<void> _createMarkers(List<ChargingHub> hubList) async {
@@ -193,48 +286,7 @@ class HubProvider extends ChangeNotifier {
         );
       }
     }
-    //
-
-/*    markers.add(
-      _buildMarker(
-        id: "243243",
-        position: const LatLng(19.196262132107243, 72.96296701103056),
-        title: "EV Dock Charging Station",
-        // icon: targetMarkerIcon!,
-      ),
-    );
-
-    markers.add(
-      _buildMarker(
-        id: "243244",
-        position: const LatLng(19.19842263661491, 72.95372020182485),
-        title: "GLIDA Charging Station",
-      ),
-    );
-
-    markers.add(
-      _buildMarker(
-        id: "243245",
-        position: const LatLng(19.193039, 72.953840),
-        title: "Kazam Charging Station",
-      ),
-    );
-
-    markers.add(
-      _buildMarker(
-        id: "243246",
-        position: const LatLng(19.262147, 72.983966),
-        title: "Vishu Electric Vehicle Charging Station",
-        *//*onTap: () async {
-          final position = await MapController().getCurrentPosition();
-          clearRoute();
-          drawRoute(
-            LatLng(position.latitude, position.longitude),
-            const LatLng(19.193039, 72.953840),
-          );
-        },*//*
-      ),
-    );*/
+  
   }
 
   Marker _buildMarker({
@@ -254,36 +306,51 @@ class HubProvider extends ChangeNotifier {
               ? currentMarkerIcon!
               : (icon ?? normalMarkerIcon!),
       anchor: const Offset(0.5, 0.5),
-      // infoWindow: InfoWindow(title: title, snippet: "Tap for details"),
-      onTap: () async {
-        clearRoute();
-         for (int i = 0; i < _recordsStation.length; i++) {
-          print('Card Position $i');
-          if (_recordsStation[i].recId == id) {
-            print(_recordsStation[i].recId);
-            print(id);
- LatLng? location = LocationConvert.getLatLngFromHub(chargingHub!);
-              Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(builder: (_) => StationDetailsScreen(hub: chargingHub,
-                            marker: Marker(
-                              markerId: MarkerId(chargingHub.recId!),
-                              position: location!,
-                              icon: activeMarkerIcon!,
-                            )
-                            ,location: location,)),
-                        );
-            print('Card Position navigation $i');
-            // scrollToIndex(i);
-            // selectMarker(id);
-            break;
-          }
-        }
-        //
-        if (onTap != null) onTap();
-      },
+
+onTap: () async {
+  clearRoute();
+
+  // 1️⃣ Zoom in to marker
+  mapController.animateCamera(
+    CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: position,
+        zoom: 17.5, // 👈 HP-style close zoom
+        tilt: 45,
+        bearing: 0,
+      ),
+    ),
+  );
+
+  // 2️⃣ Highlight marker
+  selectMarker(id);
+
+  // 3️⃣ Scroll station card (optional)
+  scrollToStation(id);
+
+  if (onTap != null) onTap();
+},
+
     );
   }
+void scrollToStation(String markerId) {
+  final index =
+      recordsStation.indexWhere((hub) => hub.recId == markerId);
+
+  if (index == -1) return;
+
+  currentVisibleIndex = index;
+
+  const double itemWidth = 350.0; // same width used everywhere
+
+  scrollController.animateTo(
+    index * itemWidth,
+    duration: const Duration(milliseconds: 400),
+    curve: Curves.easeInOut,
+  );
+
+  notifyListeners();
+}
 
   void selectMarker(String markerId) {
     selectedMarkerId = markerId;
@@ -314,75 +381,6 @@ class HubProvider extends ChangeNotifier {
     }).toSet();
   }
 
-/*  Future<void> _createMarkers(List<ChargingHub> hubList,BuildContext context) async {
-    BitmapDescriptor  normalMarkerIcon = await getResizedMarker(
-      'assets/images/normalMarker.png',
-      width: 32,
-    );
-    BitmapDescriptor  targetMarkerIcon = await getResizedMarker(
-      'assets/images/targetMarker.png',
-      width: 125,
-    );
-
-    markers.add(
-      Marker(
-        markerId: MarkerId('243243' ?? ''),
-        position: LatLng(19.196262132107243, 72.96296701103056),
-        icon: targetMarkerIcon,
-        anchor: const Offset(0.5, 0.5),
-        infoWindow: InfoWindow(
-            title:  'EV Dock Charging Station',
-            snippet: 'Tap for details',
-            onTap: () {
-              debugPrint('Marker tapped:');
-            }),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('243244' ?? ''),
-        position: LatLng(19.19842263661491, 72.95372020182485),
-        icon: normalMarkerIcon,
-        infoWindow: InfoWindow(
-            title:  'GLIDA Charging Station',
-            snippet: 'Tap for details',
-            onTap: () {
-              debugPrint('Marker tapped:');
-            }),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId('243245' ?? ''),
-        position: LatLng(19.193039, 72.953840),
-        icon: normalMarkerIcon,
-        infoWindow: InfoWindow(
-            title:  'Kazam Charging Station',
-            snippet: 'Tap for details',
-            onTap: () {
-              debugPrint('Marker tapped:');
-            }),
-      ),
-    );
-    markers.add(
-      Marker(
-          markerId: MarkerId('243246' ?? ''),
-          position: LatLng(19.262147, 72.983966),
-          icon: normalMarkerIcon,
-          infoWindow: InfoWindow(
-            title:  'Vishu Electric Vehicle Charging Station',
-            snippet: 'Tap for details',
-        ),
-        onTap: () async {
-          debugPrint('Marker tapped:');
-          final Position position = await MapController().getCurrentPosition();
-          // drawRoute(LatLng(19.262147, 72.983966), LatLng(19.193039, 72.953840));
-          drawRoute(LatLng(position.latitude, position.longitude), LatLng(19.193039, 72.953840));
-        }
-      ),
-    );
-  }*/
-
   Future<void> drawRoute(
     LatLng start,
     LatLng end,
@@ -397,14 +395,7 @@ class HubProvider extends ChangeNotifier {
           icon: currentMarkerIcon,
           onTap: () {},
           chargingHub: chargingHub
-          // onTap: () async {
-          //   final position = await MapController().getCurrentPosition();
-          //   clearRoute();
-          //   drawRoute(
-          //     LatLng(position.latitude, position.longitude),
-          //     const LatLng(19.193039, 72.953840),
-          //   );
-          // },
+          
           ),
     );
 
@@ -421,10 +412,7 @@ class HubProvider extends ChangeNotifier {
           startCap: Cap.roundCap,
           endCap: Cap.squareCap,
           jointType: JointType.round,
-          // patterns: [
-          //   PatternItem.dash(10),
-          //   PatternItem.gap(10),
-          // ],
+          
           geodesic: false,
           consumeTapEvents: false,
           onTap: () {
@@ -515,44 +503,5 @@ void searchAndFocusHub(String query) async {
   notifyListeners();
 }
 
-// void searchAndFocusHub(String query) async {
-//   if (recordsStation.isEmpty) return;
-
-//   // 🔍 Match by hub name / city / address
-//   final index = recordsStation.indexWhere((hub) =>
-//       (hub.chargingHubName ?? '').toLowerCase().contains(query.toLowerCase()) ||
-//       (hub.city ?? '').toLowerCase().contains(query.toLowerCase()) ||
-//       (hub.addressLine1 ?? '').toLowerCase().contains(query.toLowerCase()));
-
-//   if (index == -1) return;
-
-//   final hub = recordsStation[index];
-
-//   final LatLng? location = LocationConvert.getLatLngFromHub(hub);
-//   if (location == null) return;
-
-//   // 🎯 Move map camera
-//   await mapController.googleMapController?.animateCamera(
-//     CameraUpdate.newCameraPosition(
-//       CameraPosition(
-//         target: location,
-//         zoom: 15,
-//         tilt: 45,
-//       ),
-//     ),
-//   );
-
-//   // 🎯 Scroll card
-//   final double cardWidth = 350; // same as listenToScroll()
-//   scrollController.animateTo(
-//     index * cardWidth,
-//     duration: const Duration(milliseconds: 500),
-//     curve: Curves.easeInOut,
-//   );
-
-//   // 🎯 Highlight card + marker
-//   currentVisibleIndex = index;
-//   notifyListeners();
-// }
 
 }

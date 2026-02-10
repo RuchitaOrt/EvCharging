@@ -102,22 +102,22 @@ Future<ChargingGunStatusResponse> getChargingGunStatus({
   }
 }
 
-  Future<ChargingSessionResponse> getAllChargingSessions(
-    BuildContext context, {
-    int page = 1,
-    int pageSize = 50,
-  }) async {
-    final res = await APIManager().apiRequest(
-      context,
-      API.chargingsessions, // add this in APIManager
-      queryParams: {
-        'page': page.toString(),
-        'pageSize': pageSize.toString(),
-      },
-    );
+  // Future<ChargingSessionResponse> getAllChargingSessions(
+  //   BuildContext context, {
+  //   int page = 1,
+  //   int pageSize = 50,
+  // }) async {
+  //   final res = await APIManager().apiRequest(
+  //     context,
+  //     API.chargingsessions, // add this in APIManager
+  //     queryParams: {
+  //       'page': page.toString(),
+  //       'pageSize': pageSize.toString(),
+  //     },
+  //   );
 
-    return res as ChargingSessionResponse;
-  }
+  //   return res as ChargingSessionResponse;
+  // }
 
 
   /// ✅ New: Fetch Active Sessions

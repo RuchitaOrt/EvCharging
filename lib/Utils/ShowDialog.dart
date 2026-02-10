@@ -64,7 +64,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
     // set up the AlertDialog
     AlertDialog alert = AlertDialog(
-      title: Text("Hyworth Land Survey"),
+      title: Text("Ev-charging"),
       content: Text(message!),
       actions: [
         okButton,

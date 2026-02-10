@@ -6,7 +6,7 @@ class ChargingEstimateProvider extends ChangeNotifier {
   final double pricePerUnit = 18;
   final double batteryCapacity = 40;
   final double efficiency = 0.9;
-
+ final controller = TextEditingController();
   double amount = 0;
   double units = 0;
   double time = 0;
@@ -53,6 +53,8 @@ class ChargingEstimateProvider extends ChangeNotifier {
   
   void calculateFromAmount(double value) {
     amount = value;
+    print("Setted value");
+    print(amount);
     units = amount / pricePerUnit;
     time = units / chargerPower;
     percentage = (units / batteryCapacity) * 100;

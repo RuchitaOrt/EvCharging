@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
+import 'package:ev_charging_app/Utils/InternetConnection.dart';
+import 'package:ev_charging_app/main.dart';
 import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
 import 'package:ev_charging_app/model/AddReviewResponse.dart';
 import 'package:ev_charging_app/model/ChargingGunStatusRefreshResponse.dart';
@@ -11,9 +13,14 @@ import 'package:ev_charging_app/model/ChargingGunStatusResponse.dart';
 import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
 import 'package:ev_charging_app/model/ChargingHistorySessionResponse.dart';
 import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:ev_charging_app/model/CreateOrderResponse.dart';
+import 'package:ev_charging_app/model/DeleteAccountResponse.dart';
 import 'package:ev_charging_app/model/DeleteReviewResponse.dart';
 import 'package:ev_charging_app/model/DeleteVehicleResponse.dart';
 import 'package:ev_charging_app/model/EndChargingSessionResponse.dart';
+import 'package:ev_charging_app/model/RazorpayKeyResponse.dart';
+import 'package:ev_charging_app/model/RefreshTokenResponse.dart';
+import 'package:ev_charging_app/model/ResetPasswordResponse.dart';
 import 'package:ev_charging_app/model/SessionDetailResponse.dart';
 import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
 import 'package:ev_charging_app/model/UnlockConnectorResponse.dart';
@@ -22,6 +29,7 @@ import 'package:ev_charging_app/model/WalletListResponse.dart';
 import 'package:ev_charging_app/model/WalletResponse.dart';
 import 'package:ev_charging_app/model/user_vehicle_model.dart';
 import 'package:ev_charging_app/model/user_vehicle_update_response.dart';
+import 'package:ev_charging_app/model/verify_payment_response.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 
@@ -35,6 +43,7 @@ import 'package:ev_charging_app/model/ProfileResponse.dart';
 import 'package:ev_charging_app/model/ChargingHubResponse.dart';
 import 'package:ev_charging_app/model/ChargingListResponse.dart';
 import 'package:ev_charging_app/model/ChargingStationListResponse.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum API {
   login,
@@ -68,7 +77,15 @@ enum API {
   chargingHubReviewList,
   chargingHubReviewAdd,
   charginghubreviewupdate,
-  charginghubreviewdelete
+  charginghubreviewdelete,
+  resetPassword,
+  deleteAccount,
+  refreshToken,
+  fileUpload,
+  razorpayKey,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+  
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -117,14 +134,39 @@ class APIManager {
   void _addInterceptors() {
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          // Log request details
-          _logRequest(options);
+        // onRequest: (options, handler) async {
+        //   // Log request details
+        //   _logRequest(options);
 
-          final cookies = await cookieJar?.loadForRequest(options.uri);
-          print("🍪 Request cookies: $cookies");
+        //   final cookies = await cookieJar?.loadForRequest(options.uri);
+        //   print("🍪 Request cookies: $cookies");
+        //   handler.next(options);
+        // },
+        onRequest: (options, handler) async {
+          final hasInternet = await hasInternetConnection();
+
+          if (!hasInternet) {
+            handler.reject(
+              DioException(
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+                error: "No internet connection",
+              ),
+            );
+
+            // Optional: show dialog / snackbar
+            infoNormalDialog(
+              routeGlobalKey.currentContext!,
+              message: "No internet connection. Please check your network.",
+            );
+
+            return;
+          }
+
+          _logRequest(options);
           handler.next(options);
         },
+
         onResponse: (response, handler) {
           // Log response details
           _logResponse(response);
@@ -132,12 +174,54 @@ class APIManager {
           print("🍪 Set-Cookie: ${response.headers['set-cookie']}");
           handler.next(response);
         },
-        onError: (e, handler) {
-          // Log error details
-          _logError(e);
-          print("❌ API ERROR: ${e.response?.statusCode}");
+        onError: (DioException e, handler) async {
+          print("Errorcode");
+          print(e.response?.statusCode);
+          if (e.response?.statusCode == 401) {
+            print("🔒 401 detected, attempting refresh token");
+
+            final refreshed = await _refreshToken();
+
+            if (refreshed) {
+              final requestOptions = e.requestOptions;
+
+              try {
+                final retryResponse = await dio.request(
+                  requestOptions.path,
+                  data: requestOptions.data,
+                  queryParameters: requestOptions.queryParameters,
+                  options: Options(
+                    method: requestOptions.method,
+                    headers: requestOptions.headers,
+                  ),
+                );
+
+                return handler.resolve(retryResponse);
+              } catch (retryError) {
+                return handler.reject(e);
+              }
+            } else {
+              print("Statuscode ${refreshed}");
+              print("Statuscode Coming Here");
+              unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+                  message: "Your Session has Expired.Please Login Again");
+            }
+
+            // Refresh failed → force logout
+            await clearCookies();
+            unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+                message: "Your Session has Expired.Please Login Again");
+          }
+
           handler.next(e);
         },
+
+        // onError: (e, handler) {
+        //   // Log error details
+        //   _logError(e);
+        //   print("❌ API ERROR: ${e.response?.statusCode}");
+        //   handler.next(e);
+        // },
       ),
     );
   }
@@ -402,7 +486,7 @@ class APIManager {
       case API.profileUpdate:
         return "/User/profile-update";
       case API.addWalletCredits:
-        return "/User/add-wallet-credits";
+        return "/Payment/add-credits";
       case API.profileDelete:
         return "/User/profile-delete";
       case API.walletDetails:
@@ -446,14 +530,29 @@ class APIManager {
 
       case API.chargingHubReviewList:
         return "/ChargingHub/charging-hub-review-list";
-        case API.chargingHubReviewAdd:
+      case API.chargingHubReviewAdd:
         return "/ChargingHub/charging-stn-review-add";
-         case API.charginghubreviewupdate:
-          return "/ChargingHub/charging-hub-review-update";
-           case API.charginghubreviewdelete:
-          return "/ChargingHub/charging-hub-review-delete";
-        
-        
+      case API.charginghubreviewupdate:
+        return "/ChargingHub/charging-hub-review-update";
+      case API.charginghubreviewdelete:
+        return "/ChargingHub/charging-hub-review-delete";
+      case API.resetPassword:
+        return "/User/reset-password";
+
+      case API.deleteAccount:
+        return "/User/user-delete";
+      case API.refreshToken:
+        return "/User/refresh-token";
+      case API.fileUpload:
+        return "/FileStorage/upload";
+      case API.razorpayKey:
+        return "/Payment/razorpay-key";
+        case API.createRazorpayOrder:
+  return "/Payment/create-order";
+  case API.verifyRazorpayPayment:
+  return "/Payment/verify-payment";
+
+
     }
   }
 
@@ -473,16 +572,18 @@ class APIManager {
       case API.evModelList:
       case API.chargingsessiondetails:
       case API.chargingHubReviewList:
-       case API.chargingsessions:
-         case API.charginggunstatus:
+      case API.chargingsessions:
+      case API.charginggunstatus:
+      case API.razorpayKey:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:
-       case API.charginghubreviewupdate:
+      case API.charginghubreviewupdate:
         return HTTPMethod.PUT;
       case API.profileDelete:
       case API.userVehicleDelete:
       case API.charginghubreviewdelete:
+      case API.deleteAccount:
         return HTTPMethod.DELETE;
       default:
         return HTTPMethod.POST;
@@ -534,13 +635,25 @@ class APIManager {
       case API.charginggunstatus:
         return ChargingGunStatusResponse.fromJson(json);
 
-         case API.chargingsessions:
-         return ActiveSessionResponse.fromJson(json);
-         case API.chargingHubReviewAdd:
-          case API.charginghubreviewupdate:
-         return AddReviewResponse.fromJson(json);
-         case API.charginghubreviewdelete:
-  return DeleteReviewResponse.fromJson(json);
+      case API.chargingsessions:
+        return ActiveSessionResponse.fromJson(json);
+      case API.chargingHubReviewAdd:
+      case API.charginghubreviewupdate:
+        return AddReviewResponse.fromJson(json);
+      case API.charginghubreviewdelete:
+        return DeleteReviewResponse.fromJson(json);
+      case API.resetPassword:
+        return ResetPasswordResponse.fromJson(json);
+      case API.deleteAccount:
+        return DeleteAccountResponse.fromJson(json);
+      case API.refreshToken:
+        return RefreshTokenResponse.fromJson(json);
+      case API.razorpayKey:
+        return RazorpayKeyResponse.fromJson(json);
+        case API.createRazorpayOrder:
+  return CreateOrderResponse.fromJson(json);
+case API.verifyRazorpayPayment:
+  return VerifyPaymentResponse.fromJson(json);
 
 
       default:
@@ -563,7 +676,7 @@ class APIManager {
         queryParameters: queryParams,
         options: Options(
           method: apiHTTPMethod(api).name,
-          validateStatus: (_) => true,
+          // validateStatus: (_) => true,
         ),
       );
       print('Response code: ${response.statusCode}');
@@ -574,17 +687,21 @@ class APIManager {
       if (response.statusCode == 400) {
         throw BadRequestError(_serverMessage(response.data));
       }
+// if (response.statusCode == 401) {
+//   throw UnauthorisedError("Unauthorized");
+// }
 
-      if (response.statusCode == 401) {
-        print("response.statusCode ${response.statusCode}");
-        // infoNormalDialog(
-        //   context,
-        //   message: response.data['message'] ?? '',
-        // );
-        unAthorizedTokenErrorDialog(context,
-            message: "Your Session has Expired.Please Login Again");
-        throw UnauthorisedError("Unauthorized");
-      }
+      // if (response.statusCode == 401) {
+      //   print("response.statusCode ${response.statusCode}");
+      //   // infoNormalDialog(
+      //   //   context,
+      //   //   message: response.data['message'] ?? '',
+      //   // );
+      //    print("🔒 401 detected, attempting token");
+      //   unAthorizedTokenErrorDialog(context,
+      //       message: "Your Session has Expired.Please Login Again");
+      //   throw UnauthorisedError("Unauthorized");
+      // }
 
       throw FetchDataError(_serverMessage(response.data));
     } on DioException catch (e) {
@@ -610,5 +727,32 @@ class APIManager {
           "Something went wrong";
     }
     return data?.toString() ?? "Something went wrong";
+  }
+
+  Future<bool> _refreshToken() async {
+    try {
+      final response = await dio.post(
+        apiEndPoint(API.refreshToken),
+        // options: Options(validateStatus: (_) => true),
+      );
+
+      if (response.statusCode == 200) {
+        final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+
+        // Cookies are already updated automatically by CookieManager
+        print("🔁 Token refreshed successfully");
+        if (refreshResponse.success == false) {
+          unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+              message: "Your Session has Expired.Please Login Again");
+        } else {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString("userId", refreshResponse!.user!.recId!);
+        }
+        return true;
+      } else {}
+    } catch (e) {
+      print("❌ Refresh token failed: $e");
+    }
+    return false;
   }
 }

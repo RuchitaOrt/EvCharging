@@ -3,7 +3,8 @@ class CommonStrings {
 
   // Splash Screen
   static const String strLogin = "Login";
-
+    static const String strVerifyOTP = "Verify the OTP";
+     static const String strSendOTP = "Enter the otp sent to";
   static const String strManufacturer = "Manufacturer";
 
   static const String strChooseManufacturer = "Choose Manufacturer";
@@ -29,6 +30,7 @@ class CommonStrings {
   static const String strChooseConnector = "Choose Connector";
 
     static const String strRegistration = "Register";
+        static const String strResetPassword = "Reset Password";
 static const String strfirstName = "First Name";
 static const String strAmount = "Amount";
 static const String strAmountHint = "Enter amount";
@@ -48,5 +50,11 @@ static const String strConfirmPasswordHint = "Enter your confirm password";
 
 static const String strPhoneNumberHint = "Enter Mobile Number";
 static const String strMobileNo = "Mobile Number";
-    
+
+
+static const String strOldPasswordHint = "Enter your old password";
+    static const String strnewPasswordHint = "Enter your New password";
+
+    static const String strOldPassword = "Old Password";
+    static const String strNewPassword = "New Password";
 }

@@ -11,8 +11,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class MainTab extends StatefulWidget {
   final bool isLoggedIn;
+  final int currentIndex;
+  final bool iscreditopen;
    static const String route = "/main_screen";
-   MainTab({super.key,  this.isLoggedIn=false});
+   MainTab({super.key,  this.isLoggedIn=false,  this.currentIndex=0,  this.iscreditopen=false});
 
   @override
   State<MainTab> createState() => _MainTabState();
@@ -26,12 +28,14 @@ class _MainTabState extends State<MainTab> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    currentIndex=widget.currentIndex;
     print(widget.isLoggedIn);
      screens = [
      MapScreen(isLogin: widget.isLoggedIn),
      ChargingStationsScreen(),
      ScanScreen(), // Center button screen
-    const Transaction(),
+     Transaction(creditsOpen: widget.iscreditopen,),
     const ProfileScreen(),
   ];
   }

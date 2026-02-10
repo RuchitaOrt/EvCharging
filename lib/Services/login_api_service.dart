@@ -15,7 +15,7 @@ Future<LoginResponse> loginUser(
     API.login,
     jsonval: request.toJson(),
   );
-
+ print("REsponse ${response}");
   return response as LoginResponse;
 }
 }

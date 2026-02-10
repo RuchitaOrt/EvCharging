@@ -22,16 +22,51 @@ class WalletApiService {
     }
   }
 
+// Future<WalletListResponse?> getWalletDetails(
+//   BuildContext context,
+//   {
+//   required int page,
+//   required int limit,
+// }
+// ) async {
+//   final response = await _apiManager.apiRequest(
+//     context,
+//      API.walletDetails,
+//     queryParams: {
+//       "page": page,
+//       "limit": limit,
+//     },
+//   );
 
+//   return WalletListResponse.fromJson(response.data);
+// }
 
-   Future<WalletListResponse> getWalletDetails(
-    BuildContext context,
-  ) async {
-    final response = await _apiManager.apiRequest(
-      context,
-      API.walletDetails,
-    );
+Future<WalletListResponse> getWalletDetails(
+  BuildContext context, {
+  required int pageNumber,
+  required int pageSize,
+}) async {
+  final response = await _apiManager.apiRequest(
+    context,
+    API.walletDetails,
+    queryParams: {
+      "pageNumber": pageNumber.toString(),
+      "pageSize": pageSize.toString(),
+    },
+  );
 
-    return response as WalletListResponse;
-  }
+ return response as WalletListResponse;
+
+}
+
+  //  Future<WalletListResponse> getWalletDetails(
+  //   BuildContext context,
+  // ) async {
+  //   final response = await _apiManager.apiRequest(
+  //     context,
+  //     API.walletDetails,
+  //   );
+
+  //   return response as WalletListResponse;
+  // }
 }

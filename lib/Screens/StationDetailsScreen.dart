@@ -1,10 +1,14 @@
 import 'dart:async';
 
+import 'package:ev_charging_app/Provider/ChargingEstimateProvider.dart';
 import 'package:ev_charging_app/Provider/ChargingGunStatusProvider.dart';
 import 'package:ev_charging_app/Provider/ChargingHubReviewProvider.dart';
 import 'package:ev_charging_app/Provider/ChargingProvider.dart';
+import 'package:ev_charging_app/Provider/WalletProvider.dart';
 import 'package:ev_charging_app/Screens/ChargingEstimateScreen.dart';
 import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
+import 'package:ev_charging_app/Screens/Controller/station_card_widget.dart';
+import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Screens/Map/MiniMapWidget.dart';
 import 'package:ev_charging_app/Screens/SessionChargingScreen.dart';
 import 'package:ev_charging_app/Utils/AuthStorage.dart';
@@ -17,6 +21,7 @@ import 'package:ev_charging_app/Utils/sizeConfig.dart';
 import 'package:ev_charging_app/main.dart';
 import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
 import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:ev_charging_app/widget/LogoutConfirmationSheet.dart';
 import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
 
@@ -53,6 +58,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   String? selectedStationID;
   Position? _currentPosition;
   Timer? _statusTimer;
+  double currentWalletPrice = 0.0;
 
   void _startPolling() {
     _statusTimer = Timer.periodic(
@@ -73,7 +79,11 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
       },
     );
   }
-
+   String  userId ="";
+getUserInfo()
+async {
+   userId = (await AuthStorage.getUserId())!;
+}
   @override
   void dispose() {
     _statusTimer?.cancel();
@@ -83,18 +93,26 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _startPolling();
+    print("Current BALNCE");
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      getUserInfo();
+      context.read<WalletProvider>().fetchWallet(context);
+       _startPolling();
     context.read<ChargingHubReviewProvider>().fetchReviews(
           context: context,
           hubId: widget.hub.recId,
         );
     _fetchCurrentLocation();
+    });
+
+   
   }
-@override
-void deactivate() {
-  _statusTimer?.cancel();
-  super.deactivate();
-}
+
+  @override
+  void deactivate() {
+    _statusTimer?.cancel();
+    super.deactivate();
+  }
 
   void _openReviewsBottomSheet({
     required BuildContext context,
@@ -175,6 +193,7 @@ void deactivate() {
   }
 
   Widget _reviewCard(ChargingHubReview review) {
+    
     final initials = _getInitials(review.userName);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,7 +261,7 @@ void deactivate() {
               ),
             ),
 
-            MoreOptionsMenu(
+     review.userId==  userId ?    MoreOptionsMenu(
               onEdit: () {
                 _openWriteReviewBottomSheet(
                     hubID: widget.hub.recId,
@@ -288,7 +307,7 @@ void deactivate() {
                   ),
                 );
               },
-            )
+            ):Container()
           ],
         ),
         Divider(
@@ -350,6 +369,11 @@ void deactivate() {
               location!.longitude) /
           1000;
     }
+    final walletProvider = context.watch<WalletProvider>();
+
+    currentWalletPrice = walletProvider.currentBalance;
+
+    print("Current BALANCE ${walletProvider.currentBalance}");
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.white,
         statusBarBrightness: Brightness.dark,
@@ -448,11 +472,21 @@ void deactivate() {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Image.asset(
-                                CommonImagePath.frame,
-                                fit: BoxFit.cover,
-                                height: SizeConfig.blockSizeVertical * 8,
-                              ),
+                              // Image.asset(
+                              //   CommonImagePath.frame,
+                              //   fit: BoxFit.cover,
+                              //   height: SizeConfig.blockSizeVertical * 8,
+                              // ),
+                               widget.hub.chargingHubImage != null
+    ? HubImage(
+        imageId: widget.hub.chargingHubImage!,
+        height: SizeConfig.blockSizeVertical * 5,
+        width: SizeConfig.blockSizeVertical * 5,
+      )
+    : Image.asset(
+        CommonImagePath.frame,
+        height: SizeConfig.blockSizeVertical * 6,
+      ),
                               SizedBox(
                                   width: SizeConfig.blockSizeHorizontal * 2),
                               Expanded(
@@ -790,7 +824,7 @@ void deactivate() {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              "₹ 25/kW",
+                              "₹ ${charger.chargerTariff}/kW",
                               style: const TextStyle(
                                   fontSize: 12, color: CommonColors.blue),
                             ),
@@ -874,7 +908,7 @@ void deactivate() {
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children:  [
+                      children: [
                         Text('Charger Type',
                             style: TextStyle(
                                 fontWeight: FontWeight.w200, fontSize: 12)),
@@ -885,7 +919,7 @@ void deactivate() {
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children:  [
+                      children: [
                         Text('Power Output',
                             style: TextStyle(
                                 fontWeight: FontWeight.w200, fontSize: 12)),
@@ -896,7 +930,7 @@ void deactivate() {
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children:  [
+                      children: [
                         Text('Plug Type',
                             style: TextStyle(
                                 fontWeight: FontWeight.w200, fontSize: 12)),
@@ -1011,37 +1045,74 @@ void deactivate() {
                 //       builder: (_) => ChargingEstimateScreen(),
                 //     ),
                 //   );
+  // Navigator.push(
+  //                         routeGlobalKey.currentContext!,
+  //                         MaterialPageRoute(builder: (context) => ChargingEstimateScreen(selectedCharger:_selectedCharger,
+                          
+  //                         selectedStationID: selectedStationID,)),
+  //                       );
 
-                final userId = await AuthStorage.getUserId();
-                if (userId == null) return;
+                        Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => ChangeNotifierProvider(
+      create: (_) => ChargingEstimateProvider(),
+      child: ChargingEstimateScreen(
+        selectedCharger: _selectedCharger,
+        selectedStationID: selectedStationID,
+      ),
+    ),
+  ),
+);
 
-                final response = await provider.startSession(
-                  context: context,
-                  chargingGunId: _selectedCharger!.connectorName!,
-                  chargingStationId: selectedStationID!,
-                  userId: userId,
-                  chargeTagId: "B4A63CDF",
-                  connectorId:
-                      int.parse(_selectedCharger!.connectorId!.toString()),
-                  startMeterReading: "0",
-                  chargingTariff: "typeATariff",
-                );
+                // final userId = await AuthStorage.getUserId();
+                // if (userId == null) return;
+                // print("PRICE SELECT");
+                // print(_selectedCharger!.chargerTariff.toString());
+                // print(currentWalletPrice);
+                // if (double.parse(_selectedCharger!.chargerTariff.toString()) <
+                //     currentWalletPrice) {
+                //   final response = await provider.startSession(
+                //     context: context,
+                //     chargingGunId: _selectedCharger!.connectorName!,
+                //     chargingStationId: selectedStationID!,
+                //     userId: userId,
+                //     chargeTagId: "B4A63CDF",
+                //     connectorId:
+                //         int.parse(_selectedCharger!.connectorId!.toString()),
+                //     startMeterReading: "0",
+                //     chargingTariff: "typeATariff",
+                //   );
 
-                if (response != null && response.success) {
-                  showToast("Charging session started successfully!");
-                  print("SeesionID ${response.data!.session!.recId!}");
-                  _statusTimer?.cancel();
-                  Navigator.push(
-                    routeGlobalKey.currentContext!,
-                    MaterialPageRoute(
-                      builder: (_) => SessionChargingScreen(
-                        intitalResponse: response,
-                      ),
-                    ),
-                  );
-                } else {
-                  showToast("Failed to start session");
-                }
+                //   if (response != null && response.success) {
+                //     showToast("Charging session started successfully!");
+                //     print("SeesionID ${response.data!.session!.recId!}");
+                //     _statusTimer?.cancel();
+                //     Navigator.push(
+                //       routeGlobalKey.currentContext!,
+                //       MaterialPageRoute(
+                //         builder: (_) => SessionChargingScreen(
+                //           intitalResponse: response,
+                //         ),
+                //       ),
+                //     );
+                //   } else {
+                //     showToast("Failed to start session");
+                //   }
+                // } else {
+                //   showToast("Wallet does not have sufficient amount");
+                //   _statusTimer?.cancel();
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(
+                //       builder: (_) => MainTab(
+                //         isLoggedIn: GlobalLists.islLogin,
+                //         currentIndex: 3,
+                //         iscreditopen: true,
+                //       ),
+                //     ),
+                //   );
+                // }
               },
         style: ElevatedButton.styleFrom(
           backgroundColor:
@@ -1061,7 +1132,7 @@ void deactivate() {
                 ),
               )
             : Text(
-                hasSelection ? "Start Charging" : "Select a Charger",
+                hasSelection ? "Charge Now" : "Select a Charger",
                 style: const TextStyle(color: CommonColors.white),
               ),
       ),

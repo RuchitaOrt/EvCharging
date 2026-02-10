@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:ev_charging_app/Utils/commoncolors.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -39,45 +40,99 @@ class LocationPermissionManager {
 
     return true;
   }
+void _showPermissionDialog(
+  BuildContext context, {
+  bool openSettings = false,
+}) {
+  if (_dialogVisible) return;
+  _dialogVisible = true;
 
-  void _showPermissionDialog(
-      BuildContext context, {
-        bool openSettings = false,
-      }) {
-    if (_dialogVisible) return;
-    _dialogVisible = true;
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: AlertDialog(
-            title: const Text('Location Permission Required'),
-            content: const Text(
-              'Location permission is required for driver tracking.',
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  _dialogVisible = false;
-
-                  if (openSettings) {
-                    await Geolocator.openAppSettings();
-                  } else {
-                    await Geolocator.requestPermission();
-                  }
-                },
-                child: const Text('ENABLE'),
-              ),
-            ],
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) {
+      return WillPopScope(
+        onWillPop: () async => false,
+        child: AlertDialog(
+          title: const Text('Location Permission Required',style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),),
+          content: const Text(
+            'Location permission is required for tracking chargers.',
           ),
-        );
-      },
-    );
-  }
+          actions: [
+            ElevatedButton(
+              
+              onPressed: () async {
+                Navigator.of(context).pop();
+                _dialogVisible = false;
+
+                LocationPermission permission =
+                    await Geolocator.checkPermission();
+
+                if (permission == LocationPermission.denied) {
+                  permission = await Geolocator.requestPermission();
+                }
+
+                if (permission == LocationPermission.deniedForever) {
+                  // MUST open settings
+                  await Geolocator.openAppSettings();
+                }
+
+                // Optional: re-check after user action
+                permission = await Geolocator.checkPermission();
+                if (permission == LocationPermission.always ||
+                    permission == LocationPermission.whileInUse) {
+                  debugPrint('✅ Location permission granted');
+                } else {
+                  debugPrint('❌ Location permission not granted');
+                }
+              },
+              child: const Text('ENABLE',style: TextStyle(color: CommonColors.blue),),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+  // void _showPermissionDialog(
+  //     BuildContext context, {
+  //       bool openSettings = false,
+  //     }) {
+  //   if (_dialogVisible) return;
+  //   _dialogVisible = true;
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (_) {
+  //       return WillPopScope(
+  //         onWillPop: () async => false,
+  //         child: AlertDialog(
+  //           title: const Text('Location Permission Required'),
+  //           content: const Text(
+  //             'Location permission is required for driver tracking.',
+  //           ),
+  //           actions: [
+  //             ElevatedButton(
+  //               onPressed: () async {
+  //                 Navigator.of(context).pop();
+  //                 _dialogVisible = false;
+                   
+  //                 if (openSettings) {
+  //                   await Geolocator.openAppSettings();
+  //                 } else {
+  //                   await Geolocator.requestPermission();
+  //                 }
+  //               },
+  //               child: const Text('ENABLE'),
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   void _showGpsDialog(BuildContext context) {
     if (_dialogVisible) return;

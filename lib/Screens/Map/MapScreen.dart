@@ -7,6 +7,7 @@ import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
 import 'package:ev_charging_app/Screens/Controller/station_card_widget.dart';
 import 'package:ev_charging_app/Screens/Map/ActiveSessionCardWidget.dart';
 import 'package:ev_charging_app/Screens/SearchBarWidget.dart';
+import 'package:ev_charging_app/Screens/auth/LoginSwitchWidget.dart';
 import 'package:ev_charging_app/Screens/auth/login_bottom_sheet.dart';
 import 'package:ev_charging_app/Utils/AuthStorage.dart';
 import 'package:ev_charging_app/main.dart';
@@ -38,7 +39,7 @@ class _MapScreenState extends State<MapScreen> {
     print("LOGGED IN init");
     loadData();
   }
-
+ bool isLoggedIn=false;
   loadData() async {
     final style = await DefaultAssetBundle.of(context)
         .loadString('assets/map_styles/dark_map.json');
@@ -46,11 +47,12 @@ class _MapScreenState extends State<MapScreen> {
       mapsStyle = style;
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      //horizontal on map
       context.read<HubProvider>().loadHubs(context);
       // if (!widget.isLogin) {
       //   showLoginSheet(context);
       // }
-      final isLoggedIn = await AuthStorage.isLoggedIn();
+       isLoggedIn = await AuthStorage.isLoggedIn();
       print("LOGGED IN ${isLoggedIn}");
       if (!isLoggedIn) {
         showLoginSheet(context);
@@ -77,10 +79,13 @@ class _MapScreenState extends State<MapScreen> {
         );
       },
     );
+
+
   }
 
   @override
   Widget build(BuildContext context) {
+    
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarBrightness: Brightness.light,
@@ -92,6 +97,7 @@ class _MapScreenState extends State<MapScreen> {
           body: Stack(
             children: [
               GoogleMap(
+               indoorViewEnabled: true,
                 initialCameraPosition: CameraPosition(
                   // target location
                   target: controller.center,
@@ -103,6 +109,8 @@ class _MapScreenState extends State<MapScreen> {
                 myLocationEnabled: true,
                 myLocationButtonEnabled: false,
                 markers: hubProvider.markers,
+                 mapType: MapType.normal, // 👈 IMPORTANT
+  buildingsEnabled: true, // 👈 REQUIRED
                 // onMapCreated: controller.onMapCreated,
                 onMapCreated: (controller) {
                   context
@@ -118,7 +126,7 @@ class _MapScreenState extends State<MapScreen> {
                 style: mapsStyle,
                 compassEnabled: false,
                 mapToolbarEnabled: false,
-                buildingsEnabled: false,
+                // buildingsEnabled: false,
                 trafficEnabled: false,
                 polylines: hubProvider.polyLines,
                 onTap: (LatLng) {
@@ -190,9 +198,9 @@ class _MapScreenState extends State<MapScreen> {
                 },
               ),
 
-              if (hubProvider.loading)
-                const Center(child: CircularProgressIndicator()),
-              const Positioned(
+          isLoggedIn==false?Container():     (hubProvider.loading)?
+                 Center(child: CircularProgressIndicator()):
+               Positioned(
                 bottom: 40,
                 left: 0,
                 right: 0,

@@ -1,9 +1,13 @@
 import 'package:ev_charging_app/Provider/ChargingProvider.dart';
+import 'package:ev_charging_app/Screens/MainTab.dart';
 import 'package:ev_charging_app/Utils/CommonAppBar.dart';
 import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:ev_charging_app/Utils/commonimages.dart';
 import 'package:ev_charging_app/model/SessionDetailResponse.dart';
 import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
+import 'package:ev_charging_app/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:math' as math;
 import 'dart:async';
@@ -11,12 +15,18 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 
 class SessionChargingScreen extends StatefulWidget {
-  final StartChargingSessionResponse intitalResponse;
+  // final StartChargingSessionResponse intitalResponse;
+final SessionChargingArgs args;
 
-  const SessionChargingScreen({
-    super.key,
-    required this.intitalResponse,
-  });
+const SessionChargingScreen({
+  super.key,
+  required this.args,
+});
+
+  //  SessionChargingScreen({
+  //   super.key,
+  //   required this.args,
+  // });
 
   @override
   State<SessionChargingScreen> createState() => _SessionChargingScreenState();
@@ -26,25 +36,34 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
-
+int totalMinutes = 100; 
+int? remainingMinutes;
   double currentMeter = 0;
   Timer? _refreshTimer;
   String? status;
   String? cost;
   String? unitConsumed;
   String? outputPower;
-  String? batteryPercentage = "10";
+  String? batteryPercentage = "0";
   String? endMeterReading;
   @override
   void initState() {
     super.initState();
-    status = widget.intitalResponse.data!.session!.status!;
-    cost = widget.intitalResponse.data!.session!.chargingTotalFee!;
-    unitConsumed = widget.intitalResponse.data!.session!.chargingSpeed!;
-    outputPower = widget.intitalResponse.data!.session!.energyTransmitted!;
+    // status = widget.intitalResponse.data!.session!.status!;
+    // cost = widget.intitalResponse.data!.session!.chargingTotalFee!;
+    // unitConsumed = widget.intitalResponse.data!.session!.chargingSpeed!;
+    // outputPower = widget.intitalResponse.data!.session!.energyTransmitted!;
+    // batteryPercentage ==
+    //      widget.intitalResponse.data!.batteryStateOfCharge!.currentSoC;
+    // endMeterReading = widget.intitalResponse.data!.session!.endMeterReading;
+    status = widget.args.status!;
+    cost =widget.args.cost;
+    unitConsumed = widget.args.unitConsumed;
+    outputPower =widget.args.outputPower;
     batteryPercentage ==
-        "10"; // widget.intitalResponse.data!.session!.chargingSpeed;
-    endMeterReading = widget.intitalResponse.data!.session!.endMeterReading;
+       widget.args.batteryPercentage;
+    
+    endMeterReading = widget.args.endMeterReading;
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -66,16 +85,16 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
         final res =
             await context.read<ChargingProvider>().fetchChargingSessionDetails(
                   context: context,
-                  sessionId: widget.intitalResponse.data!.session!.recId!,
+                  sessionId: widget.args.sessionId!,
                 );
         setState(() {
-          status = res!.data!.session!.status;
-          cost = "${res.data!.costDetails!.energyCost.toString()!}";
+          status = res!.data!.session!.status ==null?"":res!.data!.session!.status;
+          cost = "${res.data!.costDetails.totalCost.toString()!}";
           unitConsumed =
               "${res.data!.energyConsumption!.totalEnergy!.toString()} ${res.data!.energyConsumption!.unit}";
           outputPower =
               "${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}";
-          batteryPercentage == res.data!.session!.chargingSpeed;
+          batteryPercentage == res.data!.batteryStateOfCharge.currentSoC.toString();
           endMeterReading = res.data!.session!.endMeterReading;
           print("AFTER 15 sec ${outputPower}");
           // 🔴 Stop polling if session completed
@@ -99,141 +118,161 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     final provider = context.watch<ChargingProvider>();
     final data = provider.sessionDetails?.data;
 
-    return Scaffold(
-      backgroundColor: CommonColors.white,
-      appBar: CommonAppBar(
-        title: "Charging Session",
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () async {
-                  // print("Charging session ID ${data!.session!.recId!}");
-                  final response = await provider.endSession(
-                      context: context,
-                      sessionId: widget.intitalResponse.data!.session!
-                          .recId!, // 🔑 station id
-                      endMeterReading: endMeterReading!);
-
-                  setState(() {
-                    status = response!.data!.session!.status;
-
-                    cost = response.data!.cost!.toString();
-                    unitConsumed = response.data!.energyConsumed!.toString();
-                    outputPower = response.data!.session!.energyTransmitted!;
-                    batteryPercentage == response.data!.session!.chargingSpeed;
-                    endMeterReading = response.data!.meterStop.toString();
-                  });
-                  // if (success) {
-                  //   Navigator.pop(context);
-                  // }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CommonColors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: Text(
-                  "Stop Charging",
-                  style: const TextStyle(color: CommonColors.white),
-                ),
+    return WillPopScope(
+       onWillPop: () async {
+      Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin,currentIndex: 1,),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () async {
-                  print(
-                      "Charging STATION ID ${data!.session!.chargingStationId!}");
-                  print("Charging gun ID ${data.session!.chargingGunId}");
-                  final response = await provider.unlockConnector(
-                      context: context,
-                      chargingStationId:
-                          data!.session!.chargingStationId!, // 🔑 station id
-                      connectorId: int.parse(data.session!.chargingGunId!));
-                  status = response!.data!.status;
-
-                  if (response.success) {
-                    Navigator.pop(context);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CommonColors.white,
-                  side: const BorderSide(
-                    color: CommonColors.blue, // 👈 border color
-                    width: 1.5, // 👈 border width
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: Text(
-                  "Unlock Session",
-                  style: const TextStyle(color: CommonColors.blue),
-                ),
+            );
+      return false; // prevent default pop
+    },
+      child: Scaffold(
+        backgroundColor: CommonColors.white,
+        appBar: CommonAppBar(
+          title: "Charging Session",
+          onBack: ()
+          {
+             Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin,currentIndex: 1,),
               ),
-            ),
-          ],
+            );
+          },
         ),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // _header(data),
-            //  AnimatedBuilder(
-            //     animation: _animation,
-            //     builder: (context, child) {
-            //       return CustomPaint(
-            //         painter: _ChargingPainter(_animation.value),
-            //         size: const Size(200, 200),
-            //       );
-            //     },
-            //   ),
-            // Center(
-            //   child: Transform.scale(
-            //     scale: 1.7, // 👈 increase this (1.2 – 1.6 usually perfect)
-            //     child: Lottie.asset(
-            //       'assets/lottie/animationCharger.json',
-            //       width: 200,
-            //       height: 200,
-            //       fit: BoxFit.contain,
-            //       repeat: true,
-            //     ),
-            //   ),
-            // ),
-            ChargerAnimation(
-              status: status!, // "Active" or "Complete"
-            ),
-
-            status == ""
-                ? Container()
-                : Center(
-                    child: Text(
-                      '${status}',
-                      style: TextStyle(color: CommonColors.blue, fontSize: 22),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed:status=="Completed"?null: () async {
+                    // print("Charging session ID ${data!.session!.recId!}");
+                    final response = await provider.endSession(
+                        context: context,
+                        sessionId: widget.args
+                            .sessionId!, // 🔑 station id
+                        endMeterReading: endMeterReading!);
+      
+                    setState(() {
+                      status = response!.data!.session!.status;
+      
+                      cost = response.data!.cost!.toString();
+                      unitConsumed = response.data!.energyConsumed!.toString();
+                      outputPower = response.data!.session!.energyTransmitted!;
+                      batteryPercentage == response.data!.batteryStateOfCharge!.endSoC;
+                      endMeterReading = response.data!.meterStop.toString();
+                    });
+                    // if (success) {
+                    //   Navigator.pop(context);
+                    // }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CommonColors.blue,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
-            SizedBox(
-              height: 10,
-            ),
-            _batteryProgress(),
-            _infoGrid(),
-
-            //  _ecoSection(data),
-            // _stopChargingButton(provider, data),
-
-            // const Spacer(),
-
-            /// Bottom Buttons
-          ],
+                  child: Text(
+                    "Stop Charging",
+                    style: const TextStyle(color: CommonColors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed:status=="Completed"?null: () async {
+                    print(
+                        "Charging STATION ID ${data!.session!.chargingStationId!}");
+                    print("Charging gun ID ${data.session!.chargingGunId}");
+                    final response = await provider.unlockConnector(
+                        context: context,
+                        chargingStationId:
+                            data!.session!.chargingStationId!, // 🔑 station id
+                        connectorId: int.parse(data.session!.chargingGunId!));
+                    status = response!.data!.status;
+      
+                    if (response.success) {
+                      Navigator.pop(context);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CommonColors.white,
+                    side: const BorderSide(
+                      color: CommonColors.blue, // 👈 border color
+                      width: 1.5, // 👈 border width
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: Text(
+                    "Unlock Session",
+                    style: const TextStyle(color: CommonColors.blue),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // _header(data),
+              //  AnimatedBuilder(
+              //     animation: _animation,
+              //     builder: (context, child) {
+              //       return CustomPaint(
+              //         painter: _ChargingPainter(_animation.value),
+              //         size: const Size(200, 200),
+              //       );
+              //     },
+              //   ),
+              // Center(
+              //   child: Transform.scale(
+              //     scale: 1.7, // 👈 increase this (1.2 – 1.6 usually perfect)
+              //     child: Lottie.asset(
+              //       'assets/lottie/animationCharger.json',
+              //       width: 200,
+              //       height: 200,
+              //       fit: BoxFit.contain,
+              //       repeat: true,
+              //     ),
+              //   ),
+              // ),
+              ChargerAnimation(
+                status: status!, // "Active" or "Complete"
+              ),
+      
+              status == ""
+                  ? Container()
+                  : Center(
+                      child: Text(
+                        '${status}',
+                        style: TextStyle(color: CommonColors.blue, fontSize: 22),
+                      ),
+                    ),
+              SizedBox(
+                height: 10,
+              ),
+              _batteryProgress(),
+              _infoGrid(),
+      
+              //  _ecoSection(data),
+              // _stopChargingButton(provider, data),
+      
+              // const Spacer(),
+      
+              /// Bottom Buttons
+            ],
+          ),
         ),
       ),
     );
@@ -374,13 +413,13 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
                       ),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      "33 min remaining",
-                      style: TextStyle(
-                        color: Colors.white54,
-                        fontSize: 12,
-                      ),
-                    ),
+                    //  Text(
+                    //   "${(double.parse(batteryPercentage!) / 100) * totalMinutes} min remaining",
+                    //   style: TextStyle(
+                    //     color: Colors.white54,
+                    //     fontSize: 12,
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
@@ -457,140 +496,59 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
-      crossAxisSpacing: 12,
+      crossAxisSpacing: 8,
       mainAxisSpacing: 12,
       childAspectRatio: 1.8,
       children: [
-        _infoCard("Current Price", "₹ ${"${cost}" ?? 0}"),
+        _infoCard("Current Price", "₹ ${"${cost}" ?? 0}",CommonImagePath.current),
         // _infoCard(
         //   "Battery",
         //   "${25.0 ?? 0} km",
         //   // "${data.session?.batteryKm ?? 0} km\n${data.session?.batteryPercentage ?? 0}%",
         // ),
-        _infoCard("Units Consumed", "${unitConsumed ?? '--'}"),
-        _infoCard("Output Power", "${outputPower ?? '--'}"),
+        _infoCard("Units ", "${unitConsumed ?? '--'}",CommonImagePath.unitconsumed),
+        _infoCard("Output Power", "${outputPower ?? '--'}",CommonImagePath.poweroutput),
       ],
     );
   }
 
-  Widget _infoCard(String title, String value) {
+  Widget _infoCard(String title, String value,String image) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFF101E3A),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(color: Colors.white70)),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+          SvgPicture.asset(image,width: 20,height: 20,color: Colors.white),
+          SizedBox(width: 10,),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(color: Colors.white70,fontSize: 14)),
+              const Spacer(),
+              Text(
+                value,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _ecoSection(SessionDetailData data) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: _infoCard(
-              "Output Power",
-              "${24 ?? 0} kW",
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Expanded(
-          //   child: Column(
-          //     children: [
-          //       _infoCard("CO₂ saved", "${data.co2Saved ?? 0} kg"),
-          //       const SizedBox(height: 12),
-          //       _infoCard("Green kms", "${data.greenKm ?? 0} km"),
-          //     ],
-          //   ),
-          // ),
-        ],
-      ),
-    );
-  }
 
-  // Widget _stopChargingButton(
-  //     ChargingProvider provider, SessionDetailData data) {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(16),
-  //     child: ElevatedButton(
-  //       onPressed: () async {
-  //         final success = await provider.endSession(
-  //           context: context,
-  //           sessionId: data.session!.recId!,
-  //           endMeterReading: data.session!.endMeterReading!,
-  //         );
-
-  //         if (success) Navigator.pop(context);
-  //       },
-  //       style: ElevatedButton.styleFrom(
-  //         backgroundColor: const Color(0xFF101E3A),
-  //         padding: const EdgeInsets.symmetric(vertical: 16),
-  //         shape: RoundedRectangleBorder(
-  //           borderRadius: BorderRadius.circular(14),
-  //         ),
-  //       ),
-  //       child: const Text(
-  //         "Slide to Stop Charging",
-  //         style: TextStyle(color: Colors.white, fontSize: 16),
-  //       ),
-  //     ),
-  //   );
-  // }
 }
 
-class _ChargingPainter extends CustomPainter {
-  final double progress;
 
-  _ChargingPainter(this.progress);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.width / 2 - 10;
-
-    final basePaint = Paint()
-      ..color = Colors.grey.shade800
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12;
-
-    final progressPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [Colors.greenAccent, Colors.green],
-      ).createShader(Rect.fromCircle(center: center, radius: radius))
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawCircle(center, radius, basePaint);
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -math.pi / 2,
-      2 * math.pi * progress,
-      false,
-      progressPaint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
-}
 
 class BatteryIndicator extends StatelessWidget {
   final double percentage; // 0–100
@@ -774,4 +732,23 @@ class _ChargerAnimationState extends State<ChargerAnimation>
       ),
     );
   }
+}
+class SessionChargingArgs {
+  final String sessionId;
+  final String status;
+  final String cost;
+  final String unitConsumed;
+  final String outputPower;
+  final String batteryPercentage;
+  final String endMeterReading;
+
+  SessionChargingArgs({
+    required this.sessionId,
+    required this.status,
+    required this.cost,
+    required this.unitConsumed,
+    required this.outputPower,
+    required this.batteryPercentage,
+    required this.endMeterReading,
+  });
 }

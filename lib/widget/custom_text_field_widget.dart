@@ -134,7 +134,10 @@ class _CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
           children: [
             _textFieldLabel(),
             8.0.heightBox,
-            _textFieldWidget(),
+            Container(
+              height: widget.textFieldContainerHeight,
+            
+              child: _textFieldWidget()),
             _getInputTextHintLength(widget.textEditingController.text),
             _errorTextWidget(),
           ],
