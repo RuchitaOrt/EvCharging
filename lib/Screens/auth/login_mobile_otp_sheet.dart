@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 
 class MobileOtpSheetWidget extends StatefulWidget {
   const MobileOtpSheetWidget({super.key});

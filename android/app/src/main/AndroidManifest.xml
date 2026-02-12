@@ -5,7 +5,7 @@
       <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="ev_charging_app"
+        android:label="HyCharge"
          android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -39,6 +39,9 @@
             <meta-data
     android:name="com.google.android.geo.API_KEY"
     android:value="AIzaSyDdTSK2ZYsXBQMa-PnFx4BHRfE5RIM0uNs"/>
+<meta-data
+    android:name="com.google.android.gms.maps.renderer"
+    android:value="legacy" />
 
     </application>
     <!-- Required to query activities that can process text, see:

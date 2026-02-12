@@ -1,11 +1,11 @@
-import 'package:ev_charging_app/Provider/ChargingProvider.dart';
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/model/SessionDetailResponse.dart';
-import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
+import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
+
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
@@ -44,7 +44,7 @@ int? remainingMinutes;
   String? cost;
   String? unitConsumed;
   String? outputPower;
-  String? batteryPercentage = "0";
+  String? batteryPercentage = "0.0";
   String? endMeterReading;
   @override
   void initState() {
@@ -80,7 +80,7 @@ int? remainingMinutes;
 
   void _startPolling() {
     _refreshTimer = Timer.periodic(
-      const Duration(seconds: 15),
+      const Duration(seconds: 10),
       (_) async {
         final res =
             await context.read<ChargingProvider>().fetchChargingSessionDetails(
@@ -94,7 +94,15 @@ int? remainingMinutes;
               "${res.data!.energyConsumption!.totalEnergy!.toString()} ${res.data!.energyConsumption!.unit}";
           outputPower =
               "${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}";
-          batteryPercentage == res.data!.batteryStateOfCharge.currentSoC.toString();
+          // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
+    final isActive = res?.data?.session?.active == 1;
+
+batteryPercentage = isActive
+    ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+    : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+     print("AFTER 15 sec batteryStateOfCharge");
+       print(res.data!.batteryStateOfCharge.currentSoC);
+       
           endMeterReading = res.data!.session!.endMeterReading;
           print("AFTER 15 sec ${outputPower}");
           // 🔴 Stop polling if session completed
@@ -162,7 +170,7 @@ int? remainingMinutes;
                       cost = response.data!.cost!.toString();
                       unitConsumed = response.data!.energyConsumed!.toString();
                       outputPower = response.data!.session!.energyTransmitted!;
-                      batteryPercentage == response.data!.batteryStateOfCharge!.endSoC;
+                      batteryPercentage =response.data!.batteryStateOfCharge!.endSoC.toString();
                       endMeterReading = response.data!.meterStop.toString();
                     });
                     // if (success) {
@@ -278,69 +286,6 @@ int? remainingMinutes;
     );
   }
 
-  Widget _infoTile(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(title, style: const TextStyle(color: Colors.black)),
-          Text(value, style: const TextStyle(color: Colors.black)),
-        ],
-      ),
-    );
-  }
-
-  Widget _header(SessionDetailData data) {
-    return Stack(
-      children: [
-        Container(
-          height: 230,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF0A1D3B), Color(0xFF06142E)],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-          ),
-        ),
-        Positioned(
-          top: 20,
-          left: 16,
-          right: 16,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Mercedes EQC",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                "PB 10 EF 3243",
-                style: TextStyle(color: Colors.white70),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          left: 0,
-          child: Image.asset(
-            "assets/images/car.png", // replace with your asset
-            height: 150,
-            fit: BoxFit.contain,
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _batteryProgress() {
     // final double percentage = 10; // data.session?.batteryPercentage ?? 0;
@@ -363,7 +308,7 @@ int? remainingMinutes;
                   children: [
                     TweenAnimationBuilder<double>(
                       tween: Tween(
-                          begin: 0, end: double.parse(batteryPercentage!)),
+                          begin: 0, end:batteryPercentage==null?0.0: double.parse(batteryPercentage.toString() ?? "0.0")),
                       duration: const Duration(seconds: 1),
                       builder: (_, value, __) {
                         return VerticalBatteryIndicator(
@@ -530,14 +475,31 @@ int? remainingMinutes;
             children: [
               Text(title, style: TextStyle(color: Colors.white70,fontSize: 14)),
               const Spacer(),
-              Text(
-                value,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Container(
+                width: SizeConfig.blockSizeHorizontal *25,
+  child: Text(
+    value,
+    maxLines: 1,
+    overflow: TextOverflow.ellipsis,
+    style: TextStyle(
+      color: Colors.white,
+      fontSize: 16,
+      fontWeight: FontWeight.bold,
+    ),
+  ),
+)
+
+      //         Text(
+      //           "9.33333rrrr33",
+      //           // value,
+      //           maxLines: 1,
+      // overflow: TextOverflow.ellipsis,
+      //           style: TextStyle(
+      //             color: Colors.white,
+      //             fontSize: 18,
+      //             fontWeight: FontWeight.bold,
+      //           ),
+      //         ),
             ],
           ),
         ],

@@ -1,9 +1,9 @@
-import 'package:ev_charging_app/Screens/ScanScreen.dart';
-import 'package:ev_charging_app/Screens/SelectVehicleScreen.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
-import 'package:ev_charging_app/main.dart';
+import 'package:HyCharge/Screens/ScanScreen.dart';
+import 'package:HyCharge/Screens/SelectVehicleScreen.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

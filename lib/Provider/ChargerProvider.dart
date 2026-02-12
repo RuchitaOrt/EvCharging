@@ -1,4 +1,4 @@
-import 'package:ev_charging_app/Services/charger_repository.dart';
+import 'package:HyCharge/Services/charger_repository.dart';
 import 'package:flutter/material.dart';
 
 

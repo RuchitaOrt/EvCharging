@@ -2,13 +2,13 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/CommonResponse.dart';
-import 'package:ev_charging_app/model/battery_capacity_model.dart';
-import 'package:ev_charging_app/model/battery_type_model.dart';
-import 'package:ev_charging_app/model/car_manufacturer_model.dart';
-import 'package:ev_charging_app/model/charger_type_model.dart';
-import 'package:ev_charging_app/model/ev_model.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/CommonResponse.dart';
+import 'package:HyCharge/model/battery_capacity_model.dart';
+import 'package:HyCharge/model/battery_type_model.dart';
+import 'package:HyCharge/model/car_manufacturer_model.dart';
+import 'package:HyCharge/model/charger_type_model.dart';
+import 'package:HyCharge/model/ev_model.dart';
 import 'package:flutter/material.dart';
 
 class HardwareMasterService {

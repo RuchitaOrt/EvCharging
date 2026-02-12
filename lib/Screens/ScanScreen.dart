@@ -1,10 +1,10 @@
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Screens/PaymentSuccessScreen.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/PaymentSuccessScreen.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

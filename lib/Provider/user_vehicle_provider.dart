@@ -1,7 +1,7 @@
-import 'package:ev_charging_app/model/user_vehicle_update_response.dart';
+import 'package:HyCharge/model/user_vehicle_update_response.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Services/user_vehicle_service.dart';
-import 'package:ev_charging_app/model/user_vehicle_model.dart';
+import 'package:HyCharge/Services/user_vehicle_service.dart';
+import 'package:HyCharge/model/user_vehicle_model.dart';
 
 class UserVehicleProvider extends ChangeNotifier {
   final UserVehicleService _service = UserVehicleService();

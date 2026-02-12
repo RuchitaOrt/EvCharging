@@ -1,6 +1,6 @@
-import 'package:ev_charging_app/Utils/LocationConvert.dart';
-import 'package:ev_charging_app/Utils/googleMap.dart';
-import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
+import 'package:HyCharge/Utils/googleMap.dart';
+import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 

@@ -1,8 +1,8 @@
-import 'package:ev_charging_app/Provider/LoginProvider.dart';
-import 'package:ev_charging_app/Utils/CommonStyles.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/commonstrings.dart';
+import 'package:HyCharge/Provider/LoginProvider.dart';
+import 'package:HyCharge/Utils/CommonStyles.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/UploadResponse.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/UploadResponse.dart';
 
 class FileUploadService {
   final APIManager _apiManager = APIManager();

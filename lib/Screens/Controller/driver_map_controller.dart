@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ev_charging_app/main.dart';
+import 'package:HyCharge/main.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

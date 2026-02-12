@@ -1,10 +1,10 @@
-import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
-import 'package:ev_charging_app/Provider/PaymentProvider.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
-import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
+import 'package:HyCharge/Provider/PaymentProvider.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -379,45 +379,57 @@ Widget _summaryRow() {
                           ],
                         ),
                       ),
-                      Expanded(
+                       Expanded(
                         child: Column(
                           children: [
-                            Text("Plug Type",
+                            Text("Fee",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     color: CommonColors.neutral500,
                                     fontSize: 12)),
-                            Text("${data.chargingTariff}",
+                            Text("₹${data.chargingTotalFee}",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w600, fontSize: 12)),
                           ],
                         ),
                       ),
+                      // Expanded(
+                      //   child: Column(
+                      //     children: [
+                      //       Text("Plug Type",
+                      //           style: TextStyle(
+                      //               fontWeight: FontWeight.w400,
+                      //               color: CommonColors.neutral500,
+                      //               fontSize: 12)),
+                      //       Text("${data.chargingTariff}",
+                      //           style: TextStyle(
+                      //               fontWeight: FontWeight.w600, fontSize: 12)),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                              Text("Start Battery",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text(
-                              
-                              
-                              data.soCStart==null?"-":"${data.soCStart} %",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                           
-                          ],
-                        ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                            Text("Start Battery",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w400,
+                                  color: CommonColors.neutral500,
+                                  fontSize: 12)),
+                          Text(
+                            
+                            
+                            data.soCStart==null?"-":"${data.soCStart} %",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 12)),
+                         
+                        ],
                       ),
                        Expanded(
                         child: Column(
@@ -435,44 +447,44 @@ Widget _summaryRow() {
                           ],
                         ),
                       ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text("Fee",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text("₹${data.chargingTotalFee}",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                          ],
-                        ),
-                      ),
+                      // Expanded(
+                      //   child: Column(
+                      //     children: [
+                      //       Text("Fee",
+                      //           style: TextStyle(
+                      //               fontWeight: FontWeight.w400,
+                      //               color: CommonColors.neutral500,
+                      //               fontSize: 12)),
+                      //       Text("₹${data.chargingTotalFee}",
+                      //           style: TextStyle(
+                      //               fontWeight: FontWeight.w600, fontSize: 12)),
+                      //     ],
+                      //   ),
+                      // ),
                      
                     ],
                   ),
                   const SizedBox(height: 16),
-                   Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       Text("Location",
-                           style: TextStyle(
-                               fontWeight: FontWeight.w400,
-                               color: CommonColors.neutral500,
-                               fontSize: 12)),
-                      Text(
-                             "${data.chargingHubName}",
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
-                              ),
-                            ),
-                     ],
-                   ),
+                  //  Column(
+                  //   mainAxisAlignment: MainAxisAlignment.start,
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //    children: [
+                  //      Text("Location",
+                  //          style: TextStyle(
+                  //              fontWeight: FontWeight.w400,
+                  //              color: CommonColors.neutral500,
+                  //              fontSize: 12)),
+                  //     Text(
+                  //            "${data.chargingHubName}",
+                  //             maxLines: 2,
+                  //             overflow: TextOverflow.ellipsis,
+                  //             style: const TextStyle(
+                  //               fontWeight: FontWeight.w600,
+                  //               fontSize: 12,
+                  //             ),
+                  //           ),
+                  //    ],
+                  //  ),
                     const SizedBox(height: 16),
                   Container(
                     width: SizeConfig.blockSizeHorizontal * 90,

@@ -1,0 +1,4 @@
+storePassword=Hycharge
+keyPassword=Hycharge
+keyAlias=key
+storeFile=/Users/macbook/Documents/flutter_projects/ev_charging_app/android/hycharge.jks

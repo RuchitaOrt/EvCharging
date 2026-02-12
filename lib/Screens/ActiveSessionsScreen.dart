@@ -1,10 +1,10 @@
-import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingProvider.dart';
-import 'package:ev_charging_app/Screens/SessionChargingScreen.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/main.dart';
-import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
+import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Screens/SessionChargingScreen.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

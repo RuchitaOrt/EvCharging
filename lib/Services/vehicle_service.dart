@@ -1,6 +1,6 @@
-import 'package:ev_charging_app/model/VehicleListResponse.dart';
+import 'package:HyCharge/model/VehicleListResponse.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
 
 class VehicleApiService {
   final APIManager _apiManager = APIManager();

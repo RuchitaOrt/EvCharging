@@ -1,10 +1,10 @@
 
 
 
-import 'package:ev_charging_app/Utils/CommonStyles.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/extentions.dart';
-import 'package:ev_charging_app/widget/TextWithAsterisk.dart';
+import 'package:HyCharge/Utils/CommonStyles.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/extentions.dart';
+import 'package:HyCharge/widget/TextWithAsterisk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

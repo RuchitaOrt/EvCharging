@@ -1,10 +1,10 @@
-import 'package:ev_charging_app/model/LogoutResponse.dart';
-import 'package:ev_charging_app/model/ResetPasswordResponse.dart';
+import 'package:HyCharge/model/LogoutResponse.dart';
+import 'package:HyCharge/model/ResetPasswordResponse.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Request/RegisterRequest.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/Utils/AppEror.dart';
-import 'package:ev_charging_app/model/RegistrationResponse.dart';
+import 'package:HyCharge/Request/RegisterRequest.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/AppEror.dart';
+import 'package:HyCharge/model/RegistrationResponse.dart';
 
 // class AuthApiService {
 //   final APIManager _apiManager = APIManager();

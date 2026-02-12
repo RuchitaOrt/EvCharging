@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/DeleteAccountResponse.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/DeleteAccountResponse.dart';
 
 class DeleteAccountService {
   static Future<DeleteAccountResponse> deleteAccount(

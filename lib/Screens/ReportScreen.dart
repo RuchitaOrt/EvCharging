@@ -1,6 +1,6 @@
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
 
 class ReportIssueScreen extends StatelessWidget {

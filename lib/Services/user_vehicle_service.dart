@@ -1,11 +1,11 @@
-import 'package:ev_charging_app/model/DeleteVehicleResponse.dart';
-import 'package:ev_charging_app/model/user_vehicle_update_response.dart';
+import 'package:HyCharge/model/DeleteVehicleResponse.dart';
+import 'package:HyCharge/model/user_vehicle_update_response.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/user_vehicle_model.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/user_vehicle_model.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/user_vehicle_model.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/user_vehicle_model.dart';
 
 class UserVehicleService {
   final APIManager _api = APIManager();

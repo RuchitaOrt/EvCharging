@@ -1,32 +1,34 @@
-import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
-import 'package:ev_charging_app/Provider/AuthProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingEstimateProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingGunStatusProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingHubReviewProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingProvider.dart';
-import 'package:ev_charging_app/Provider/DeleteAccountProvider.dart';
-import 'package:ev_charging_app/Provider/FileUploadProvider.dart';
-import 'package:ev_charging_app/Provider/HubProvider.dart';
-import 'package:ev_charging_app/Provider/ImageCacheProvider.dart';
-import 'package:ev_charging_app/Provider/LoginProvider.dart';
-import 'package:ev_charging_app/Provider/PaymentProvider.dart';
-import 'package:ev_charging_app/Provider/ProfileProvider.dart';
-import 'package:ev_charging_app/Provider/VehicleProvider.dart';
-import 'package:ev_charging_app/Provider/WalletProvider.dart';
+import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
+import 'package:HyCharge/Provider/AuthProvider.dart';
+import 'package:HyCharge/Provider/ChargingEstimateProvider.dart';
+import 'package:HyCharge/Provider/ChargingGunStatusProvider.dart';
+import 'package:HyCharge/Provider/ChargingHubReviewProvider.dart';
+import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Provider/DeleteAccountProvider.dart';
+import 'package:HyCharge/Provider/FileUploadProvider.dart';
+import 'package:HyCharge/Provider/HubProvider.dart';
+import 'package:HyCharge/Provider/ImageCacheProvider.dart';
+import 'package:HyCharge/Provider/LoginProvider.dart';
+import 'package:HyCharge/Provider/PaymentProvider.dart';
+import 'package:HyCharge/Provider/ProfileProvider.dart';
+import 'package:HyCharge/Provider/VehicleProvider.dart';
+import 'package:HyCharge/Provider/WalletProvider.dart';
 
-import 'package:ev_charging_app/Provider/charging_hub_provider.dart';
-import 'package:ev_charging_app/Provider/hardware_master_provider.dart';
-import 'package:ev_charging_app/Provider/user_vehicle_provider.dart';
-import 'package:ev_charging_app/Routers/routers.dart';
+import 'package:HyCharge/Provider/charging_hub_provider.dart';
+import 'package:HyCharge/Provider/hardware_master_provider.dart';
+import 'package:HyCharge/Provider/user_vehicle_provider.dart';
+import 'package:HyCharge/Routers/routers.dart';
 
-import 'package:ev_charging_app/Screens/SplashScreen.dart';
-import 'package:ev_charging_app/Services/ChargingHistorySessionProvider.dart';
-import 'package:ev_charging_app/Utils/UtilityFile.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:HyCharge/Screens/SplashScreen.dart';
+import 'package:HyCharge/Services/ChargingHistorySessionProvider.dart';
+import 'package:HyCharge/Utils/UtilityFile.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:provider/provider.dart';
 
 import 'Provider/MapOverViewProvider.dart';
@@ -42,6 +44,8 @@ final GlobalKey<NavigatorState> routeGlobalKey = GlobalKey();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+// ✅ NEW OFFICIAL API (replaces useAndroidViewSurface)
+  AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
 
   await Firebase.initializeApp();
   await Utility().loadAPIConfig();
@@ -108,7 +112,7 @@ class _MyAppState extends State<MyApp> {
         bottom: true,
         child: MaterialApp(
           navigatorObservers: [routeObserver],
-          title: 'Ev Charging',
+          title: 'HyCharge',
           debugShowCheckedModeBanner: false,
           navigatorKey: routeGlobalKey,
           theme: ThemeData(

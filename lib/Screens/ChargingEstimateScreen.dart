@@ -1,18 +1,18 @@
-import 'package:ev_charging_app/Bottomsheet/showAddMoneyBottomSheet.dart';
-import 'package:ev_charging_app/Provider/ChargingEstimateProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingProvider.dart';
-import 'package:ev_charging_app/Provider/WalletProvider.dart';
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Screens/SessionChargingScreen.dart';
-import 'package:ev_charging_app/Utils/AuthStorage.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonstrings.dart';
-import 'package:ev_charging_app/main.dart';
-import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
-import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
+import 'package:HyCharge/Bottomsheet/showAddMoneyBottomSheet.dart';
+import 'package:HyCharge/Provider/ChargingEstimateProvider.dart';
+import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Provider/WalletProvider.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/SessionChargingScreen.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
+import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -105,117 +105,209 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
                 ),
                 const SizedBox(height: 16),
                 SizedBox(
-                  width: double.infinity,
-                  height: 44,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CommonColors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+  width: double.infinity,
+  height: 44,
+  child: Consumer<ChargingProvider>(
+    builder: (context, provider, _) => ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: CommonColors.blue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      onPressed: provider.loading
+          ? null // disable button while loading
+          : () async {
+              final chargingEstimate =
+                  context.read<ChargingEstimateProvider>();
+              final userId = await AuthStorage.getUserId();
+              if (userId == null) return;
+
+              final enteredAmount = chargingEstimate.amount;
+
+              if (enteredAmount == 0) {
+                showToast("Please enter amount");
+              } else if (currentWalletPrice >= enteredAmount) {
+                // ✅ start session
+                final response = await provider.startSession(
+                  context: context,
+                  chargingGunId: widget.selectedCharger!.connectorName!,
+                  chargingStationId: widget.selectedStationID!,
+                  userId: userId,
+                  chargeTagId: "B4A63CDF",
+                  connectorId: int.parse(widget.selectedCharger!.connectorId!),
+                  startMeterReading: "0",
+                  chargingTariff: "typeATariff",
+                );
+
+                if (response != null && response.success) {
+                  showToast("Charging session started successfully!");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SessionChargingScreen(
+                        args: SessionChargingArgs(
+                          sessionId: response.data!.session!.recId,
+                          status: response.data!.session!.status ?? "",
+                          cost: response.data!.session!.chargingTotalFee ?? "0",
+                          unitConsumed: response.data!.session!.chargingSpeed ?? "0",
+                          outputPower: response.data!.session!.energyTransmitted ?? "0",
+                          batteryPercentage: response.data!.session!.soCStart.toString() ?? "0",
+                          endMeterReading: response.data!.session!.endMeterReading ?? "0",
+                        ),
                       ),
                     ),
-                    onPressed: () async {
-                      final chargingEstimate =
-                          context.read<ChargingEstimateProvider>();
-                      final userId = await AuthStorage.getUserId();
-                      if (userId == null) return;
-                      print("PRICE SELECT");
-                      print(widget.selectedCharger!.chargerTariff.toString());
-                      print(currentWalletPrice);
-
-                      final enteredAmount = chargingEstimate.amount;
-                      print("Entered Amount");
-                      print(enteredAmount);
-                      print(currentWalletPrice);
-                      debugPrint(
-                        "Provider hash: ${context.read<ChargingEstimateProvider>().hashCode}",
-                      );
-                      if (enteredAmount == 0) {
-                        showToast("Please enter amount");
-                      } else if (currentWalletPrice >= enteredAmount)
-                      // && enteredAmount > 0
-                      {
-                        final provider = context.read<ChargingProvider>();
-
-                        final response = await provider.startSession(
-                          context: context,
-                          chargingGunId: widget.selectedCharger!.connectorName!,
-                          chargingStationId: widget.selectedStationID!,
-                          userId: userId,
-                          chargeTagId: "B4A63CDF",
-                          connectorId: int.parse(
-                              widget.selectedCharger!.connectorId!.toString()),
-                          startMeterReading: "0",
-                          chargingTariff: "typeATariff",
-                        );
-
-                        if (response != null && response.success) {
-                          showToast("Charging session started successfully!");
-                          print("SeesionID ${response.data!.session!.recId!}");
-
-                          // Navigator.push(
-                          //   routeGlobalKey.currentContext!,
-                          //   MaterialPageRoute(
-                          //     builder: (_) => SessionChargingScreen(
-                          //       intitalResponse: response,
-                          //     ),
-                          //   ),
-                          // );
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => SessionChargingScreen(
-                                args: SessionChargingArgs(
-                                  sessionId: response.data!.session!.recId,
-                                  status: response.data!.session!.status ?? "",
-                                  cost: response
-                                          .data!.session!.chargingTotalFee ??
-                                      "0",
-                                  unitConsumed:
-                                      response.data!.session!.chargingSpeed ??
-                                          "0",
-                                  outputPower: response
-                                          .data!.session!.energyTransmitted ??
-                                      "0",
-                                  batteryPercentage: response
-                                          .data!.session!.soCStart
-                                          .toString() ??
-                                      "0",
-                                  endMeterReading:
-                                      response.data!.session!.endMeterReading ??
-                                          "0",
-                                ),
-                              ),
-                            ),
-                          );
-                        } else {
-                          showToast("Failed to start session");
-                        }
-                      } else {
-                        showToast("Wallet does not have sufficient amount");
-
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => MainTab(
-                              isLoggedIn: GlobalLists.islLogin,
-                              currentIndex: 3,
-                              iscreditopen: true,
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text(
-                      "Start Charging",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
+                  );
+                } else {
+                  showToast("Failed to start session");
+                }
+              } else {
+                showToast("Wallet does not have sufficient amount");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MainTab(
+                      isLoggedIn: GlobalLists.islLogin,
+                      currentIndex: 3,
+                      iscreditopen: true,
                     ),
                   ),
-                ),
+                );
+              }
+            },
+      child: provider.loading
+          ? const SizedBox(
+              height: 22,
+              width: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(CommonColors.white),
+              ),
+            )
+          : const Text(
+              "Start Charging",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+    ),
+  ),
+)
+,
+            //     SizedBox(
+            //       width: double.infinity,
+            //       height: 44,
+            //       child: ElevatedButton(
+            //         style: ElevatedButton.styleFrom(
+            //           backgroundColor: CommonColors.blue,
+            //           shape: RoundedRectangleBorder(
+            //             borderRadius: BorderRadius.circular(12),
+            //           ),
+            //         ),
+            //         onPressed: () async {
+            //           final chargingEstimate =
+            //               context.read<ChargingEstimateProvider>();
+            //           final userId = await AuthStorage.getUserId();
+            //           if (userId == null) return;
+            //           print("PRICE SELECT");
+            //           print(widget.selectedCharger!.chargerTariff.toString());
+            //           print(currentWalletPrice);
+
+            //           final enteredAmount = chargingEstimate.amount;
+            //           print("Entered Amount");
+            //           print(enteredAmount);
+            //           print(currentWalletPrice);
+                     
+            //           if (enteredAmount == 0) {
+            //             showToast("Please enter amount");
+            //           } else if (currentWalletPrice >= enteredAmount)
+            //           // && enteredAmount > 0
+            //           {
+            //             final provider = context.read<ChargingProvider>();
+
+            //             final response = await provider.startSession(
+            //               context: context,
+            //               chargingGunId: widget.selectedCharger!.connectorName!,
+            //               chargingStationId: widget.selectedStationID!,
+            //               userId: userId,
+            //               chargeTagId: "B4A63CDF",
+            //               connectorId: int.parse(
+            //                   widget.selectedCharger!.connectorId!.toString()),
+            //               startMeterReading: "0",
+            //               chargingTariff: "typeATariff",
+            //             );
+
+            //             if (response != null && response.success) {
+            //               showToast("Charging session started successfully!");
+            //               print("SeesionID ${response.data!.session!.recId!}");
+
+                         
+            //               Navigator.push(
+            //                 context,
+            //                 MaterialPageRoute(
+            //                   builder: (_) => SessionChargingScreen(
+            //                     args: SessionChargingArgs(
+            //                       sessionId: response.data!.session!.recId,
+            //                       status: response.data!.session!.status ?? "",
+            //                       cost: response
+            //                               .data!.session!.chargingTotalFee ??
+            //                           "0",
+            //                       unitConsumed:
+            //                           response.data!.session!.chargingSpeed ??
+            //                               "0",
+            //                       outputPower: response
+            //                               .data!.session!.energyTransmitted ??
+            //                           "0",
+            //                       batteryPercentage: response
+            //                               .data!.session!.soCStart
+            //                               .toString() ??
+            //                           "0",
+            //                       endMeterReading:
+            //                           response.data!.session!.endMeterReading ??
+            //                               "0",
+            //                     ),
+            //                   ),
+            //                 ),
+            //               );
+            //             } else {
+            //               showToast("Failed to start session");
+            //             }
+            //           } else {
+            //             showToast("Wallet does not have sufficient amount");
+
+            //             Navigator.push(
+            //               context,
+            //               MaterialPageRoute(
+            //                 builder: (_) => MainTab(
+            //                   isLoggedIn: GlobalLists.islLogin,
+            //                   currentIndex: 3,
+            //                   iscreditopen: true,
+            //                 ),
+            //               ),
+            //             );
+            //           }
+            //         },
+            //         child:isLoading
+            // ? const SizedBox(
+            //     height: 22,
+            //     width: 22,
+            //     child: CircularProgressIndicator(
+            //       strokeWidth: 2.5,
+            //       valueColor: AlwaysStoppedAnimation<Color>(CommonColors.white),
+            //     ),
+            //   )
+            // :  const Text(
+            //           "Start Charging",
+            //           style: TextStyle(
+            //             fontSize: 14,
+            //             fontWeight: FontWeight.w700,
+            //             color: Colors.white,
+            //           ),
+            //         ),
+            //       ),
+            //     ),
               ],
             ),
           ),
@@ -339,7 +431,7 @@ class _TabViews extends StatelessWidget {
             _AmountTab(),
             textInfo(),
             const SizedBox(height: 8),
-            _EstimateCard("Time", "Unit", "Percentage", "2.00", "20", "20 %"),
+            _EstimateCard("Time", "Unit", "Percentage", "-", "-", "0 %"),
           ],
         ),
         Column(
@@ -357,7 +449,7 @@ class _TabViews extends StatelessWidget {
             textInfo(),
             const SizedBox(height: 8),
             _EstimateCard(
-                "Time", "Percentage", "Amount", "2.00", "20 %", "₹ 2000"),
+                "Time", "Percentage", "Amount", "-", "0 %", "₹ 0"),
           ],
         ),
         //       Column(
@@ -392,7 +484,7 @@ class _TabViews extends StatelessWidget {
             ),
             textInfo(),
             const SizedBox(height: 8),
-            _EstimateCard("Time", "Unit", "Amount", "2.00", "20", "₹ 2000"),
+            _EstimateCard("Time", "Unit", "Amount", "-", "-", "₹ 0"),
           ],
         ),
       ],

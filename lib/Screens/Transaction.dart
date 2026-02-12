@@ -1,12 +1,12 @@
-import 'package:ev_charging_app/Bottomsheet/showAddMoneyBottomSheet.dart';
-import 'package:ev_charging_app/Provider/PaymentProvider.dart';
-import 'package:ev_charging_app/Provider/WalletProvider.dart';
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/enum/enum.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
+import 'package:HyCharge/Bottomsheet/showAddMoneyBottomSheet.dart';
+import 'package:HyCharge/Provider/PaymentProvider.dart';
+import 'package:HyCharge/Provider/WalletProvider.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/enum/enum.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';

@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:ev_charging_app/Request/LoginRequest.dart';
-import 'package:ev_charging_app/Services/login_api_service.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
+import 'package:HyCharge/Request/LoginRequest.dart';
+import 'package:HyCharge/Services/login_api_service.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
 
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/model/LoginResponse.dart';
-import 'package:ev_charging_app/Utils/AppEror.dart';
+import 'package:HyCharge/model/LoginResponse.dart';
+import 'package:HyCharge/Utils/AppEror.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';

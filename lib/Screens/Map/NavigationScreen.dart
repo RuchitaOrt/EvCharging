@@ -1,4 +1,4 @@
-import 'package:ev_charging_app/Provider/NavigationProvider.dart';
+import 'package:HyCharge/Provider/NavigationProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';

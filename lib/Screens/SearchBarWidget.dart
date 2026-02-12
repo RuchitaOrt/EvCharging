@@ -1,6 +1,6 @@
-import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatefulWidget {

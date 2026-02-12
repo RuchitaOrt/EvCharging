@@ -1,11 +1,11 @@
 import 'dart:ui';
 import 'package:dio/dio.dart';
-import 'package:ev_charging_app/Screens/StationDetailsScreen.dart';
-import 'package:ev_charging_app/Services/hub_repository.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/Utils/LocationConvert.dart';
-import 'package:ev_charging_app/main.dart';
-// import 'package:ev_charging_app/model/ChargingHubResponse.dart';
+import 'package:HyCharge/Screens/StationDetailsScreen.dart';
+import 'package:HyCharge/Services/hub_repository.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
+import 'package:HyCharge/main.dart';
+// import 'package:HyCharge/model/ChargingHubResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';

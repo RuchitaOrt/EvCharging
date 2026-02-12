@@ -1,11 +1,11 @@
 import 'dart:typed_data';
 
-import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
-import 'package:ev_charging_app/Screens/MapOverviewScreen.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/googleMap.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
+import 'package:HyCharge/Screens/Controller/map_controller.dart';
+import 'package:HyCharge/Screens/MapOverviewScreen.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/googleMap.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'

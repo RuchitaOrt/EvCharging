@@ -1,9 +1,9 @@
 // razorpay_helper.dart
-import 'package:ev_charging_app/Provider/PaymentProvider.dart';
-import 'package:ev_charging_app/Provider/WalletProvider.dart';
-import 'package:ev_charging_app/Request/AddWalletRequest.dart';
-import 'package:ev_charging_app/Utils/AuthStorage.dart';
-import 'package:ev_charging_app/main.dart';
+import 'package:HyCharge/Provider/PaymentProvider.dart';
+import 'package:HyCharge/Provider/WalletProvider.dart';
+import 'package:HyCharge/Request/AddWalletRequest.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/main.dart';
 import 'package:provider/provider.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,9 @@
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/CreateOrderResponse.dart';
-import 'package:ev_charging_app/model/verify_payment_response.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/CreateOrderResponse.dart';
+import 'package:HyCharge/model/verify_payment_response.dart';
 import 'package:flutter/material.dart';
 
-import 'package:ev_charging_app/model/RazorpayKeyResponse.dart';
+import 'package:HyCharge/model/RazorpayKeyResponse.dart';
 
 class PaymentService {
   final APIManager _apiManager = APIManager();

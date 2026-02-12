@@ -1,14 +1,14 @@
-import 'package:ev_charging_app/Request/RegisterRequest.dart';
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Services/auth_api_service.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/Utils/AppEror.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/ValidationHelper.dart';
-import 'package:ev_charging_app/model/LogoutResponse.dart';
-import 'package:ev_charging_app/model/RegistrationResponse.dart';
-import 'package:ev_charging_app/model/ResetPasswordResponse.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
+import 'package:HyCharge/Request/RegisterRequest.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Services/auth_api_service.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/AppEror.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/ValidationHelper.dart';
+import 'package:HyCharge/model/LogoutResponse.dart';
+import 'package:HyCharge/model/RegistrationResponse.dart';
+import 'package:HyCharge/model/ResetPasswordResponse.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

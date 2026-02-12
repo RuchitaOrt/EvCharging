@@ -1,8 +1,8 @@
-import 'package:ev_charging_app/Services/ChargingHubReviewService.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/model/AddReviewResponse.dart';
-import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
-import 'package:ev_charging_app/model/DeleteReviewResponse.dart';
+import 'package:HyCharge/Services/ChargingHubReviewService.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/model/AddReviewResponse.dart';
+import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
+import 'package:HyCharge/model/DeleteReviewResponse.dart';
 import 'package:flutter/material.dart';
 
 class ChargingHubReviewProvider extends ChangeNotifier {

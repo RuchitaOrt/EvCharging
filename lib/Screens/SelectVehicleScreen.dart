@@ -1,10 +1,10 @@
-import 'package:ev_charging_app/Screens/PayScreen.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/commonstrings.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
-import 'package:ev_charging_app/widget/CustomDropdownField.dart';
+import 'package:HyCharge/Screens/PayScreen.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/widget/CustomDropdownField.dart';
 import 'package:flutter/material.dart';
 
 class SelectVehicleScreen extends StatefulWidget {

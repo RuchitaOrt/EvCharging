@@ -1,9 +1,9 @@
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Services/DeleteAccountService.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Services/DeleteAccountService.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/model/DeleteAccountResponse.dart';
+import 'package:HyCharge/model/DeleteAccountResponse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 

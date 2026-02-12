@@ -1,4 +1,4 @@
-# ev_charging_app
+# HyCharge
 
 A new Flutter project.
 

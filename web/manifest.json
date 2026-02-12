@@ -1,6 +1,6 @@
 {
-    "name": "ev_charging_app",
-    "short_name": "ev_charging_app",
+    "name": "HyCharge",
+    "short_name": "HyCharge",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

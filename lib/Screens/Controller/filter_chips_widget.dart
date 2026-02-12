@@ -1,4 +1,4 @@
-import 'package:ev_charging_app/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:flutter/material.dart';
 
 

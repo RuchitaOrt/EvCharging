@@ -1,8 +1,8 @@
-// import 'package:ev_charging_app/Services/ChargingService.dart';
+// import 'package:HyCharge/Services/ChargingService.dart';
 // import 'package:flutter/material.dart';
-// import 'package:ev_charging_app/model/ChargingHistorySessionResponse.dart';
+// import 'package:HyCharge/model/ChargingHistorySessionResponse.dart';
 
-// import 'package:ev_charging_app/Utils/ShowDialog.dart';
+// import 'package:HyCharge/Utils/ShowDialog.dart';
 
 // class ChargingHistorySessionProvider extends ChangeNotifier {
 //   final ChargingService _service = ChargingService();

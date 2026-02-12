@@ -1,10 +1,10 @@
-import 'package:ev_charging_app/Provider/ProfileProvider.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/model/ProfileResponse.dart';
-import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
+import 'package:HyCharge/Provider/ProfileProvider.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/model/ProfileResponse.dart';
+import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

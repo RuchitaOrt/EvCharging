@@ -2,8 +2,8 @@
 import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
-import 'package:ev_charging_app/Services/hub_repository.dart';
-import 'package:ev_charging_app/Utils/LocationConvert.dart';
+import 'package:HyCharge/Services/hub_repository.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';

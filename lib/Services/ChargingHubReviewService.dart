@@ -1,7 +1,7 @@
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/AddReviewResponse.dart';
-import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
-import 'package:ev_charging_app/model/DeleteReviewResponse.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/AddReviewResponse.dart';
+import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
+import 'package:HyCharge/model/DeleteReviewResponse.dart';
 import 'package:flutter/material.dart';
 
 class ChargingHubReviewService {

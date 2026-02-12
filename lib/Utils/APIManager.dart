@@ -4,45 +4,45 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
-import 'package:ev_charging_app/Utils/InternetConnection.dart';
-import 'package:ev_charging_app/main.dart';
-import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
-import 'package:ev_charging_app/model/AddReviewResponse.dart';
-import 'package:ev_charging_app/model/ChargingGunStatusRefreshResponse.dart';
-import 'package:ev_charging_app/model/ChargingGunStatusResponse.dart';
-import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
-import 'package:ev_charging_app/model/ChargingHistorySessionResponse.dart';
-import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
-import 'package:ev_charging_app/model/CreateOrderResponse.dart';
-import 'package:ev_charging_app/model/DeleteAccountResponse.dart';
-import 'package:ev_charging_app/model/DeleteReviewResponse.dart';
-import 'package:ev_charging_app/model/DeleteVehicleResponse.dart';
-import 'package:ev_charging_app/model/EndChargingSessionResponse.dart';
-import 'package:ev_charging_app/model/RazorpayKeyResponse.dart';
-import 'package:ev_charging_app/model/RefreshTokenResponse.dart';
-import 'package:ev_charging_app/model/ResetPasswordResponse.dart';
-import 'package:ev_charging_app/model/SessionDetailResponse.dart';
-import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
-import 'package:ev_charging_app/model/UnlockConnectorResponse.dart';
-import 'package:ev_charging_app/model/VehicleListResponse.dart';
-import 'package:ev_charging_app/model/WalletListResponse.dart';
-import 'package:ev_charging_app/model/WalletResponse.dart';
-import 'package:ev_charging_app/model/user_vehicle_model.dart';
-import 'package:ev_charging_app/model/user_vehicle_update_response.dart';
-import 'package:ev_charging_app/model/verify_payment_response.dart';
+import 'package:HyCharge/Utils/InternetConnection.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/model/AddReviewResponse.dart';
+import 'package:HyCharge/model/ChargingGunStatusRefreshResponse.dart';
+import 'package:HyCharge/model/ChargingGunStatusResponse.dart';
+import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
+import 'package:HyCharge/model/ChargingHistorySessionResponse.dart';
+import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/model/CreateOrderResponse.dart';
+import 'package:HyCharge/model/DeleteAccountResponse.dart';
+import 'package:HyCharge/model/DeleteReviewResponse.dart';
+import 'package:HyCharge/model/DeleteVehicleResponse.dart';
+import 'package:HyCharge/model/EndChargingSessionResponse.dart';
+import 'package:HyCharge/model/RazorpayKeyResponse.dart';
+import 'package:HyCharge/model/RefreshTokenResponse.dart';
+import 'package:HyCharge/model/ResetPasswordResponse.dart';
+import 'package:HyCharge/model/SessionDetailResponse.dart';
+import 'package:HyCharge/model/StartChargingSessionResponse.dart';
+import 'package:HyCharge/model/UnlockConnectorResponse.dart';
+import 'package:HyCharge/model/VehicleListResponse.dart';
+import 'package:HyCharge/model/WalletListResponse.dart';
+import 'package:HyCharge/model/WalletResponse.dart';
+import 'package:HyCharge/model/user_vehicle_model.dart';
+import 'package:HyCharge/model/user_vehicle_update_response.dart';
+import 'package:HyCharge/model/verify_payment_response.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 
-import 'package:ev_charging_app/Utils/AppEror.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/AppEror.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 
-import 'package:ev_charging_app/model/LoginResponse.dart';
-import 'package:ev_charging_app/model/RegistrationResponse.dart';
-import 'package:ev_charging_app/model/LogoutResponse.dart';
-import 'package:ev_charging_app/model/ProfileResponse.dart';
-import 'package:ev_charging_app/model/ChargingHubResponse.dart';
-import 'package:ev_charging_app/model/ChargingListResponse.dart';
-import 'package:ev_charging_app/model/ChargingStationListResponse.dart';
+import 'package:HyCharge/model/LoginResponse.dart';
+import 'package:HyCharge/model/RegistrationResponse.dart';
+import 'package:HyCharge/model/LogoutResponse.dart';
+import 'package:HyCharge/model/ProfileResponse.dart';
+import 'package:HyCharge/model/ChargingHubResponse.dart';
+import 'package:HyCharge/model/ChargingListResponse.dart';
+import 'package:HyCharge/model/ChargingStationListResponse.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum API {
@@ -749,7 +749,10 @@ case API.verifyRazorpayPayment:
           await prefs.setString("userId", refreshResponse!.user!.recId!);
         }
         return true;
-      } else {}
+      } else {
+         unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+              message: "Your Session has Expired.Please Login Again");
+      }
     } catch (e) {
       print("❌ Refresh token failed: $e");
     }

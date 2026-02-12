@@ -1,9 +1,9 @@
-import 'package:ev_charging_app/Screens/ProfileScreen.dart';
-import 'package:ev_charging_app/Screens/ScanScreen.dart';
-import 'package:ev_charging_app/Screens/SelectVehicleScreen.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
+import 'package:HyCharge/Screens/ProfileScreen.dart';
+import 'package:HyCharge/Screens/ScanScreen.dart';
+import 'package:HyCharge/Screens/SelectVehicleScreen.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:flutter/material.dart';
 
 class PayScreen extends StatefulWidget {

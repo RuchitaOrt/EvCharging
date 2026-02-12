@@ -1,4 +1,4 @@
-import 'package:ev_charging_app/Services/station_repository.dart';
+import 'package:HyCharge/Services/station_repository.dart';
 import 'package:flutter/material.dart';
 
 class StationProvider extends ChangeNotifier {

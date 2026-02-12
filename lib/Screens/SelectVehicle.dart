@@ -1,12 +1,12 @@
-import 'package:ev_charging_app/Screens/MyVehicleScreen.dart';
-import 'package:ev_charging_app/Screens/SelectVehicleScreen.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/commonstrings.dart';
-import 'package:ev_charging_app/main.dart';
-import 'package:ev_charging_app/widget/CustomDropdownField.dart';
-import 'package:ev_charging_app/widget/TextWithAsterisk.dart';
+import 'package:HyCharge/Screens/MyVehicleScreen.dart';
+import 'package:HyCharge/Screens/SelectVehicleScreen.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/widget/CustomDropdownField.dart';
+import 'package:HyCharge/widget/TextWithAsterisk.dart';
 import 'package:flutter/material.dart';
 class VehicleUnit {
   final String image;

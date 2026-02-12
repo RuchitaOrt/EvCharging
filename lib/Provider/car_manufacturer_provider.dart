@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Services/car_manufacturer_service.dart';
-import 'package:ev_charging_app/model/car_manufacturer_model.dart';
+import 'package:HyCharge/Services/car_manufacturer_service.dart';
+import 'package:HyCharge/model/car_manufacturer_model.dart';
 
 class CarManufacturerProvider extends ChangeNotifier {
   final CarManufacturerApiService _service =

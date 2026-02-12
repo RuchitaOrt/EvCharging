@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:ev_charging_app/Services/hardware_master_service.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
+import 'package:HyCharge/Services/hardware_master_service.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:flutter/material.dart';
 
 class ImageCacheProvider extends ChangeNotifier {

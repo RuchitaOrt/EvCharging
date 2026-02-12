@@ -1,7 +1,7 @@
-  import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Screens/SplashScreen.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
+  import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/SplashScreen.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';

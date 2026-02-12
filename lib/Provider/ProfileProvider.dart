@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/ValidationHelper.dart';
-import 'package:ev_charging_app/model/UploadResponse.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/ValidationHelper.dart';
+import 'package:HyCharge/model/UploadResponse.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/Services/profile_repository.dart';
-import 'package:ev_charging_app/model/ProfileResponse.dart';
+import 'package:HyCharge/Services/profile_repository.dart';
+import 'package:HyCharge/model/ProfileResponse.dart';
 
 class ProfileProvider extends ChangeNotifier {
   final ProfileRepository _repo = ProfileRepository();

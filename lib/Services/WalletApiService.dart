@@ -1,7 +1,7 @@
-import 'package:ev_charging_app/Request/AddWalletRequest.dart';
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/WalletListResponse.dart';
-import 'package:ev_charging_app/model/WalletResponse.dart';
+import 'package:HyCharge/Request/AddWalletRequest.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/WalletListResponse.dart';
+import 'package:HyCharge/model/WalletResponse.dart';
 import 'package:flutter/material.dart';
 
 class WalletApiService {

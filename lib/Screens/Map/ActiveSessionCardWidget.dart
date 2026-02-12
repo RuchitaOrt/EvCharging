@@ -1,5 +1,5 @@
-import 'package:ev_charging_app/Provider/ActiveSessionProvider.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

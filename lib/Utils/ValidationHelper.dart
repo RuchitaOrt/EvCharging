@@ -1,4 +1,4 @@
-import 'package:ev_charging_app/Utils/regex_helper.dart';
+import 'package:HyCharge/Utils/regex_helper.dart';
 
 class ValidationHelper {
   ValidationHelper._(); // private constructor

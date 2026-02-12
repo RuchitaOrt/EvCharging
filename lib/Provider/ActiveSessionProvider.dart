@@ -1,5 +1,5 @@
-import 'package:ev_charging_app/Services/ChargingService.dart';
-import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/Services/ChargingService.dart';
+import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:flutter/material.dart';
 // enum SessionFilter { thisMonth, last7Days, all }
 // class ActiveSessionProvider extends ChangeNotifier {

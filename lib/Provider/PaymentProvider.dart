@@ -1,8 +1,8 @@
-import 'package:ev_charging_app/Services/PaymentService.dart';
-import 'package:ev_charging_app/model/CreateOrderResponse.dart';
-import 'package:ev_charging_app/model/verify_payment_response.dart';
+import 'package:HyCharge/Services/PaymentService.dart';
+import 'package:HyCharge/model/CreateOrderResponse.dart';
+import 'package:HyCharge/model/verify_payment_response.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/model/RazorpayKeyResponse.dart';
+import 'package:HyCharge/model/RazorpayKeyResponse.dart';
 
 
 class PaymentProvider extends ChangeNotifier {

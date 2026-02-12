@@ -1,5 +1,6 @@
-import 'package:ev_charging_app/Screens/OnboardingScreen.dart';
+import 'package:HyCharge/Screens/OnboardingScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:new_version_plus/new_version_plus.dart';
 
 class SplashScreen extends StatefulWidget {
   static const String route = "/splashScreen";
@@ -15,8 +16,38 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
 
     // Navigate to onboarding screen after 3 seconds
+    // checkUpdate();
     Future.delayed(const Duration(seconds: 3), () {
        FocusScope.of(context).unfocus();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      );
+    });
+  }
+
+  // Future<void> checkUpdate() async {
+  //   final newVersion = NewVersionPlus(
+  //     androidId: "com.ev.charging_app",
+  //   );
+
+  //   final status = await newVersion.getVersionStatus();
+  //   print(status);
+  //   print(status!.canUpdate);
+  //   if (status != null && status.canUpdate) {
+  //     newVersion.showUpdateDialog(
+  //       context: context,
+  //       versionStatus: status,
+  //       allowDismissal: false, // Force update
+  //     );
+  //   } else {
+  //     navigateToNextScreen();
+  //   }
+  // }
+
+  void navigateToNextScreen() {
+    Future.delayed(const Duration(seconds: 3), () {
+      FocusScope.of(context).unfocus();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const OnboardingScreen()),

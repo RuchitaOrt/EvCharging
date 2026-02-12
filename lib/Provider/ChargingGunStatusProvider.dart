@@ -1,121 +1,31 @@
-import 'package:ev_charging_app/Services/ChargingService.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/model/ChargingGunStatusRefreshResponse.dart';
-import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/Services/ChargingService.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/model/ChargingGunStatusRefreshResponse.dart';
+import 'package:HyCharge/model/ChargingGunStatusResponse.dart';
+import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:flutter/material.dart';
 
 
-// class ChargingGunStatusProvider extends ChangeNotifier {
-//   // final ChargingService _service = ChargingService();
-
-//   // bool loading = false;
-//   // ChargingGunStatusRefreshResponse? response;
-
-//   // Future<void> refreshChargingGunStatus({
-//   //   required BuildContext context,
-//   //   required String chargingGunId,
-//   // }) async {
-//   //   loading = true;
-//   //   notifyListeners();
-
-//   //   try {
-//   //     final res = await _service.getChargingGunStatus(
-//   //       context,
-//   //       chargingGunId,
-//   //     );
-//   //     response = res;
-//   //   } catch (e) {
-//   //     showToast("Failed to refresh charging gun status");
-//   //   } finally {
-//   //     loading = false;
-//   //     notifyListeners();
-//   //   }
-//   // }
-//   final ChargingService _service = ChargingService();
-
-//   Map<int, String> _gunStatusMap = {}; // connectorId → status
-//   bool _loading = false;
-
-//   String getStatus(int chargingGunId) =>
-//       _gunStatusMap[chargingGunId] ?? "Unknown";
-
-//   bool get loading => _loading;
-//  Map<int, String> get gunStatusMap => _gunStatusMap;
-//   Future<void> fetchGunStatus({
-//     required BuildContext context,
-//    required int chargingGunId,
-//   }) async {
-//     try {
-//        final res = await _service.getChargingGunStatus(
-//        context:  context,
-//        chargingGunId:  chargingGunId,
-//       );
-
-//       if (res.success == true) {
-//         _gunStatusMap[chargingGunId] = res.data!.status!;
-//         notifyListeners();
-//       }
-//     } catch (e) {
-//       debugPrint("Gun status error: $e");
-//     }
-//   }
-
-//   /// 🔁 Fetch all chargers at once
-//   Future<void> refreshAll({
-//     required BuildContext context,
-//     required List<Charger> chargers,
-//   }) async {
-//     for (final charger in chargers) {
-//       await fetchGunStatus(
-//         context: context,
-//         chargingGunId: charger.connectorId!,
-//       );
-//     }
-//   }
-// }
 class ChargingGunStatusProvider extends ChangeNotifier {
   final ChargingService _service = ChargingService();
 
   // Instead of only status, store full Charger
-  Map<int, Charger> _chargerMap = {}; // connectorId -> Charger
+  // Map<int, Charger> _chargerMap = {}; // connectorId -> Charger
   bool _loading = false;
 
   bool get loading => _loading;
 
   // Public getter for UI
-  Map<int, Charger> get chargers => _chargerMap;
+  // Map<int, Charger> get chargers => _chargerMap;
 
   // Get just status easily
   String getStatus(int chargingGunId) =>
       _chargerMap[chargingGunId]?.lastStatus ?? "Unknown";
 
-  /// Fetch individual charger status
-//   Future<void> fetchGunStatus({
-//     required BuildContext context,
-//     required Charger charger,
-//   }) async {
-//     try {
-//       final res = await _service.getChargingGunStatus(
-//         context: context,
-//         chargingGunId: charger.connectorId!,
-//       );
+final Map<int, Charger> _chargerMap = {};
 
-//       if (res.success == true) {
-//         // Update the charger object with new status
-//         final updatedCharger = _chargerMap[charger.connectorId!] = Charger(
-//   connectorId: charger.connectorId,
+  Map<int, Charger> get chargers => _chargerMap;
 
-//   lastStatus: charger.lastStatus, chargePointId: charger.chargePointId, connectorName:  charger.connectorName,
-// );
-
-
-//         _chargerMap[charger.connectorId!] = updatedCharger;
-//         notifyListeners();
-//       }
-//     } catch (e) {
-//       debugPrint("Gun status error: $e");
-//     }
-//   }
 Future<void> fetchGunStatus({
   required BuildContext context,
   required Charger charger,
@@ -123,36 +33,79 @@ Future<void> fetchGunStatus({
   try {
     final res = await _service.getChargingGunStatus(
       context: context,
-      chargingGunId: int.parse(charger!.connectorId!.toString()),
+      chargingGunId: charger.recId!,
     );
 
-    if (res.success! && res.data != null) {
+    if (res.success == true && res.data != null) {
       final gunData = res.data!;
+      final key = int.parse(charger.connectorId!);
 
-      // Update the charger object with new status
-      final updatedCharger = _chargerMap[int.parse(charger!.connectorId!.toString())] = Charger(
+      _chargerMap[key] = Charger(
         connectorId: charger.connectorId,
-        lastStatus: charger.lastStatus, // ✅ use API status
         chargePointId: charger.chargePointId,
         connectorName: charger.connectorName,
-        recId: charger.recId
+        chargerTypeName: charger.chargerTypeName,
+        chargerTariff: charger.chargerTariff,
+        powerOutput: charger.powerOutput,
+        recId: charger.recId,
+        lastStatus: gunData.status, // ✅ updated value
       );
-
-      _chargerMap[int.parse(charger!.connectorId!.toString())] = updatedCharger;
-      notifyListeners();
     }
   } catch (e) {
     debugPrint("Gun status error: $e");
   }
 }
+Future<ChargingGunStatusResponse?> fetchGunStatusValue({
+  required BuildContext context,
+  required Charger charger,
+}) async {
+  try {
+    _loading=true;
+    notifyListeners();
+    final res = await _service.getChargingGunStatus(
+      context: context,
+      chargingGunId: charger.recId!,
+    );
 
-  /// Refresh all chargers at once
-  Future<void> refreshAll({
-    required BuildContext context,
-    required List<Charger> chargers,
-  }) async {
-    for (final charger in chargers) {
-      await fetchGunStatus(context: context, charger: charger);
+    if (res.success == true && res.data != null) {
+      final gunData = res.data!;
+      final key = int.parse(charger.connectorId!);
+
+      _chargerMap[key] = Charger(
+        connectorId: charger.connectorId,
+        chargePointId: charger.chargePointId,
+        connectorName: charger.connectorName,
+        chargerTypeName: charger.chargerTypeName,
+        chargerTariff: charger.chargerTariff,
+        powerOutput: charger.powerOutput,
+        recId: charger.recId,
+        lastStatus: gunData.status,
+      );
+       _loading=false;
+       notifyListeners();
     }
+_loading=false;
+       notifyListeners();
+    return res; // ✅ return response
+
+  } catch (e) {
+      _loading=false;
+       notifyListeners();
+    debugPrint("Gun status error: $e");
+    return null; // ❌ handle errors by returning null
   }
+}
+
+
+Future<void> refreshAll({
+  required BuildContext context,
+  required List<Charger> chargers,
+}) async {
+  for (final charger in chargers) {
+    await fetchGunStatus(context: context, charger: charger);
+  }
+  notifyListeners(); // 🔥 triggers UI rebuild
+}
+
+
 }

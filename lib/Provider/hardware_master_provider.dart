@@ -1,10 +1,10 @@
 // providers/hardware_master_provider.dart
-import 'package:ev_charging_app/Services/hardware_master_service.dart';
-import 'package:ev_charging_app/model/battery_capacity_model.dart';
-import 'package:ev_charging_app/model/battery_type_model.dart';
-import 'package:ev_charging_app/model/car_manufacturer_model.dart';
-import 'package:ev_charging_app/model/charger_type_model.dart';
-import 'package:ev_charging_app/model/ev_model.dart';
+import 'package:HyCharge/Services/hardware_master_service.dart';
+import 'package:HyCharge/model/battery_capacity_model.dart';
+import 'package:HyCharge/model/battery_type_model.dart';
+import 'package:HyCharge/model/car_manufacturer_model.dart';
+import 'package:HyCharge/model/charger_type_model.dart';
+import 'package:HyCharge/model/ev_model.dart';
 import 'package:flutter/material.dart';
 
 class HardwareMasterProvider extends ChangeNotifier {

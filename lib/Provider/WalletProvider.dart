@@ -1,11 +1,11 @@
-import 'package:ev_charging_app/Request/AddWalletRequest.dart';
-import 'package:ev_charging_app/Services/WalletApiService.dart';
+import 'package:HyCharge/Request/AddWalletRequest.dart';
+import 'package:HyCharge/Services/WalletApiService.dart';
 
-import 'package:ev_charging_app/Utils/AppEror.dart';
-import 'package:ev_charging_app/Utils/RazorpayHelper.dart';
-import 'package:ev_charging_app/enum/enum.dart';
-import 'package:ev_charging_app/model/WalletListResponse.dart';
-import 'package:ev_charging_app/model/WalletResponse.dart' as wallet;
+import 'package:HyCharge/Utils/AppEror.dart';
+import 'package:HyCharge/Utils/RazorpayHelper.dart';
+import 'package:HyCharge/enum/enum.dart';
+import 'package:HyCharge/model/WalletListResponse.dart';
+import 'package:HyCharge/model/WalletResponse.dart' as wallet;
 import 'package:flutter/material.dart';
 class WalletProvider extends ChangeNotifier {
   final WalletApiService _service = WalletApiService();

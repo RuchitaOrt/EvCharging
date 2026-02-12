@@ -1,14 +1,14 @@
 
-import 'package:ev_charging_app/Provider/VehicleProvider.dart';
-import 'package:ev_charging_app/Provider/user_vehicle_provider.dart';
-import 'package:ev_charging_app/Screens/AddVehicle.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/main.dart';
-import 'package:ev_charging_app/model/VehicleListResponse.dart';
-import 'package:ev_charging_app/widget/LogoutConfirmationSheet.dart';
+import 'package:HyCharge/Provider/VehicleProvider.dart';
+import 'package:HyCharge/Provider/user_vehicle_provider.dart';
+import 'package:HyCharge/Screens/AddVehicle.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/VehicleListResponse.dart';
+import 'package:HyCharge/widget/LogoutConfirmationSheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:ev_charging_app/Services/file_upload_service.dart';
+import 'package:HyCharge/Services/file_upload_service.dart';
 import 'package:flutter/material.dart';
-import 'package:ev_charging_app/model/UploadResponse.dart';
+import 'package:HyCharge/model/UploadResponse.dart';
 
 
 class UploadProvider extends ChangeNotifier {

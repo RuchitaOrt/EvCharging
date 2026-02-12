@@ -1,6 +1,6 @@
 
-import 'package:ev_charging_app/Utils/CommonStyles.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/CommonStyles.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:flutter/material.dart';
 
 class TextWithAsterisk extends StatelessWidget {

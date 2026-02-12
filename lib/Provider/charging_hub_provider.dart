@@ -1,6 +1,6 @@
 
-import 'package:ev_charging_app/Services/charging_hub_service.dart';
-import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/Services/charging_hub_service.dart';
+import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:flutter/material.dart';
 
 

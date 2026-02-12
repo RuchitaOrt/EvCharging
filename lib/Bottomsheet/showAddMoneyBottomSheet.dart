@@ -1,12 +1,12 @@
-import 'package:ev_charging_app/Provider/PaymentProvider.dart';
-import 'package:ev_charging_app/Provider/WalletProvider.dart';
-import 'package:ev_charging_app/Request/AddWalletRequest.dart';
-import 'package:ev_charging_app/Utils/AuthStorage.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonstrings.dart';
-import 'package:ev_charging_app/widget/TextWithAsterisk.dart';
-import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
+import 'package:HyCharge/Provider/PaymentProvider.dart';
+import 'package:HyCharge/Provider/WalletProvider.dart';
+import 'package:HyCharge/Request/AddWalletRequest.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/widget/TextWithAsterisk.dart';
+import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

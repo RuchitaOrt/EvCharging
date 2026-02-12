@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:ev_charging_app/Provider/MapOverViewProvider.dart';
-import 'package:ev_charging_app/Screens/MapStationCardScreen.dart';
+import 'package:HyCharge/Provider/MapOverViewProvider.dart';
+import 'package:HyCharge/Screens/MapStationCardScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

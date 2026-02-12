@@ -1,12 +1,12 @@
-import 'package:ev_charging_app/Utils/APIManager.dart';
-import 'package:ev_charging_app/model/ActiveSessionResponse.dart';
-import 'package:ev_charging_app/model/ChargingGunStatusRefreshResponse.dart';
-import 'package:ev_charging_app/model/ChargingGunStatusResponse.dart';
-import 'package:ev_charging_app/model/ChargingHistorySessionResponse.dart';
-import 'package:ev_charging_app/model/EndChargingSessionResponse.dart';
-import 'package:ev_charging_app/model/SessionDetailResponse.dart';
-import 'package:ev_charging_app/model/StartChargingSessionResponse.dart';
-import 'package:ev_charging_app/model/UnlockConnectorResponse.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/model/ChargingGunStatusRefreshResponse.dart';
+import 'package:HyCharge/model/ChargingGunStatusResponse.dart';
+import 'package:HyCharge/model/ChargingHistorySessionResponse.dart';
+import 'package:HyCharge/model/EndChargingSessionResponse.dart';
+import 'package:HyCharge/model/SessionDetailResponse.dart';
+import 'package:HyCharge/model/StartChargingSessionResponse.dart';
+import 'package:HyCharge/model/UnlockConnectorResponse.dart';
 import 'package:flutter/material.dart';
 
 class ChargingService {
@@ -81,7 +81,7 @@ class ChargingService {
 // }
 Future<ChargingGunStatusResponse> getChargingGunStatus({
   required BuildContext context,
-  required int chargingGunId,
+  required String chargingGunId,
 }) async {
   final response = await APIManager().apiRequest(
     context,

@@ -1,7 +1,7 @@
 
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Screens/OnboardingScreen.dart';
-import 'package:ev_charging_app/Screens/SplashScreen.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/OnboardingScreen.dart';
+import 'package:HyCharge/Screens/SplashScreen.dart';
 import 'package:flutter/material.dart';
 
 class Routers {

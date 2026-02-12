@@ -1,29 +1,29 @@
 import 'dart:async';
 
-import 'package:ev_charging_app/Provider/ChargingEstimateProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingGunStatusProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingHubReviewProvider.dart';
-import 'package:ev_charging_app/Provider/ChargingProvider.dart';
-import 'package:ev_charging_app/Provider/WalletProvider.dart';
-import 'package:ev_charging_app/Screens/ChargingEstimateScreen.dart';
-import 'package:ev_charging_app/Screens/Controller/map_controller.dart';
-import 'package:ev_charging_app/Screens/Controller/station_card_widget.dart';
-import 'package:ev_charging_app/Screens/MainTab.dart';
-import 'package:ev_charging_app/Screens/Map/MiniMapWidget.dart';
-import 'package:ev_charging_app/Screens/SessionChargingScreen.dart';
-import 'package:ev_charging_app/Utils/AuthStorage.dart';
-import 'package:ev_charging_app/Utils/CommonAppBar.dart';
-import 'package:ev_charging_app/Utils/LocationConvert.dart';
-import 'package:ev_charging_app/Utils/ShowDialog.dart';
-import 'package:ev_charging_app/Utils/commoncolors.dart';
-import 'package:ev_charging_app/Utils/commonimages.dart';
-import 'package:ev_charging_app/Utils/sizeConfig.dart';
-import 'package:ev_charging_app/main.dart';
-import 'package:ev_charging_app/model/ChargingHubReviewResponse.dart';
-import 'package:ev_charging_app/model/ChargingcomprehensiveHubResponse.dart';
-import 'package:ev_charging_app/widget/GlobalLists.dart';
-import 'package:ev_charging_app/widget/LogoutConfirmationSheet.dart';
-import 'package:ev_charging_app/widget/custom_text_field_widget.dart';
+import 'package:HyCharge/Provider/ChargingEstimateProvider.dart';
+import 'package:HyCharge/Provider/ChargingGunStatusProvider.dart';
+import 'package:HyCharge/Provider/ChargingHubReviewProvider.dart';
+import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Provider/WalletProvider.dart';
+import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
+import 'package:HyCharge/Screens/Controller/map_controller.dart';
+import 'package:HyCharge/Screens/Controller/station_card_widget.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/Map/MiniMapWidget.dart';
+import 'package:HyCharge/Screens/SessionChargingScreen.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
+import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
+import 'package:HyCharge/widget/LogoutConfirmationSheet.dart';
+import 'package:HyCharge/widget/custom_text_field_widget.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -79,11 +79,12 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
       },
     );
   }
-   String  userId ="";
-getUserInfo()
-async {
-   userId = (await AuthStorage.getUserId())!;
-}
+
+  String userId = "";
+  getUserInfo() async {
+    userId = (await AuthStorage.getUserId())!;
+  }
+
   @override
   void dispose() {
     _statusTimer?.cancel();
@@ -97,15 +98,13 @@ async {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getUserInfo();
       context.read<WalletProvider>().fetchWallet(context);
-       _startPolling();
-    context.read<ChargingHubReviewProvider>().fetchReviews(
-          context: context,
-          hubId: widget.hub.recId,
-        );
-    _fetchCurrentLocation();
+      _startPolling();
+      context.read<ChargingHubReviewProvider>().fetchReviews(
+            context: context,
+            hubId: widget.hub.recId,
+          );
+      _fetchCurrentLocation();
     });
-
-   
   }
 
   @override
@@ -193,7 +192,6 @@ async {
   }
 
   Widget _reviewCard(ChargingHubReview review) {
-    
     final initials = _getInitials(review.userName);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,53 +259,55 @@ async {
               ),
             ),
 
-     review.userId==  userId ?    MoreOptionsMenu(
-              onEdit: () {
-                _openWriteReviewBottomSheet(
-                    hubID: widget.hub.recId,
-                    stationId: review.chargingStationId!,
-                    stationName: widget.hub.chargingHubName ?? "Station",
-                    rating: review.rating,
-                    description: review.description,
-                    isEdit: true,
-                    recId: review.recId);
-              },
-              onDelete: () async {
-                showModalBottomSheet(
-                  backgroundColor: CommonColors.white,
-                  context: context,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  isScrollControlled: true,
-                  builder: (_) => ConfirmationSheet(
-                    title: "Are you sure you want to delete? ",
-                    singleButton: "",
-                    imagePath: CommonImagePath.delete, // Your SVG/PNG
-                    isSingleButton: false,
-                    onBackToHome: () {},
-                    onCancel: () => Navigator.pop(context),
-                    onLogout: () async {
-                      final updatedResponse = await context
-                          .read<ChargingHubReviewProvider>()
-                          .deleteReview(context, review.recId!);
-
-                      if (updatedResponse != null) {
-                        showToast(updatedResponse.message);
-                      } else {
-                        showToast('Something went wrong');
-                      }
-
-                      Navigator.pop(context);
+            review.userId == userId
+                ? MoreOptionsMenu(
+                    onEdit: () {
+                      _openWriteReviewBottomSheet(
+                          hubID: widget.hub.recId,
+                          stationId: review.chargingStationId!,
+                          stationName: widget.hub.chargingHubName ?? "Station",
+                          rating: review.rating,
+                          description: review.description,
+                          isEdit: true,
+                          recId: review.recId);
                     },
-                    firstbutton: 'Cancel',
-                    secondButton: 'Delete',
-                    subHeading: '',
-                  ),
-                );
-              },
-            ):Container()
+                    onDelete: () async {
+                      showModalBottomSheet(
+                        backgroundColor: CommonColors.white,
+                        context: context,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        isScrollControlled: true,
+                        builder: (_) => ConfirmationSheet(
+                          title: "Are you sure you want to delete? ",
+                          singleButton: "",
+                          imagePath: CommonImagePath.delete, // Your SVG/PNG
+                          isSingleButton: false,
+                          onBackToHome: () {},
+                          onCancel: () => Navigator.pop(context),
+                          onLogout: () async {
+                            final updatedResponse = await context
+                                .read<ChargingHubReviewProvider>()
+                                .deleteReview(context, review.recId!);
+
+                            if (updatedResponse != null) {
+                              showToast(updatedResponse.message);
+                            } else {
+                              showToast('Something went wrong');
+                            }
+
+                            Navigator.pop(context);
+                          },
+                          firstbutton: 'Cancel',
+                          secondButton: 'Delete',
+                          subHeading: '',
+                        ),
+                      );
+                    },
+                  )
+                : Container()
           ],
         ),
         Divider(
@@ -477,16 +477,16 @@ async {
                               //   fit: BoxFit.cover,
                               //   height: SizeConfig.blockSizeVertical * 8,
                               // ),
-                               widget.hub.chargingHubImage != null
-    ? HubImage(
-        imageId: widget.hub.chargingHubImage!,
-        height: SizeConfig.blockSizeVertical * 5,
-        width: SizeConfig.blockSizeVertical * 5,
-      )
-    : Image.asset(
-        CommonImagePath.frame,
-        height: SizeConfig.blockSizeVertical * 6,
-      ),
+                              widget.hub.chargingHubImage != null
+                                  ? HubImage(
+                                      imageId: widget.hub.chargingHubImage!,
+                                      height: SizeConfig.blockSizeVertical * 5,
+                                      width: SizeConfig.blockSizeVertical * 5,
+                                    )
+                                  : Image.asset(
+                                      CommonImagePath.frame,
+                                      height: SizeConfig.blockSizeVertical * 6,
+                                    ),
                               SizedBox(
                                   width: SizeConfig.blockSizeHorizontal * 2),
                               Expanded(
@@ -831,74 +831,35 @@ async {
                           ],
                         ),
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isAvailable
-                              ? CommonColors.darkgreen.withOpacity(0.15)
-                              : Colors.red.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Consumer<ChargingGunStatusProvider>(
-                          builder: (context, statusProvider, _) {
-                            // Find the latest status for this charger
-                            // final updatedCharger = statusProvider.chargers
-                            //     .firstWhere(
-                            //         (c) => c.connectorId == charger.connectorId,
-                            //         orElse: () => charger);
-// final updatedIsAvailable = statusProvider.gunStatusMap[charger.connectorId] ?? charger.lastStatus;
+                      Consumer<ChargingGunStatusProvider>(
+                        builder: (context, provider, _) {
+                          final updatedCharger = provider
+                                  .chargers[int.parse(charger.connectorId!)] ??
+                              charger;
 
-//       // final updatedIsAvailable = updatedCharger. == "Available";
+                          final isAvailable =
+                              updatedCharger.lastStatus == "Available";
 
-//       return Text(
-//        updatedIsAvailable ?? "Unknown",
-//         style: TextStyle(
-//           fontSize: 12,
-//           fontWeight: FontWeight.w500,
-//           color: updatedIsAvailable ? CommonColors.darkgreen : Colors.red,
-//         ),
-//       );
-                            final updatedCharger =
-                                statusProvider.chargers[charger.connectorId] ??
-                                    charger;
-                            final updatedIsAvailable =
-                                updatedCharger.lastStatus == "Available";
-
-                            return Text(
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: isAvailable
+                                  ? CommonColors.darkgreen.withOpacity(0.15)
+                                  : Colors.red.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
                               updatedCharger.lastStatus ?? "Unknown",
                               style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: updatedIsAvailable
+                                color: isAvailable
                                     ? CommonColors.darkgreen
                                     : Colors.red,
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-
-                      // Container(
-                      //   padding: const EdgeInsets.symmetric(
-                      //       horizontal: 12, vertical: 6),
-                      //   decoration: BoxDecoration(
-                      //     color: isAvailable
-                      //         ? CommonColors.darkgreen.withOpacity(0.15)
-                      //         : Colors.red.withOpacity(0.15),
-                      //     borderRadius: BorderRadius.circular(20),
-                      //   ),
-                      //   child: Text(
-                      //     charger.lastStatus ?? "Unknown",
-                      //     style: TextStyle(
-                      //       fontSize: 12,
-                      //       fontWeight: FontWeight.w500,
-                      //       color: isAvailable
-                      //           ? CommonColors.darkgreen
-                      //           : Colors.red,
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -1028,7 +989,7 @@ async {
   }
 
   Widget _navigateButton() {
-    final provider = context.watch<ChargingProvider>();
+    final provider = context.watch<ChargingGunStatusProvider>();
 
     final bool hasSelection = _selectedCharger != null;
     final bool isLoading = provider.loading;
@@ -1039,80 +1000,49 @@ async {
         onPressed: (!hasSelection || isLoading)
             ? null
             : () async {
-                //  Navigator.push(
-                //     routeGlobalKey.currentContext!,
-                //     MaterialPageRoute(
-                //       builder: (_) => ChargingEstimateScreen(),
-                //     ),
-                //   );
-  // Navigator.push(
-  //                         routeGlobalKey.currentContext!,
-  //                         MaterialPageRoute(builder: (context) => ChargingEstimateScreen(selectedCharger:_selectedCharger,
-                          
-  //                         selectedStationID: selectedStationID,)),
-  //                       );
+             
+  if (_selectedCharger == null) return;
 
-                        Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => ChangeNotifierProvider(
-      create: (_) => ChargingEstimateProvider(),
-      child: ChargingEstimateScreen(
-        selectedCharger: _selectedCharger,
-        selectedStationID: selectedStationID,
+  // 1️⃣ Fetch the status
+  final statusAvailable = await context
+      .read<ChargingGunStatusProvider>()
+      .fetchGunStatusValue(
+        context: context,
+        charger: _selectedCharger!,
+      );
+
+  // 2️⃣ Check the status
+  if (statusAvailable!.data!.isAvailable == true) {
+    // ✅ Status is available, navigate
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChangeNotifierProvider(
+          create: (_) => ChargingEstimateProvider(),
+          child: ChargingEstimateScreen(
+            selectedCharger: _selectedCharger,
+            selectedStationID: selectedStationID,
+          ),
+        ),
       ),
-    ),
-  ),
-);
-
-                // final userId = await AuthStorage.getUserId();
-                // if (userId == null) return;
-                // print("PRICE SELECT");
-                // print(_selectedCharger!.chargerTariff.toString());
-                // print(currentWalletPrice);
-                // if (double.parse(_selectedCharger!.chargerTariff.toString()) <
-                //     currentWalletPrice) {
-                //   final response = await provider.startSession(
-                //     context: context,
-                //     chargingGunId: _selectedCharger!.connectorName!,
-                //     chargingStationId: selectedStationID!,
-                //     userId: userId,
-                //     chargeTagId: "B4A63CDF",
-                //     connectorId:
-                //         int.parse(_selectedCharger!.connectorId!.toString()),
-                //     startMeterReading: "0",
-                //     chargingTariff: "typeATariff",
-                //   );
-
-                //   if (response != null && response.success) {
-                //     showToast("Charging session started successfully!");
-                //     print("SeesionID ${response.data!.session!.recId!}");
-                //     _statusTimer?.cancel();
-                //     Navigator.push(
-                //       routeGlobalKey.currentContext!,
-                //       MaterialPageRoute(
-                //         builder: (_) => SessionChargingScreen(
-                //           intitalResponse: response,
-                //         ),
-                //       ),
-                //     );
-                //   } else {
-                //     showToast("Failed to start session");
-                //   }
-                // } else {
-                //   showToast("Wallet does not have sufficient amount");
-                //   _statusTimer?.cancel();
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (_) => MainTab(
-                //         isLoggedIn: GlobalLists.islLogin,
-                //         currentIndex: 3,
-                //         iscreditopen: true,
-                //       ),
-                //     ),
-                //   );
-                // }
+    );
+  } else {
+   
+    showToast("Charging gun status is not available. Please try again.");
+  }
+              //  context.read<ChargingGunStatusProvider>().fetchGunStatusValue(context: context, charger: _selectedCharger!);
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (_) => ChangeNotifierProvider(
+              //         create: (_) => ChargingEstimateProvider(),
+              //         child: ChargingEstimateScreen(
+              //           selectedCharger: _selectedCharger,
+              //           selectedStationID: selectedStationID,
+              //         ),
+              //       ),
+              //     ),
+              //   );
               },
         style: ElevatedButton.styleFrom(
           backgroundColor:
