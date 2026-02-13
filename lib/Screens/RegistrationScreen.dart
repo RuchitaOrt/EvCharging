@@ -177,7 +177,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           hintText: CommonStrings.strPasswordHint,
                           contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 16.0),
+                              vertical: 10.0, horizontal: 8.0),
                           border: OutlineInputBorder(
                               borderRadius: borderRadius,
                               borderSide: enableBorder),
@@ -221,7 +221,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           ),
                           hintText: CommonStrings.strconfirmpassword,
                           contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 16.0),
+                              vertical: 10.0, horizontal: 8.0),
                           border: OutlineInputBorder(
                               borderRadius: borderRadius,
                               borderSide: enableBorder),

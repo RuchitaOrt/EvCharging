@@ -243,11 +243,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     user: provider.profile!.user!)),
                           );
                         } else {
-                          infoNormalDialog(
-                            routeGlobalKey.currentContext!,
-                            message:
-                                "No internet connection. Please check your network.",
-                          );
+                          showToast("No internet connection. Please check your network.");
+                          // infoNormalDialog(
+                          //   routeGlobalKey.currentContext!,
+                          //   message:
+                          //       "No internet connection. Please check your network.",
+                          // );
                         }
                       },
                     ),

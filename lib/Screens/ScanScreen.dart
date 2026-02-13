@@ -21,12 +21,12 @@ class _ScanScreenState extends State<ScanScreen> {
     super.initState();
 
     // Navigate to onboarding screen after 3 seconds
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const PaymentSuccessScreen()),
-      );
-    });
+    // Future.delayed(const Duration(seconds: 1), () {
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const PaymentSuccessScreen()),
+    //   );
+    // });
   }
   @override
   Widget build(BuildContext context) {

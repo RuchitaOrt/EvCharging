@@ -54,9 +54,12 @@ dependencies:
   intl: ^0.19.0
   url_launcher: ^6.2.5
   lottie: ^3.1.0
+  # google_sign_in: ^6.2.1
+  # firebase_core: ^2.25.0
+  firebase_core: ^3.0.0
   google_sign_in: ^6.2.1
-  firebase_core: ^2.25.0
-  firebase_auth: ^4.15.0
+  firebase_auth: ^5.0.0
+  # firebase_auth: ^4.15.0
   razorpay_flutter: 
   image_picker: ^1.0.7
   new_version_plus:

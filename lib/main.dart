@@ -47,7 +47,17 @@ Future<void> main() async {
 // ✅ NEW OFFICIAL API (replaces useAndroidViewSurface)
   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
 
-  await Firebase.initializeApp();
+  // await Firebase.initializeApp();
+  await Firebase.initializeApp(
+  options: const FirebaseOptions(
+    apiKey: "YOUR_API_KEY",
+    appId: "YOUR_APP_ID",
+    messagingSenderId: "SENDER_ID",
+    projectId: "PROJECT_ID",
+    storageBucket: "PROJECT_ID.appspot.com",
+  ),
+);
+
   await Utility().loadAPIConfig();
 
   SystemChrome.setPreferredOrientations([

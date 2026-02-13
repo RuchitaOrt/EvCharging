@@ -1,4 +1,6 @@
+import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/OnboardingScreen.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:flutter/material.dart';
 import 'package:new_version_plus/new_version_plus.dart';
 
@@ -17,13 +19,14 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Navigate to onboarding screen after 3 seconds
     // checkUpdate();
-    Future.delayed(const Duration(seconds: 3), () {
-       FocusScope.of(context).unfocus();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    });
+    loadData();
+    // Future.delayed(const Duration(seconds: 3), () {
+    //    FocusScope.of(context).unfocus();
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+    //   );
+    // });
   }
 
   // Future<void> checkUpdate() async {
@@ -44,6 +47,36 @@ class _SplashScreenState extends State<SplashScreen> {
   //     navigateToNextScreen();
   //   }
   // }
+loadData() async {
+
+  final isFirstTime = await AuthStorage.isFirstTime();
+  final loggedIn = await AuthStorage.isLoggedIn();
+
+  if (isFirstTime) {
+
+    await AuthStorage.setFirstTimeDone();
+
+   Future.delayed(const Duration(seconds: 3), () {
+       FocusScope.of(context).unfocus();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+      );
+    });
+
+  } else {
+FocusScope.of(context).unfocus();
+   
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MainTab(isLoggedIn: loggedIn),
+        ),
+      );
+   
+
+  }
+}
 
   void navigateToNextScreen() {
     Future.delayed(const Duration(seconds: 3), () {

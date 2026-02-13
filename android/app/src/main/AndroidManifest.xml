@@ -8,6 +8,7 @@
         android:label="HyCharge"
          android:usesCleartextTraffic="true"
         android:name="${applicationName}"
+        android:launchMode="singleTop"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

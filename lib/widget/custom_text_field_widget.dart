@@ -190,7 +190,7 @@ Widget _textFieldWidget() {
       hintStyle: CommonStyles.textFieldHint,
       errorStyle: CommonStyles.textFieldHint,
       counterText: "",
-      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
       border: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
       focusedBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorder),
       enabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),

@@ -155,11 +155,11 @@ class APIManager {
             );
 
             // Optional: show dialog / snackbar
-            infoNormalDialog(
-              routeGlobalKey.currentContext!,
-              message: "No internet connection. Please check your network.",
-            );
-
+            // infoNormalDialog(
+            //   routeGlobalKey.currentContext!,
+            //   message: "No internet connection. Please check your network.",
+            // );
+showToast("No internet connection. Please check your network.");
             return;
           }
 

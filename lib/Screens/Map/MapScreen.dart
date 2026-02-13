@@ -217,6 +217,7 @@
 //     context.read<HubProvider>().searchAndFocusHub(value);
 //   }
 // }
+
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/HubProvider.dart';
 import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';

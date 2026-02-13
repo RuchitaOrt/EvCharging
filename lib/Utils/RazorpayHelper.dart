@@ -48,20 +48,20 @@ class RazorpayHelper {
 
   Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
     debugPrint('Payment Success: ${response.paymentId}');
-    print("PAYMENT RESPONSE");
-    print(response);
-    print("Hello Signature: ${response.signature ?? "xyz"}");
+    // print("PAYMENT RESPONSE");
+    // print(response);
+    // print("Hello Signature: ${response.signature ?? "xyz"}");
 
-    print("PgID: ${response.paymentId ?? "abc"}");
-    print("PgID: ${response.orderId ?? "orderid"}");
+    // print("PgID: ${response.paymentId ?? "abc"}");
+    // print("PgID: ${response.orderId ?? "orderid"}");
 
     final provider = routeGlobalKey.currentContext!.read<PaymentProvider>();
 
     final verifyResponse = await provider.verifyRazorpayPayment(
       routeGlobalKey.currentContext!,
-      orderId: response.orderId!,
-      paymentId: response.paymentId!,
-      signature: response.signature!,
+      orderId: response.orderId ?? "",
+      paymentId: response.paymentId ?? "",
+      signature:response.signature ?? "",
     );
 
     if (verifyResponse?.success == true &&
@@ -74,9 +74,9 @@ class RazorpayHelper {
         AddWalletRequest(
           userId: userId!,
           currency: "INR",
-          orderId: response.orderId!,
-          paymentId: response.paymentId!,
-          paymentSignature: response.signature!,
+          orderId: response.orderId ?? "",
+          paymentId: response.paymentId ?? "",
+          paymentSignature: response.signature ?? "",
           amount: double.parse(amountValue!),
         ),
       );

@@ -170,7 +170,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           ),
                           hintText: CommonStrings.strOldPasswordHint,
                           contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 16.0),
+                              vertical: 10.0, horizontal: 8.0),
                           border: OutlineInputBorder(
                               borderRadius: borderRadius,
                               borderSide: enableBorder),
@@ -214,7 +214,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           ),
                           hintText: CommonStrings.strnewPasswordHint,
                           contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 16.0),
+                              vertical: 10.0, horizontal: 8.0),
                           border: OutlineInputBorder(
                               borderRadius: borderRadius,
                               borderSide: enableBorder),
@@ -258,7 +258,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           ),
                           hintText: CommonStrings.strconfirmpassword,
                           contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 16.0),
+                              vertical: 10.0, horizontal: 8.0),
                           border: OutlineInputBorder(
                               borderRadius: borderRadius,
                               borderSide: enableBorder),

@@ -645,7 +645,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                           ),
                           hintText: CommonStrings.strPasswordHint,
                           contentPadding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                              EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                           border: OutlineInputBorder(
                               borderRadius: borderRadius, borderSide: enableBorder),
                           focusedBorder: OutlineInputBorder(
