@@ -24,16 +24,6 @@ class Utility extends ChangeNotifier {
       print("Error loading API config: $e");
     }
   }
-  // void loadAPIConfig(BuildContext context) {
-    
-  //   DefaultAssetBundle.of(context)
-  //       .loadString('assets/API-Configuration.json')
-  //       .then((value) {
-  //     APIManager().loadConfiguration(value);
-  //   }).catchError((error) {
-  //     print('error loading json');
-  //   });
-  // }
 
   bool isValidPhoneNumber(String input) {
     final RegExp regex = new RegExp(r'^(?:[+0]9)?[0-9]{10,}$');

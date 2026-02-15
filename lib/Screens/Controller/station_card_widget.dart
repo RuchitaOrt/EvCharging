@@ -20,54 +20,58 @@ import '../../model/ChargingcomprehensiveHubResponse.dart';
 import '../StationDetailsScreen.dart';
 // import '../../model/ChargingHubResponse.dart';
 
+import 'package:flutter/gestures.dart';
+
 class StationCardWidget extends StatelessWidget {
   const StationCardWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    
     final screenWidth = MediaQuery.of(context).size.width;
 
     return SizedBox(
       height: 145,
       child: Consumer<HubProvider>(
         builder: (context, value, _) {
-          return ListView.separated(
-            controller: value.scrollController,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            itemCount:
-            value.recordsStation.length +
-    (value.isMoreLoading ? 1 : 0),
-            //  value.recordsStation.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-  if (index >= value.recordsStation.length) {
-    return const SizedBox(
-      width: 80,
-      child: Center(
-        child: CircularProgressIndicator(strokeWidth: 2,color: CommonColors.white,),
-      ),
-    );
-  }
+          return ScrollConfiguration(
+            behavior: const MaterialScrollBehavior().copyWith(
+              dragDevices: {
+                PointerDeviceKind.touch,
+                PointerDeviceKind.mouse,
+                PointerDeviceKind.trackpad,
+              },
+            ),
+            child: ListView.separated(
+              controller: value.scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemCount: value.recordsStation.length +
+                  (value.isMoreLoading ? 1 : 0),
+              separatorBuilder: (_, __) =>
+                  const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                if (index >= value.recordsStation.length) {
+                  return const SizedBox(
+                    width: 80,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: CommonColors.white,
+                      ),
+                    ),
+                  );
+                }
 
-  final isSelected = value.currentVisibleIndex == index;
+                final isSelected =
+                    value.currentVisibleIndex == index;
 
-  return _StationCard(
-    chargingHub: value.recordsStation[index],
-    isSelected: isSelected,
-    cardWidth: screenWidth * 0.88,
-  );
-},
-
-            // itemBuilder: (context, index) {
-            //   final isSelected = value.currentVisibleIndex == index;
-            //   return _StationCard(
-            //     chargingHub: value.recordsStation[index],
-            //     isSelected: isSelected,
-            //     cardWidth: screenWidth * 0.88,
-            //   );
-            // },
+                return _StationCard(
+                  chargingHub: value.recordsStation[index],
+                  isSelected: isSelected,
+                  cardWidth: screenWidth * 0.88,
+                );
+              },
+            ),
           );
         },
       ),
@@ -105,16 +109,7 @@ class _StationCardState extends State<_StationCard> {
   }
 }
 
-  //   void _fetchCurrentLocation() async {
-  //   Position? position = await MapController().getCurrentPosition();
-  //   if (position != null) {
-  //     setState(() {
-  //       _currentPosition = position;
-  //     });
-  //     print(
-  //         "Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}");
-  //   }
-  // }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -194,13 +189,14 @@ class _StationCardState extends State<_StationCard> {
               //       CommonImagePath.frame,
               //       height: SizeConfig.blockSizeVertical * 6,
               //     ),
-              widget.chargingHub.chargingHubImage != null
-    ? HubImage(
-        imageId: widget.chargingHub.chargingHubImage!,
-        height: SizeConfig.blockSizeVertical * 5,
-        width: SizeConfig.blockSizeVertical * 5,
-      )
-    : Image.asset(
+    //           widget.chargingHub.chargingHubImage != null
+    // ? HubImage(
+    //     imageId: widget.chargingHub.chargingHubImage!,
+    //     height: SizeConfig.blockSizeVertical * 5,
+    //     width: SizeConfig.blockSizeVertical * 5,
+    //   )
+    // : 
+    Image.asset(
         CommonImagePath.frame,
         height: SizeConfig.blockSizeVertical * 6,
       ),
@@ -429,20 +425,35 @@ class HubImage extends StatefulWidget {
 }
 
 class _HubImageState extends State<HubImage> {
-  late Future<Uint8List> _imageFuture;
+  Future<Uint8List?>? _imageFuture;
 
   @override
   void initState() {
     super.initState();
+    _loadImage();
+  }
+
+  @override
+  void didUpdateWidget(covariant HubImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 🔁 Reload only if imageId changes
+    if (oldWidget.imageId != widget.imageId) {
+      _loadImage();
+    }
+  }
+
+  void _loadImage() {
     _imageFuture =
         context.read<HubProvider>().downloadImage(widget.imageId);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<Uint8List>(
+    return FutureBuilder<Uint8List?>(
       future: _imageFuture,
       builder: (context, snapshot) {
+        // ⏳ Loading
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SizedBox(
             height: widget.height,
@@ -453,14 +464,17 @@ class _HubImageState extends State<HubImage> {
           );
         }
 
-        if (!snapshot.hasData) {
+        // ❌ Error / No Image
+        if (!snapshot.hasData || snapshot.data == null) {
           return Image.asset(
             CommonImagePath.frame,
             height: widget.height,
             width: widget.width,
+            fit: BoxFit.cover,
           );
         }
 
+        // ✅ Success
         return ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Image.memory(
@@ -474,3 +488,4 @@ class _HubImageState extends State<HubImage> {
     );
   }
 }
+

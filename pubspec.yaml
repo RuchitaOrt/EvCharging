@@ -63,6 +63,8 @@ dependencies:
   razorpay_flutter: 
   image_picker: ^1.0.7
   new_version_plus:
+  file_picker: ^10.3.10
+  connectivity_plus: ^7.0.0
 
 
 

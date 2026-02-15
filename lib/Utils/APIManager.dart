@@ -32,7 +32,7 @@ import 'package:HyCharge/model/user_vehicle_update_response.dart';
 import 'package:HyCharge/model/verify_payment_response.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/foundation.dart';
 import 'package:HyCharge/Utils/AppEror.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 
@@ -131,101 +131,110 @@ class APIManager {
   }
 
   /// 🔍 LOGGING + ERROR INTERCEPTOR
-  void _addInterceptors() {
-    dio.interceptors.add(
-      InterceptorsWrapper(
-        // onRequest: (options, handler) async {
-        //   // Log request details
-        //   _logRequest(options);
-
-        //   final cookies = await cookieJar?.loadForRequest(options.uri);
-        //   print("🍪 Request cookies: $cookies");
-        //   handler.next(options);
-        // },
-        onRequest: (options, handler) async {
+void _addInterceptors() {
+  dio.interceptors.add(
+    InterceptorsWrapper(
+      onRequest: (options, handler) async {
+        if (!kIsWeb) {
           final hasInternet = await hasInternetConnection();
-
           if (!hasInternet) {
-            handler.reject(
+            showToast("No internet connection. Please check your network.");
+            return handler.reject(
               DioException(
                 requestOptions: options,
                 type: DioExceptionType.connectionError,
                 error: "No internet connection",
               ),
             );
-
-            // Optional: show dialog / snackbar
-            // infoNormalDialog(
-            //   routeGlobalKey.currentContext!,
-            //   message: "No internet connection. Please check your network.",
-            // );
-showToast("No internet connection. Please check your network.");
-            return;
           }
+        }
+        _logRequest(options);
+        handler.next(options);
+      },
 
-          _logRequest(options);
-          handler.next(options);
-        },
+      onResponse: (response, handler) {
+        _logResponse(response);
+        print("🍪 Set-Cookie: ${response.headers['set-cookie']}");
+        handler.next(response);
+      },
 
-        onResponse: (response, handler) {
-          // Log response details
-          _logResponse(response);
+//      onError: (DioException e, handler) async {
+//   if (e.response?.statusCode == 401) {
 
-          print("🍪 Set-Cookie: ${response.headers['set-cookie']}");
-          handler.next(response);
-        },
-        onError: (DioException e, handler) async {
-          print("Errorcode");
-          print(e.response?.statusCode);
-          if (e.response?.statusCode == 401) {
-            print("🔒 401 detected, attempting refresh token");
+//     print("🔒 401 detected");
 
-            final refreshed = await _refreshToken();
+//     // Prevent infinite retry loop
+//     if (e.requestOptions.extra['retried'] == true) {
+//       print("⚠️ Already retried once");
 
-            if (refreshed) {
-              final requestOptions = e.requestOptions;
+//       if (!kIsWeb) {
+//         await clearCookies();
+//         unAthorizedTokenErrorDialog(
+//           routeGlobalKey.currentContext!,
+//           message: "Your Session has Expired. Please Login Again",
+//         );
+//       }
 
-              try {
-                final retryResponse = await dio.request(
-                  requestOptions.path,
-                  data: requestOptions.data,
-                  queryParameters: requestOptions.queryParameters,
-                  options: Options(
-                    method: requestOptions.method,
-                    headers: requestOptions.headers,
-                  ),
-                );
+//       return handler.next(e);
+//     }
 
-                return handler.resolve(retryResponse);
-              } catch (retryError) {
-                return handler.reject(e);
-              }
-            } else {
-              print("Statuscode ${refreshed}");
-              print("Statuscode Coming Here");
-              unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-                  message: "Your Session has Expired.Please Login Again");
-            }
+//     print("🔁 Attempting refresh...");
+//     final refreshed = await _refreshToken();
 
-            // Refresh failed → force logout
-            await clearCookies();
-            unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-                message: "Your Session has Expired.Please Login Again");
-          }
+//     if (refreshed) {
+//       final requestOptions = e.requestOptions;
+//       requestOptions.extra['retried'] = true;
 
-          handler.next(e);
-        },
+//       try {
+//         final retryResponse = await dio.request(
+//           requestOptions.path,
+//           data: requestOptions.data,
+//           queryParameters: requestOptions.queryParameters,
+//           options: Options(
+//             method: requestOptions.method,
+//             headers: requestOptions.headers,
+//           ),
+//         );
 
-        // onError: (e, handler) {
-        //   // Log error details
-        //   _logError(e);
-        //   print("❌ API ERROR: ${e.response?.statusCode}");
-        //   handler.next(e);
-        // },
-      ),
-    );
-  }
+//         print("✅ Retry successful");
+//         return handler.resolve(retryResponse);
 
+//       } catch (retryError) {
+//         print("❌ Retry failed");
+//         return handler.next(e);
+//       }
+//     }
+
+//     //  TEMP FIX FOR WEB
+//     if (kIsWeb) {
+//       print("⚠️ Web: skipping forced logout (temporary fix)");
+
+//       // DO NOT reject
+//       return handler.resolve(
+//         e.response ?? Response(
+//           requestOptions: e.requestOptions,
+//           statusCode: 200,
+//           data: {},
+//         ),
+//       );
+//     }
+
+//     // Mobile normal logout
+//     await clearCookies();
+//     unAthorizedTokenErrorDialog(
+//       routeGlobalKey.currentContext!,
+//       message: "Your Session has Expired. Please Login Again",
+//     );
+
+//     return handler.next(e);
+//   }
+
+//   handler.next(e);
+// }
+
+    ),
+  );
+}
   /// 📝 REQUEST LOGGER
   void _logRequest(RequestOptions options) {
     print('\n' + '=' * 60);
@@ -729,33 +738,41 @@ case API.verifyRazorpayPayment:
     return data?.toString() ?? "Something went wrong";
   }
 
-  Future<bool> _refreshToken() async {
-    try {
-      final response = await dio.post(
-        apiEndPoint(API.refreshToken),
-        // options: Options(validateStatus: (_) => true),
-      );
+Future<bool> _refreshToken() async {
+  try {
+    final refreshDio = Dio(BaseOptions(
+      baseUrl: baseURL!,
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      extra: {'withCredentials': true},
+    ));
 
-      if (response.statusCode == 200) {
-        final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+    if (!kIsWeb) {
+      refreshDio.interceptors.add(CookieManager(cookieJar!));
+    }
 
-        // Cookies are already updated automatically by CookieManager
-        print("🔁 Token refreshed successfully");
-        if (refreshResponse.success == false) {
-          unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-              message: "Your Session has Expired.Please Login Again");
-        } else {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString("userId", refreshResponse!.user!.recId!);
-        }
-        return true;
-      } else {
-         unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-              message: "Your Session has Expired.Please Login Again");
+    final response = await refreshDio.post(
+      apiEndPoint(API.refreshToken),
+    );
+
+    if (response.statusCode == 200) {
+      final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+
+      if (refreshResponse.success == false) {
+        return false;
       }
-    } catch (e) {
-      print("❌ Refresh token failed: $e");
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString("userId", refreshResponse.user!.recId);
+      return true;
     }
     return false;
+  } catch (e) {
+    print("❌ Refresh token failed: $e");
+    return false;
   }
+}
+
 }

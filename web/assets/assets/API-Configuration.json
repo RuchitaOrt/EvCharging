@@ -1,0 +1,15 @@
+{
+    "environment": "development",
+    "version": "1",
+    "development": {
+      
+        "hostUrl":"https://evc-management.ortdemo.com/api",
+        "timeout": 120,
+        "retry": 3
+    },
+    "production": {
+        "hostUrl": "https://evc-management.ortdemo.com/api",
+        "timeout": 120,
+        "retry": 3
+    }
+}

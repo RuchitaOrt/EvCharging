@@ -1,7 +1,9 @@
+import 'dart:developer';
+
 import 'package:HyCharge/Request/LoginRequest.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:flutter/material.dart';
-import 'package:HyCharge/Utils/AppEror.dart';
+
 import 'package:HyCharge/model/LoginResponse.dart';
 
 class LoginService {
@@ -15,7 +17,7 @@ Future<LoginResponse> loginUser(
     API.login,
     jsonval: request.toJson(),
   );
- print("REsponse ${response}");
+ log("REsponse ${response}");
   return response as LoginResponse;
 }
 }

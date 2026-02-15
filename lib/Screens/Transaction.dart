@@ -1,94 +1,18 @@
 import 'package:HyCharge/Bottomsheet/showAddMoneyBottomSheet.dart';
 import 'package:HyCharge/Provider/PaymentProvider.dart';
 import 'package:HyCharge/Provider/WalletProvider.dart';
-import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/enum/enum.dart';
-import 'package:HyCharge/widget/GlobalLists.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-// class Transaction extends StatefulWidget {
-//   final bool creditsOpen;
-//   const Transaction({super.key, this.creditsOpen = false});
-
-//   @override
-//   State<Transaction> createState() => _TransactionState();
-// }
-
-// class _TransactionState extends State<Transaction> {
-//   // @override
-//   // void initState() {
-//   //   super.initState();
-//   //   WidgetsBinding.instance.addPostFrameCallback((_) {
-//   //     print("widget.creditsOpe");
-//   //     print(widget.creditsOpen);
-//   //     if (widget.creditsOpen) {
-//   //       final walletProvider = context.read<WalletProvider>();
-
-//   //       print("Current BALANCE ${walletProvider.currentBalance}");
-//   //       showAddMoneyBottomSheet(
-//   //           context, "${walletProvider.currentBalance.toStringAsFixed(2)}");
-//   //     }
-//   //     context.read<WalletProvider>().fetchWallet(context);
-//   //     context.read<PaymentProvider>().loadRazorpayKey(context);
-//   //   });
-//   // }
-// late final ScrollController _scrollController;
-
-// @override
-// void initState() {
-//   super.initState();
-
-//   _scrollController = ScrollController()
-//     ..addListener(() {
-//       if (_scrollController.position.pixels >=
-//           _scrollController.position.maxScrollExtent - 200) {
-//         context.read<WalletProvider>().loadMore(context);
-//       }
-//     });
-
-//   WidgetsBinding.instance.addPostFrameCallback((_) {
-//     context.read<WalletProvider>().fetchWallet(context);
-//   });
-// }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//         backgroundColor: CommonColors.neutral50,
-//         appBar: CommonAppBar(
-//             title: "Transactions",
-//             onBack: () {
-//               Navigator.push(
-//                 context,
-//                 MaterialPageRoute(
-//                     builder: (context) =>
-//                         MainTab(isLoggedIn: GlobalLists.islLogin)),
-//               );
-//             }),
-//         body:
-//          SingleChildScrollView(
-//           child: Column(
-//             mainAxisAlignment: MainAxisAlignment.start,
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               _WalletHeader(),
-//               const _TransactionSection(),
-//             ],
-//           ),
-//         )
-      
-//         );
-//   }
-// }
 class Transaction extends StatefulWidget {
-   final bool creditsOpen;
+  final bool creditsOpen;
   const Transaction({super.key, required this.creditsOpen});
 
   @override
@@ -105,334 +29,31 @@ class _TransactionState extends State<Transaction> {
     _scrollController = ScrollController()
       ..addListener(() {
         final provider = context.read<WalletProvider>();
-if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200 &&
-    !provider.isMoreLoading &&
-    provider.hasMore) {
-  provider.loadMore(context);
-}
-        // if (_scrollController.position.pixels >=
-        //         _scrollController.position.maxScrollExtent - 200 &&
-        //     !provider.isMoreLoading &&
-        //     provider.hasMoreData) {
-        //   provider.loadMore(context);
-        // }
+        if (_scrollController.position.pixels >=
+                _scrollController.position.maxScrollExtent - 200 &&
+            !provider.isMoreLoading &&
+            provider.hasMore) {
+          provider.loadMore(context);
+        }
       });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-        print("widget.creditsOpe");
-      print(widget.creditsOpen);
       if (widget.creditsOpen) {
         final walletProvider = context.read<WalletProvider>();
-
-        print("Current BALANCE ${walletProvider.currentBalance}");
         showAddMoneyBottomSheet(
-            context, "${walletProvider.currentBalance.toStringAsFixed(2)}");
+          context,
+          walletProvider.currentBalance.toStringAsFixed(2),
+        );
       }
       context.read<WalletProvider>().fetchWallet(context);
-       context.read<PaymentProvider>().loadRazorpayKey(context);
+      context.read<PaymentProvider>().loadRazorpayKey(context);
     });
   }
-
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-   void _showFilterDialog(BuildContext context) {
-    final provider = context.read<WalletProvider>();
-    WalletFilterType tempSelected = provider.selectedFilter;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setState) => AlertDialog(
-          title: const Text("Filter Transactions"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: WalletFilterType.values.map((filter) {
-              return RadioListTile<WalletFilterType>(
-                title: Text(filter.name),
-                value: filter,
-                groupValue: tempSelected,
-                onChanged: (v) => setState(() => tempSelected = v!),
-              );
-            }).toList(),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                provider.changeFilter(tempSelected);
-                Navigator.pop(ctx);
-              },
-              child: const Text("Done"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _filterButton(BuildContext context, WalletProvider provider) {
-    return GestureDetector(
-      onTap: () => _showFilterDialog(context),
-      child: Container(
-        padding: const EdgeInsets.only(bottom: 4, left: 8, right: 8),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: CommonColors.blue, width: 1.2),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(CommonImagePath.filterblue,
-                color: CommonColors.blue),
-            const SizedBox(width: 5),
-            Text(
-              provider.filterLabel,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: CommonColors.blue,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(String? isoDate) {
-    if (isoDate == null || isoDate.isEmpty) return "";
-    final date = DateTime.parse(isoDate).toLocal();
-    return DateFormat('EEE, MMM dd, yyyy hh:mm a').format(date);
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: CommonColors.neutral50,
-      appBar: CommonAppBar(
-        title: "Transactions",
-        onBack: () => Navigator.pop(context),
-      ),
-      body: Consumer<WalletProvider>(
-        builder: (context, provider, _) {
-          final transactions = provider.filteredTransactions;
-
-          if (provider.isInitialLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          return ListView.builder(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(20),
-            itemCount:
-                transactions.length + 2 + (provider.isMoreLoading ? 1 : 0),
-            itemBuilder: (context, index) {
-              // 🔹 Wallet header
-              if (index == 0) return _WalletSummaryCard();
-
-              // 🔹 Section title
-              if (index == 1) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Payment History",
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w800),
-                      ),
-                      _filterButton(context, provider),
-                    ],
-                  ),
-                );
-              }
-
-              final txIndex = index - 2;
-
-              // 🔹 Bottom loader
-              if (txIndex == transactions.length && provider.hasMore) {
-                return const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              final tx = transactions[txIndex];
-              final isCredit = tx.transactionType == "Credit";
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _TransactionTile(
-                  item: _Tx(
-                    tx.transactionType ?? "",
-                    "₹${tx.amount ?? 0}",
-                    _formatDate(tx.createdOn?.toString()),
-                    isCredit,
-                    tx.additionalInfo1 ?? "",
-                  ),
-                ),
-              );
-            },
-          );
-        },
-      ),
-    );
-  }
-  
-}
-
-class _WalletHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-      child: Column(
-        children: [
-          _WalletSummaryCard(),
-        ],
-      ),
-    );
-  }
-}
-
-
-class _TransactionSection extends StatefulWidget {
-  const _TransactionSection();
-
-  @override
-  State<_TransactionSection> createState() => _TransactionSectionState();
-}
-
-class _TransactionSectionState extends State<_TransactionSection> {
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _scrollController = ScrollController()
-      ..addListener(() {
-        if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200) {
-          context.read<WalletProvider>().loadMore(context);
-        }
-      });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Consumer<WalletProvider>(
-        builder: (context, provider, _) {
-          final transactions = provider.filteredTransactions;
-
-          // 🔹 Initial loading
-          if (provider.isInitialLoading) {
-            return const Padding(
-              padding: EdgeInsets.all(24),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          // 🔹 Empty state
-          if (transactions.isEmpty) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.only(top: 40),
-                child: Text("No Payment History Found"),
-              ),
-            );
-          }
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Payment History",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
-                  ),
-                  _filterButton(context, provider),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              /// 🔥 Paginated list
-              ListView.builder(
-                controller: _scrollController,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: transactions.length +
-                    (provider.isMoreLoading ? 1 : 0),
-                itemBuilder: (context, index) {
-                  // 🔹 Bottom loader
-                  if (index == transactions.length) {
-                    return const Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: CircularProgressIndicator()),
-                    );
-                  }
-
-                  final tx = transactions[index];
-                  final isCredit = tx.transactionType == "Credit";
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _TransactionTile(
-                      item: _Tx(
-                        tx.transactionType ?? "",
-                        "₹${tx.amount ?? 0}",
-                        _formatDate(tx.createdOn?.toString()),
-                        isCredit,
-                        tx.additionalInfo1 ?? "",
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _filterButton(BuildContext context, WalletProvider provider) {
-    return GestureDetector(
-      onTap: () => _showFilterDialog(context),
-      child: Container(
-        padding: const EdgeInsets.only(bottom: 4, left: 8, right: 8),
-        decoration: BoxDecoration(
-          border: Border(
-            bottom: BorderSide(color: CommonColors.blue, width: 1.2),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SvgPicture.asset(CommonImagePath.filterblue,
-                color: CommonColors.blue),
-            const SizedBox(width: 5),
-            Text(
-              provider.filterLabel,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: CommonColors.blue,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   String _formatDate(String? isoDate) {
@@ -474,211 +95,123 @@ class _TransactionSectionState extends State<_TransactionSection> {
       ),
     );
   }
+
+  Widget _filterButton(BuildContext context, WalletProvider provider) {
+    return GestureDetector(
+      onTap: () => _showFilterDialog(context),
+      child: Container(
+        padding: const EdgeInsets.only(bottom: 4, left: 8, right: 8),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: CommonColors.blue, width: 1.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(CommonImagePath.filterblue,
+                color: CommonColors.blue),
+            const SizedBox(width: 5),
+            Text(
+              provider.filterLabel,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: CommonColors.blue,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: CommonColors.neutral50,
+      appBar: CommonAppBar(
+        title: "Transactions",
+        onBack: () => Navigator.pop(context),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWeb = constraints.maxWidth > 900;
+
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isWeb ? 1200 : double.infinity,
+              ),
+              child: Consumer<WalletProvider>(
+                builder: (context, provider, _) {
+                  final transactions = provider.filteredTransactions;
+
+                  if (provider.isInitialLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  return ListView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(20),
+                    itemCount:
+                        transactions.length + 2 + (provider.isMoreLoading ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == 0) return const _WalletSummaryCard();
+
+                      if (index == 1) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                "Payment History",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                              _filterButton(context, provider),
+                            ],
+                          ),
+                        );
+                      }
+
+                      final txIndex = index - 2;
+
+                      if (txIndex == transactions.length && provider.hasMore) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final tx = transactions[txIndex];
+                      final isCredit = tx.transactionType == "Credit";
+
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _TransactionTile(
+                          item: _Tx(
+                            tx.transactionType ?? "",
+                            "₹${tx.amount ?? 0}",
+                            _formatDate(tx.createdOn?.toString()),
+                            isCredit,
+                            tx.additionalInfo1 ?? "",
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
-
-// class _TransactionSection extends StatelessWidget {
-//   const _TransactionSection();
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: const EdgeInsets.only(left: 20, right: 20),
-//       child: Consumer<WalletProvider>(
-//         builder: (context, provider, _) {
-//           final transactions = provider.filteredTransactions;
-
-//           if (provider.isLoading) {
-//             return const Padding(
-//               padding: EdgeInsets.all(24),
-//               child: Center(child: CircularProgressIndicator()),
-//             );
-//           }
-
-//           // Minimum height to fill space even if no data
-//           return ConstrainedBox(
-//             constraints: BoxConstraints(
-//               minHeight: MediaQuery.of(context).size.height * 0.5,
-//             ),
-//             child: transactions.isEmpty
-//                 ? Center(
-//                     child: Column(
-//                       mainAxisSize: MainAxisSize.min,
-//                       children: const [
-//                         Text(
-//                           "No Payment History Found",
-//                         ),
-//                       ],
-//                     ),
-//                   )
-//                 : Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           const Text(
-//                             "Payment History",
-//                             style: TextStyle(
-//                               fontSize: 14,
-//                               fontWeight: FontWeight.w800,
-//                             ),
-//                           ),
-
-//                           // const Text(
-//                           //   "Wallet",
-//                           //   style: TextStyle(
-//                           //       fontSize: 20, fontWeight: FontWeight.w700),
-//                           // ),
-//                           IntrinsicWidth(
-//                             child: GestureDetector(
-//                               onTap: () => _showFilterDialog(context),
-//                               child: Container(
-//                                 padding: const EdgeInsets.only(
-//                                     bottom: 4, left: 8, right: 8),
-//                                 decoration: BoxDecoration(
-//                                   border: Border(
-//                                     bottom: BorderSide(
-//                                       color: CommonColors.blue,
-//                                       width: 1.2,
-//                                     ),
-//                                   ),
-//                                 ),
-//                                 child: Row(
-//                                   mainAxisSize: MainAxisSize.min,
-//                                   children: [
-//                                     SvgPicture.asset(
-//                                       CommonImagePath.filterblue,
-//                                       color: CommonColors.blue,
-//                                     ),
-//                                     const SizedBox(width: 5),
-//                                     Text(
-//                                       provider.filterLabel,
-//                                       style: TextStyle(
-//                                         fontSize: 12,
-//                                         fontWeight: FontWeight.w600,
-//                                         color: CommonColors.blue,
-//                                       ),
-//                                     ),
-//                                   ],
-//                                 ),
-//                               ),
-//                             ),
-//                           )
-//                         ],
-//                       ),
-//                       // const SizedBox(height: 12),
-//                       // _tabButton(provider.filterLabel, Icons.menu, 0),
-//                       const SizedBox(height: 16),
-
-//                       ...transactions.map((tx) {
-//                         final isCredit = tx!.transactionType == "Credit";
-//                         return Padding(
-//                           padding: const EdgeInsets.only(bottom: 12),
-//                           child: _TransactionTile(
-//                             item: _Tx(
-//                                 _buildTitle("${tx!.transactionType!}"),
-//                                 "₹${tx.amount.toString() ?? "0"}",
-//                                 _formatDate(tx!.createdOn!.toString()),
-//                                 isCredit,
-//                                 tx.additionalInfo1!),
-//                           ),
-//                         );
-//                       }).toList(),
-
-//                       // Optional: Add extra space at bottom
-//                       const SizedBox(height: 50),
-//                     ],
-//                   ),
-//           );
-//         },
-//       ),
-//     );
-//   }
-
-//   void _showFilterDialog(BuildContext context) {
-//     final provider = context.read<WalletProvider>();
-//     WalletFilterType tempSelected = provider.selectedFilter;
-
-//     showDialog(
-//       context: context,
-//       builder: (ctx) {
-//         return StatefulBuilder(
-//           builder: (ctx, setState) {
-//             return AlertDialog(
-//               title: const Text(
-//                 "Filter Transactions",
-//                 style: TextStyle(fontSize: 18),
-//               ),
-//               content: Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 children: [
-//                   RadioListTile<WalletFilterType>(
-//                     title: const Text("This Month"),
-//                     value: WalletFilterType.thisMonth,
-//                     activeColor: CommonColors.blue,
-//                     groupValue: tempSelected,
-//                     onChanged: (value) {
-//                       setState(() {
-//                         tempSelected = value!;
-//                       });
-//                     },
-//                   ),
-//                   RadioListTile<WalletFilterType>(
-//                     title: const Text("Last 7 Days"),
-//                     value: WalletFilterType.last7Days,
-//                     activeColor: CommonColors.blue,
-//                     groupValue: tempSelected,
-//                     onChanged: (value) {
-//                       setState(() {
-//                         tempSelected = value!;
-//                       });
-//                     },
-//                   ),
-//                   RadioListTile<WalletFilterType>(
-//                     title: const Text("All"),
-//                     value: WalletFilterType.all,
-//                     activeColor: CommonColors.blue,
-//                     groupValue: tempSelected,
-//                     onChanged: (value) {
-//                       setState(() {
-//                         tempSelected = value!;
-//                       });
-//                     },
-//                   ),
-//                 ],
-//               ),
-//               actions: [
-//                 ElevatedButton(
-//                   onPressed: () {
-//                     provider.changeFilter(tempSelected);
-//                     Navigator.pop(ctx);
-//                   },
-//                   child: const Text("Done",
-//                       style: TextStyle(
-//                         fontSize: 14,
-//                         color: CommonColors.blue,
-//                       )),
-//                 ),
-//               ],
-//             );
-//           },
-//         );
-//       },
-//     );
-//   }
-
-
-//   String _buildTitle(tx) {
-//     return "${tx}";
-//   }
-
-//   String _formatDate(String? isoDate) {
-//     if (isoDate == null || isoDate.isEmpty) return "";
-
-//     final date = DateTime.parse(isoDate).toLocal();
-
-//     return DateFormat('EEE, MMM dd, yyyy hh:mm a').format(date);
-//   }
-// }
 
 class _Tx {
   final String title;
@@ -701,11 +234,8 @@ class _TransactionTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        // border: Border.all(color: Colors.black12),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -728,28 +258,25 @@ class _TransactionTile extends StatelessWidget {
                     style: const TextStyle(
                         fontSize: 12, fontWeight: FontWeight.w800)),
                 const SizedBox(height: 2),
-                Text("${item.orderId}",
+                Text(item.orderId,
                     style:
                         const TextStyle(fontSize: 10, color: Colors.black54)),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(item.time,
                         style: const TextStyle(
                             fontSize: 10, color: Colors.black54)),
                     Text(
-                        item.isCredit ? "+ ${item.amount}" : "- ${item.amount}",
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            color:
-                                item.isCredit ? Colors.green : Colors.orange)),
-                    // Icon(
-                    //   item.isCredit ? Icons.call_received : Icons.call_made,
-                    //   color: item.isCredit ? Colors.green : Colors.orange,
-                    //   size: 14,
-                    // )
+                      item.isCredit ? "+ ${item.amount}" : "- ${item.amount}",
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        color: item.isCredit
+                            ? Colors.green
+                            : Colors.orange,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -762,6 +289,8 @@ class _TransactionTile extends StatelessWidget {
 }
 
 class _WalletSummaryCard extends StatelessWidget {
+  const _WalletSummaryCard();
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WalletProvider>(
@@ -781,18 +310,16 @@ class _WalletSummaryCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              /// Left logo / icon
               Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: CommonColors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Image.asset(CommonImagePath.logo)),
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: CommonColors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Image.asset(CommonImagePath.logo),
+              ),
               const SizedBox(width: 12),
-
-              /// Balance
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -818,17 +345,15 @@ class _WalletSummaryCard extends StatelessWidget {
                   ],
                 ),
               ),
-
-              /// Add Credits button
               SizedBox(
                 height: 35,
                 width: 110,
                 child: ElevatedButton(
                   onPressed: () {
-                   
-                    showAddMoneyBottomSheet(context,
-                        "${provider.currentBalance.toStringAsFixed(2)}");
-                   
+                    showAddMoneyBottomSheet(
+                      context,
+                      provider.currentBalance.toStringAsFixed(2),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.blue,
@@ -839,9 +364,10 @@ class _WalletSummaryCard extends StatelessWidget {
                   child: Text(
                     "Add Credits",
                     style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: CommonColors.white),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: CommonColors.white,
+                    ),
                   ),
                 ),
               )

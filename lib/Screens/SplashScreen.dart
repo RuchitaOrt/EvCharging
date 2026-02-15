@@ -13,88 +13,81 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+
   @override
   void initState() {
     super.initState();
-
-    // Navigate to onboarding screen after 3 seconds
-    // checkUpdate();
     loadData();
-    // Future.delayed(const Duration(seconds: 3), () {
-    //    FocusScope.of(context).unfocus();
-    //   Navigator.pushReplacement(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-    //   );
-    // });
   }
 
-  // Future<void> checkUpdate() async {
-  //   final newVersion = NewVersionPlus(
-  //     androidId: "com.ev.charging_app",
-  //   );
+  loadData() async {
+    final isFirstTime = await AuthStorage.isFirstTime();
+    final loggedIn = await AuthStorage.isLoggedIn();
 
-  //   final status = await newVersion.getVersionStatus();
-  //   print(status);
-  //   print(status!.canUpdate);
-  //   if (status != null && status.canUpdate) {
-  //     newVersion.showUpdateDialog(
-  //       context: context,
-  //       versionStatus: status,
-  //       allowDismissal: false, // Force update
-  //     );
-  //   } else {
-  //     navigateToNextScreen();
-  //   }
-  // }
-loadData() async {
+    if (!mounted) return;
 
-  final isFirstTime = await AuthStorage.isFirstTime();
-  final loggedIn = await AuthStorage.isLoggedIn();
+    if (isFirstTime) {
+      await AuthStorage.setFirstTimeDone();
 
-  if (isFirstTime) {
+      Future.delayed(const Duration(seconds: 3), () {
+        if (!mounted) return;
 
-    await AuthStorage.setFirstTimeDone();
+        FocusScope.of(context).unfocus();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const OnboardingScreen(),
+          ),
+        );
+      });
 
-   Future.delayed(const Duration(seconds: 3), () {
-       FocusScope.of(context).unfocus();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    });
+    } else {
 
-  } else {
-FocusScope.of(context).unfocus();
-   
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MainTab(isLoggedIn: loggedIn),
-        ),
-      );
-   
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
 
+        FocusScope.of(context).unfocus();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainTab(isLoggedIn: loggedIn),
+          ),
+        );
+      });
+
+    }
   }
-}
 
   void navigateToNextScreen() {
     Future.delayed(const Duration(seconds: 3), () {
+      if (!mounted) return;
+
       FocusScope.of(context).unfocus();
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+        MaterialPageRoute(
+          builder: (context) => const OnboardingScreen(),
+        ),
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SizedBox.expand(
-        child: Image.asset(
-          'assets/images/firstscreen.png',
-          fit: BoxFit.cover, // makes the image full screen
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: width > 900 ? 500 : width,
+            ),
+            child: Image.asset(
+              'assets/images/firstscreen.png',
+              fit: BoxFit.cover,
+            ),
+          ),
         ),
       ),
     );
