@@ -47,36 +47,89 @@ class _SplashScreenState extends State<SplashScreen> {
   //     navigateToNextScreen();
   //   }
   // }
-loadData() async {
+//   Future<void> loadData() async {
+//   await Future.delayed(const Duration(seconds: 3));
+
+//   if (!mounted) return;
+
+//   final isFirstTime = await AuthStorage.isFirstTime();
+//   final loggedIn = await AuthStorage.isLoggedIn();
+
+//   print("IS FIRST TIME: $isFirstTime");
+
+//   if (isFirstTime) {
+//     await AuthStorage.setFirstTimeDone();
+
+//     Navigator.of(context).pushReplacement(
+//       MaterialPageRoute(
+//         builder: (_) => const OnboardingScreen(),
+//       ),
+//     );
+//   } else {
+//     Navigator.of(context).pushReplacement(
+//       MaterialPageRoute(
+//         builder: (_) => MainTab(isLoggedIn: loggedIn),
+//       ),
+//     );
+//   }
+// }
+Future<void> loadData() async {
+  await Future.delayed(const Duration(seconds: 3));
+
+  if (!mounted) return;
 
   final isFirstTime = await AuthStorage.isFirstTime();
   final loggedIn = await AuthStorage.isLoggedIn();
 
+  print("SPLASH -> isFirstTime: $isFirstTime");
+  print("SPLASH -> loggedIn: $loggedIn");
+
   if (isFirstTime) {
-
-    await AuthStorage.setFirstTimeDone();
-
-   Future.delayed(const Duration(seconds: 3), () {
-       FocusScope.of(context).unfocus();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    });
-
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const OnboardingScreen(),
+      ),
+    );
   } else {
-FocusScope.of(context).unfocus();
-   
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MainTab(isLoggedIn: loggedIn),
-        ),
-      );
-   
-
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => MainTab(isLoggedIn: loggedIn),
+      ),
+    );
   }
 }
+
+// loadData() async {
+
+//   final isFirstTime = await AuthStorage.isFirstTime();
+//   final loggedIn = await AuthStorage.isLoggedIn();
+//   print("ISFIRSTTIME");
+// print(isFirstTime);
+//   if (isFirstTime) {
+
+//     await AuthStorage.setFirstTimeDone();
+
+//    Future.delayed(const Duration(seconds: 3), () {
+//        FocusScope.of(context).unfocus();
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+//       );
+//     });
+
+//   } else {
+// FocusScope.of(context).unfocus();
+   
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(
+//           builder: (_) => MainTab(isLoggedIn: loggedIn),
+//         ),
+//       );
+   
+
+//   }
+// }
 
   void navigateToNextScreen() {
     Future.delayed(const Duration(seconds: 3), () {

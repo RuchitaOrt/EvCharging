@@ -8,6 +8,9 @@ import 'package:HyCharge/Utils/ValidationHelper.dart';
 import 'package:HyCharge/model/LogoutResponse.dart';
 import 'package:HyCharge/model/RegistrationResponse.dart';
 import 'package:HyCharge/model/ResetPasswordResponse.dart';
+import 'package:HyCharge/model/resend_otp_response.dart';
+import 'package:HyCharge/model/send_otp_response.dart';
+import 'package:HyCharge/model/verify_otp_response.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -166,4 +169,8 @@ class AuthProvider extends ChangeNotifier {
       return null;
     }
   }
+
+
+
+
 }

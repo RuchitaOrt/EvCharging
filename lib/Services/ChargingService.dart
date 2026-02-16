@@ -7,6 +7,7 @@ import 'package:HyCharge/model/EndChargingSessionResponse.dart';
 import 'package:HyCharge/model/SessionDetailResponse.dart';
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:HyCharge/model/UnlockConnectorResponse.dart';
+import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:flutter/material.dart';
 
 class ChargingService {
@@ -138,5 +139,36 @@ Future<ChargingGunStatusResponse> getChargingGunStatus({
     );
 
     return res as ActiveSessionResponse;
+  }
+
+   Future<EstimateChargingResponse> estimateCharging({
+    required BuildContext context,
+    required String chargingGunId,
+    required String chargingStationId,
+    required String connectorId,
+    required double batteryCapacity,
+    required double desiredEnergy,
+    required double desiredDuration,
+    required double currentBatteryPercentage,
+    required double desiredCost,
+  }) async {
+    final body = {
+      "chargingGunId": chargingGunId,
+      "chargingStationId": chargingStationId,
+      "connectorId": connectorId,
+      "batteryCapacity": batteryCapacity,
+      "desiredEnergy": desiredEnergy,
+      "desiredDuration": desiredDuration,
+      "currentBatteryPercentage": currentBatteryPercentage,
+      "desiredCost": desiredCost,
+    };
+
+    final response = await  APIManager()..apiRequest(
+      context,
+      API.estimateCharging,
+      jsonval: body,
+    );
+
+    return response as EstimateChargingResponse;
   }
 }

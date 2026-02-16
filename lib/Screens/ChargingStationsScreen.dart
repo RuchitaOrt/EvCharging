@@ -111,7 +111,8 @@ Future<void> _onScroll() async {
           width: 0.3,
         ),
       ),
-      child: Row(
+      child:
+       Row(
         children: [
           Icon(Icons.search, color: CommonColors.hintGrey),
           SizedBox(width: 12),
@@ -191,9 +192,11 @@ Future<void> _onScroll() async {
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: SizeConfig.blockSizeHorizontal * 78,
-                      child: _searchBar(),
+                    Expanded(
+                      child: SizedBox(
+                        width: SizeConfig.blockSizeHorizontal * 78,
+                        child: _searchBar(),
+                      ),
                     ),
                     SizedBox(width: 10),
                     Image.asset(CommonImagePath.filter, height: 40),
@@ -344,7 +347,7 @@ itemBuilder: (context, index) {
                                 child: Text(
                                   hub.chargingHubName ?? 'Unnamed Station',
                                   style: const TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     color: CommonColors.primary,
                                   ),
@@ -392,7 +395,7 @@ ExpandableText(
   text: hub.amenities ?? "",
   trimLines: 2,
   style: const TextStyle(
-    fontSize: 12,
+    fontSize: 10,
     color: CommonColors.neutral500,
   ),
 ),
@@ -434,7 +437,7 @@ ExpandableText(
       children: [
         Image.asset(icon, height: 14),
         const SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontSize: 12)),
+        Text(text, style: const TextStyle(fontSize: 10)),
       ],
     );
   }
@@ -450,7 +453,7 @@ ExpandableText(
         Text(
           price,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             color: CommonColors.primary,
           ),

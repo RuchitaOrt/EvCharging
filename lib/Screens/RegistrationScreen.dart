@@ -1,6 +1,7 @@
 import 'package:HyCharge/Provider/AuthProvider.dart';
 import 'package:HyCharge/Request/RegisterRequest.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Services/pdf_viewer_screen.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
@@ -11,6 +12,7 @@ import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -331,17 +333,40 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             color: CommonColors.black,
                             fontWeight: FontWeight.w400),
                       ),
-                      TextSpan(
-                        text: "Terms of Service ",
-                        style: TextStyle(
-                            fontSize: 14,
-                            decoration: TextDecoration.underline, // 👈 add this
-                            decorationColor: CommonColors
-                                .skyBlue, // optional (same color underline)
-                            decorationThickness: 2,
-                            color: CommonColors.skyBlue,
-                            fontWeight: FontWeight.w400),
-                      ),
+                     WidgetSpan(
+  child: GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const PdfViewerScreen(
+            title: "Terms of Service",
+            assetPath: "assets/pdfs/terms.pdf",
+          ),
+        ),
+      );
+    },
+    child: Container(
+     
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: CommonColors.skyBlue,
+            width: 1,
+          ),
+        ),
+      ),
+      child: const Text(
+        "Terms of Service ",
+        style: TextStyle(
+          fontSize: 12,
+          color: CommonColors.skyBlue,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+    ),
+  ),
+),
                       TextSpan(
                         text: "and ",
                         style: TextStyle(
@@ -349,17 +374,40 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             fontSize: 14,
                             fontWeight: FontWeight.w400),
                       ),
-                      TextSpan(
-                        text: "Privacy Policy ",
-                        style: TextStyle(
-                            fontSize: 14,
-                            color: CommonColors.skyBlue,
-                            decoration: TextDecoration.underline, // 👈 add this
-                            decorationColor: CommonColors
-                                .skyBlue, // optional (same color underline)
-                            decorationThickness: 2,
-                            fontWeight: FontWeight.w400),
-                      ),
+                     WidgetSpan(
+  child: GestureDetector(
+    onTap: () {
+       Navigator.push(
+                                               context,
+                                               MaterialPageRoute(
+                                 builder: (_) => const PdfViewerScreen(
+                                   title: "Privacy Policy ",
+                                   assetPath: "assets/pdfs/privacy.pdf",
+                                 ),
+                                               ),
+                                             );
+    },
+    child: Container(
+     
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: CommonColors.skyBlue,
+            width: 1,
+          ),
+        ),
+      ),
+      child: const Text(
+        "Privacy Policy ",
+        style: TextStyle(
+          fontSize: 12,
+          color: CommonColors.skyBlue,
+          fontWeight: FontWeight.w400,
+        ),
+      ),
+    ),
+  ),
+),
                     ],
                   ),
                 ),

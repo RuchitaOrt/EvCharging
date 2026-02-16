@@ -182,6 +182,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 width: 120,
                                                 height: 120,
                                                 fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  CommonImagePath.profileImage,
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                );
+              },
                                               )
                                             : Image.asset(
                                                 CommonImagePath.profileImage,

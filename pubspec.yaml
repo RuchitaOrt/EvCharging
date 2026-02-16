@@ -63,6 +63,8 @@ dependencies:
   razorpay_flutter: 
   image_picker: ^1.0.7
   new_version_plus:
+  syncfusion_flutter_pdfviewer: ^32.2.4
+
 
 
 
@@ -92,6 +94,8 @@ flutter:
     - assets/API-Configuration.json
     - assets/map_styles/dark_map.json
     - assets/lottie/animationCharger.json
+    - assets/pdfs/terms.pdf
+    - assets/pdfs/privacy.pdf
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

@@ -820,7 +820,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                               "Connector - ${charger.connectorName}" ??
                                   "Connector",
                               style:
-                                  const TextStyle(fontWeight: FontWeight.w600),
+                                  const TextStyle(fontWeight: FontWeight.w600,fontSize: 13),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -852,6 +852,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                             child: Text(
                               updatedCharger.lastStatus ?? "Unknown",
                               style: TextStyle(
+                                fontSize:  12,
                                 color: isAvailable
                                     ? CommonColors.darkgreen
                                     : Colors.red,
@@ -872,7 +873,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                       children: [
                         Text('Charger Type',
                             style: TextStyle(
-                                fontWeight: FontWeight.w200, fontSize: 12)),
+                                fontWeight: FontWeight.w200, fontSize: 11)),
                         Text('${charger.chargerTypeName}',
                             style: TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 13)),

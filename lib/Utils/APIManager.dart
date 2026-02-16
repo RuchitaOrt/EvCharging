@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:HyCharge/model/estimate_charging_response.dart';
+import 'package:HyCharge/model/resend_otp_response.dart';
+import 'package:HyCharge/model/send_otp_response.dart';
+import 'package:HyCharge/model/verify_otp_response.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:cookie_jar/cookie_jar.dart';
@@ -85,6 +89,11 @@ enum API {
   razorpayKey,
   createRazorpayOrder,
   verifyRazorpayPayment,
+  sendOtp,
+  verifyOtp,
+  resendOtp,
+  estimateCharging,
+
   
 }
 
@@ -175,46 +184,94 @@ showToast("No internet connection. Please check your network.");
           handler.next(response);
         },
         onError: (DioException e, handler) async {
-          print("Errorcode");
-          print(e.response?.statusCode);
-          if (e.response?.statusCode == 401) {
-            print("🔒 401 detected, attempting refresh token");
+  if (e.response?.statusCode == 401) {
+    print("🔒 401 detected");
 
-            final refreshed = await _refreshToken();
+    // If refresh already failed → logout immediately
+    if (_refreshFailed) {
+      await clearCookies();
+      unAthorizedTokenErrorDialog(
+        routeGlobalKey.currentContext!,
+        message: "Your Session has Expired. Please Login Again",
+      );
+      return handler.reject(e);
+    }
 
-            if (refreshed) {
-              final requestOptions = e.requestOptions;
+    final refreshed = await _refreshToken();
 
-              try {
-                final retryResponse = await dio.request(
-                  requestOptions.path,
-                  data: requestOptions.data,
-                  queryParameters: requestOptions.queryParameters,
-                  options: Options(
-                    method: requestOptions.method,
-                    headers: requestOptions.headers,
-                  ),
-                );
+    if (refreshed) {
+      final requestOptions = e.requestOptions;
 
-                return handler.resolve(retryResponse);
-              } catch (retryError) {
-                return handler.reject(e);
-              }
-            } else {
-              print("Statuscode ${refreshed}");
-              print("Statuscode Coming Here");
-              unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-                  message: "Your Session has Expired.Please Login Again");
-            }
+      try {
+        final retryResponse = await dio.request(
+          requestOptions.path,
+          data: requestOptions.data,
+          queryParameters: requestOptions.queryParameters,
+          options: Options(
+            method: requestOptions.method,
+            headers: requestOptions.headers,
+          ),
+        );
 
-            // Refresh failed → force logout
-            await clearCookies();
-            unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-                message: "Your Session has Expired.Please Login Again");
-          }
+        return handler.resolve(retryResponse);
+      } catch (_) {
+        return handler.reject(e);
+      }
+    } else {
+      // ❌ Refresh failed → logout
+      await clearCookies();
+      unAthorizedTokenErrorDialog(
+        routeGlobalKey.currentContext!,
+        message: "Your Session has Expired. Please Login Again",
+      );
+      return handler.reject(e);
+    }
+  }
 
-          handler.next(e);
-        },
+  handler.next(e);
+},
+
+        // onError: (DioException e, handler) async {
+        //   print("Errorcode");
+        //   print(e.response?.statusCode);
+        //   if (e.response?.statusCode == 401) {
+        //     print("🔒 401 detected, attempting refresh token");
+
+        //     final refreshed = await _refreshToken();
+
+        //     if (refreshed) {
+        //       final requestOptions = e.requestOptions;
+
+        //       try {
+        //         final retryResponse = await dio.request(
+        //           requestOptions.path,
+        //           data: requestOptions.data,
+        //           queryParameters: requestOptions.queryParameters,
+        //           options: Options(
+        //             method: requestOptions.method,
+        //             headers: requestOptions.headers,
+        //           ),
+        //         );
+
+        //         return handler.resolve(retryResponse);
+        //       } catch (retryError) {
+        //         return handler.reject(e);
+        //       }
+        //     } else {
+        //       print("Statuscode ${refreshed}");
+        //       print("Statuscode Coming Here");
+        //       unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+        //           message: "Your Session has Expired.Please Login Again");
+        //     }
+
+        //     // Refresh failed → force logout
+        //     await clearCookies();
+        //     unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+        //         message: "Your Session has Expired.Please Login Again");
+        //   }
+
+        //   handler.next(e);
+        // },
 
         // onError: (e, handler) {
         //   // Log error details
@@ -551,6 +608,14 @@ showToast("No internet connection. Please check your network.");
   return "/Payment/create-order";
   case API.verifyRazorpayPayment:
   return "/Payment/verify-payment";
+case API.sendOtp:
+  return "/User/send-otp";
+case API.verifyOtp:
+  return "/User/verify-otp";
+case API.resendOtp:
+  return "/User/resend-otp";
+case API.estimateCharging:
+  return "/ChargingSession/estimate-charging";
 
 
     }
@@ -655,6 +720,16 @@ showToast("No internet connection. Please check your network.");
 case API.verifyRazorpayPayment:
   return VerifyPaymentResponse.fromJson(json);
 
+case API.sendOtp:
+  return SendOtpResponse.fromJson(json);
+case API.verifyOtp:
+  return VerifyOtpResponse.fromJson(json);
+
+
+case API.resendOtp:
+  return ResendOtpResponse.fromJson(json);
+case API.estimateCharging:
+  return EstimateChargingResponse.fromJson(json);
 
       default:
         return json;
@@ -729,33 +804,78 @@ case API.verifyRazorpayPayment:
     return data?.toString() ?? "Something went wrong";
   }
 
-  Future<bool> _refreshToken() async {
-    try {
-      final response = await dio.post(
-        apiEndPoint(API.refreshToken),
-        // options: Options(validateStatus: (_) => true),
-      );
-
-      if (response.statusCode == 200) {
-        final refreshResponse = RefreshTokenResponse.fromJson(response.data);
-
-        // Cookies are already updated automatically by CookieManager
-        print("🔁 Token refreshed successfully");
-        if (refreshResponse.success == false) {
-          unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-              message: "Your Session has Expired.Please Login Again");
-        } else {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString("userId", refreshResponse!.user!.recId!);
-        }
-        return true;
-      } else {
-         unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
-              message: "Your Session has Expired.Please Login Again");
-      }
-    } catch (e) {
-      print("❌ Refresh token failed: $e");
-    }
+bool _isRefreshingToken = false;
+bool _refreshFailed = false;
+Future<bool> _refreshToken() async {
+  if (_isRefreshingToken || _refreshFailed) {
     return false;
   }
+
+  _isRefreshingToken = true;
+
+  try {
+    final response = await dio.post(
+      apiEndPoint(API.refreshToken),
+    );
+
+    if (response.statusCode == 200) {
+      final refreshResponse =
+          RefreshTokenResponse.fromJson(response.data);
+
+      if (refreshResponse.success == true &&
+          refreshResponse.user != null) {
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(
+          "userId",
+          refreshResponse.user!.recId!,
+        );
+
+        print("🔁 Token refreshed successfully");
+        _isRefreshingToken = false;
+        return true;
+      } else {
+        // ❌ Refresh token invalid
+        print("❌ Refresh token failed: ${refreshResponse.message}");
+        _refreshFailed = true;
+      }
+    }
+  } catch (e) {
+    print("❌ Refresh token exception: $e");
+    _refreshFailed = true;
+  }
+
+  _isRefreshingToken = false;
+  return false;
+}
+
+  // Future<bool> _refreshToken() async {
+  //   try {
+  //     final response = await dio.post(
+  //       apiEndPoint(API.refreshToken),
+  //       // options: Options(validateStatus: (_) => true),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+
+  //       // Cookies are already updated automatically by CookieManager
+  //       print("🔁 Token refreshed successfully");
+  //       if (refreshResponse.success == false) {
+  //         unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+  //             message: "Your Session has Expired.Please Login Again");
+  //       } else {
+  //         final prefs = await SharedPreferences.getInstance();
+  //         await prefs.setString("userId", refreshResponse!.user!.recId!);
+  //       }
+  //       return true;
+  //     } else {
+  //        unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+  //             message: "Your Session has Expired.Please Login Again");
+  //     }
+  //   } catch (e) {
+  //     print("❌ Refresh token failed: $e");
+  //   }
+  //   return false;
+  // }
 }
