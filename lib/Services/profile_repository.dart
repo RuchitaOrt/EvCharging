@@ -11,6 +11,9 @@ class ProfileRepository {
       API.profile,
     );
 
+    print('response ${response}');
+
+
     return response as ProfileResponse;
   }
 

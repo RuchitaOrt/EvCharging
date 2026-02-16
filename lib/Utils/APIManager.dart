@@ -696,21 +696,21 @@ case API.verifyRazorpayPayment:
       if (response.statusCode == 400) {
         throw BadRequestError(_serverMessage(response.data));
       }
-// if (response.statusCode == 401) {
-//   throw UnauthorisedError("Unauthorized");
-// }
+if (response.statusCode == 401) {
+  throw UnauthorisedError("Unauthorized");
+}
 
-      // if (response.statusCode == 401) {
-      //   print("response.statusCode ${response.statusCode}");
-      //   // infoNormalDialog(
-      //   //   context,
-      //   //   message: response.data['message'] ?? '',
-      //   // );
-      //    print("🔒 401 detected, attempting token");
-      //   unAthorizedTokenErrorDialog(context,
-      //       message: "Your Session has Expired.Please Login Again");
-      //   throw UnauthorisedError("Unauthorized");
-      // }
+      if (response.statusCode == 401) {
+        print("response.statusCode ${response.statusCode}");
+        // infoNormalDialog(
+        //   context,
+        //   message: response.data['message'] ?? '',
+        // );
+         print("🔒 401 detected, attempting token");
+        unAthorizedTokenErrorDialog(context,
+            message: "Your Session has Expired.Please Login Again");
+        throw UnauthorisedError("Unauthorized");
+      }
 
       throw FetchDataError(_serverMessage(response.data));
     } on DioException catch (e) {

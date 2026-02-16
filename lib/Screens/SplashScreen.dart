@@ -74,20 +74,13 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    // final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       body: SizedBox.expand(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: width > 900 ? 500 : width,
-            ),
-            child: Image.asset(
-              'assets/images/firstscreen.png',
-              fit: BoxFit.cover,
-            ),
-          ),
+        child: Image.asset(
+          'assets/images/firstscreen.png',
+          fit: BoxFit.cover, // makes the image full screen
         ),
       ),
     );

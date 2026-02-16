@@ -1,4 +1,6 @@
+
 import 'dart:io';
+// import 'dart:nativewrappers/_internal/vm/lib/developer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +21,6 @@ import 'package:HyCharge/Screens/SupportScreen.dart';
 
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/ImageHelper.dart';
-import 'package:HyCharge/Utils/InternetConnection.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
@@ -220,6 +221,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           _profileTile(CommonImagePath.profileIcon, 'Edit Profile', () {
+            print('provider.profile!.use${provider.profile!.user!}');
             Navigator.push(
               routeGlobalKey.currentContext!,
               MaterialPageRoute(
