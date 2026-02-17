@@ -1,15 +1,21 @@
 import 'package:HyCharge/Provider/LoginProvider.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class VerifyOtpBottomSheet extends StatefulWidget {
   final String mobileNo;
+  final String authToken;
 
-  VerifyOtpBottomSheet({super.key, required this.mobileNo});
+  VerifyOtpBottomSheet(
+      {super.key, required this.mobileNo, required this.authToken});
 
   @override
   State<VerifyOtpBottomSheet> createState() => _VerifyOtpBottomSheetState();
@@ -68,18 +74,41 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                             controller: otpfielfController,
                           ),
                           const SizedBox(height: 15),
-                            Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
+                          GestureDetector(
+                            onTap: () async {
+                              await loginProvider.resendOtp(
+                                context: context,
+                                phoneNumber: widget.mobileNo,
+                                countryCode: "+91",
+                              );
+ showToast(
+                                    loginProvider.resendOtpResponse!.message);
+                              if (loginProvider.resendOtpResponse?.success ==
+                                  true) {
                                
-                              
-                                Text(
-                                    "Resend Otp",
-                                    style: CommonStyles.tsbllueHeading),
-                                      SizedBox(width: 5,),
-                                     Icon(Icons.refresh,color: CommonColors.greyText,),
-                              ],
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                Navigator.pop(context);
+                                showVerifyOTPLoginSheet(
+                                    context,
+                                    widget.mobileNo,
+                                    loginProvider.sendOtpResponse!.authId!);
+                              }
+                            },
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text("Resend Otp",
+                                      style: CommonStyles.tsbllueHeading,),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Icon(
+                                    Icons.refresh,
+                                    color: CommonColors.greyText,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           const SizedBox(height: 15),
@@ -95,7 +124,45 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () async {
+                                await loginProvider.verifyOtp(
+                                  context: context,
+                                  authId: widget.authToken,
+                                  otpCode: otpfielfController.text,
+                                  phoneNumber: widget.mobileNo,
+                                );
+
+                                if (loginProvider.verifyOtpResponse?.success ==
+                                    true) {
+                                  GlobalLists.islLogin = true;
+                                   // Close bottom sheet
+  Navigator.of(context, rootNavigator: true).pop();
+
+  // Wait for sheet animation to finish
+  Future.delayed(const Duration(milliseconds: 300), () {
+
+    Navigator.of(routeGlobalKey.currentContext!)
+        .pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => MainTab(isLoggedIn: true),
+      ),
+      (route) => false,
+    );
+
+  });
+                                  // Navigator.of(context, rootNavigator: true)
+                                  //     .pop(); // close sheet
+
+                                  // // Navigate to main tab
+                                  // Navigator.pushReplacement(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //       builder: (_) => MainTab(
+                                  //             isLoggedIn: true,
+                                  //           )),
+                                  // );
+                                }
+                              },
                               child: loginProvider.isLoading
                                   ? const SizedBox(
                                       height: 20,
@@ -124,6 +191,26 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
       ),
     );
   }
+
+  showVerifyOTPLoginSheet(
+      BuildContext context, String mobile, String authToken) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: VerifyOtpBottomSheet(
+            mobileNo: mobile,
+            authToken: authToken,
+          ),
+        );
+      },
+    );
+  }
 }
 
 class OtpBoxField extends StatefulWidget {
@@ -133,7 +220,7 @@ class OtpBoxField extends StatefulWidget {
   const OtpBoxField({
     super.key,
     required this.controller,
-    this.length = 4,
+    this.length = 6,
   });
 
   @override
@@ -172,7 +259,7 @@ class _OtpBoxFieldState extends State<OtpBoxField> {
 
           /// Visible OTP boxes
           Padding(
-            padding: const EdgeInsets.only(left: 20,right: 20),
+            padding: const EdgeInsets.only(left: 10, right: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(widget.length, (index) {
@@ -180,10 +267,10 @@ class _OtpBoxFieldState extends State<OtpBoxField> {
                 if (index < widget.controller.text.length) {
                   text = widget.controller.text[index];
                 }
-            
+
                 return Container(
-                  width: 55,
-                  height: 55,
+                  width: 42,
+                  height: 50,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),

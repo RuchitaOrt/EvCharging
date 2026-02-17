@@ -18,45 +18,116 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     loadData();
+    // Future.delayed(const Duration(seconds: 3), () {
+    //    FocusScope.of(context).unfocus();
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+    //   );
+    // });
   }
 
-  loadData() async {
-    final isFirstTime = await AuthStorage.isFirstTime();
-    final loggedIn = await AuthStorage.isLoggedIn();
+  // Future<void> checkUpdate() async {
+  //   final newVersion = NewVersionPlus(
+  //     androidId: "com.ev.charging_app",
+  //   );
 
-    if (!mounted) return;
+  //   final status = await newVersion.getVersionStatus();
+  //   print(status);
+  //   print(status!.canUpdate);
+  //   if (status != null && status.canUpdate) {
+  //     newVersion.showUpdateDialog(
+  //       context: context,
+  //       versionStatus: status,
+  //       allowDismissal: false, // Force update
+  //     );
+  //   } else {
+  //     navigateToNextScreen();
+  //   }
+  // }
+//   Future<void> loadData() async {
+//   await Future.delayed(const Duration(seconds: 3));
 
-    if (isFirstTime) {
-      await AuthStorage.setFirstTimeDone();
+//   if (!mounted) return;
 
-      Future.delayed(const Duration(seconds: 3), () {
-        if (!mounted) return;
+//   final isFirstTime = await AuthStorage.isFirstTime();
+//   final loggedIn = await AuthStorage.isLoggedIn();
 
-        FocusScope.of(context).unfocus();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const OnboardingScreen(),
-          ),
-        );
-      });
+//   print("IS FIRST TIME: $isFirstTime");
 
-    } else {
+//   if (isFirstTime) {
+//     await AuthStorage.setFirstTimeDone();
 
-      Future.delayed(const Duration(milliseconds: 500), () {
-        if (!mounted) return;
+//     Navigator.of(context).pushReplacement(
+//       MaterialPageRoute(
+//         builder: (_) => const OnboardingScreen(),
+//       ),
+//     );
+//   } else {
+//     Navigator.of(context).pushReplacement(
+//       MaterialPageRoute(
+//         builder: (_) => MainTab(isLoggedIn: loggedIn),
+//       ),
+//     );
+//   }
+// }
+Future<void> loadData() async {
+  await Future.delayed(const Duration(seconds: 3));
 
-        FocusScope.of(context).unfocus();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MainTab(isLoggedIn: loggedIn),
-          ),
-        );
-      });
+  if (!mounted) return;
 
-    }
+  final isFirstTime = await AuthStorage.isFirstTime();
+  final loggedIn = await AuthStorage.isLoggedIn();
+
+  print("SPLASH -> isFirstTime: $isFirstTime");
+  print("SPLASH -> loggedIn: $loggedIn");
+
+  if (isFirstTime) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => const OnboardingScreen(),
+      ),
+    );
+  } else {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => MainTab(isLoggedIn: loggedIn),
+      ),
+    );
   }
+}
+
+// loadData() async {
+
+//   final isFirstTime = await AuthStorage.isFirstTime();
+//   final loggedIn = await AuthStorage.isLoggedIn();
+//   print("ISFIRSTTIME");
+// print(isFirstTime);
+//   if (isFirstTime) {
+
+//     await AuthStorage.setFirstTimeDone();
+
+//    Future.delayed(const Duration(seconds: 3), () {
+//        FocusScope.of(context).unfocus();
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+//       );
+//     });
+
+//   } else {
+// FocusScope.of(context).unfocus();
+   
+//       Navigator.pushReplacement(
+//         context,
+//         MaterialPageRoute(
+//           builder: (_) => MainTab(isLoggedIn: loggedIn),
+//         ),
+//       );
+   
+
+//   }
+// }
 
   void navigateToNextScreen() {
     Future.delayed(const Duration(seconds: 3), () {

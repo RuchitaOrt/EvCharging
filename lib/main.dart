@@ -47,11 +47,12 @@ final GlobalKey<NavigatorState> routeGlobalKey = GlobalKey();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
+  if (!kIsWeb) {
+    AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
+  }
 
   if (Firebase.apps.isEmpty) {
     if (kIsWeb) {
-      
       await Firebase.initializeApp(
         options: const FirebaseOptions(
           apiKey: "YOUR_API_KEY",
@@ -63,7 +64,6 @@ Future<void> main() async {
         ),
       );
     } else {
-      // Android / iOS
       await Firebase.initializeApp();
     }
   }
@@ -75,8 +75,9 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(MyApp());
+  runApp(const MyApp());
 }
+
 class MyApp extends StatefulWidget {
   const MyApp() : super();
 

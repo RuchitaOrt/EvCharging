@@ -7,6 +7,7 @@ import 'package:HyCharge/model/ProfileResponse.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserProfile? user;
@@ -61,32 +62,41 @@ if(widget.user!=null)
     return Scaffold(
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(title: "Edit Profile"),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _profileImage(),
-            const SizedBox(height: 10),
+     body: SingleChildScrollView(
+  padding: const EdgeInsets.all(20),
+  child: LayoutBuilder(
+    builder: (context, constraints) {
+      final isWeb = kIsWeb;
+      final isDesktop = constraints.maxWidth > 900;
 
-            _inputField("First Name", firstNameController),
-            
+      return Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: isWeb && isDesktop ? 1200 : double.infinity,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _profileImage(),
+              const SizedBox(height: 10),
 
-            _inputField("Last Name", lastNameController),
-           
-            _inputField("Email", emailController),
-          
+              _inputField("First Name", firstNameController),
+              _inputField("Last Name", lastNameController),
+              _inputField("Email", emailController),
+              _inputField("Address *", addressController, maxLines: 3),
+              _inputField("Phone Number", phoneController),
 
-            _inputField("Address *", addressController, maxLines: 3),
-            
-            _inputField("Phone Number", phoneController),
-           
- const SizedBox(height: 10),
-
-            _updateButton(context),
-          ],
+              const SizedBox(height: 10),
+              _updateButton(context),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    },
+  ),
+)
+);
+
   }
 
   // 🔹 Profile Image UI

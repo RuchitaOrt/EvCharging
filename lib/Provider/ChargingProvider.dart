@@ -3,6 +3,7 @@ import 'package:HyCharge/model/EndChargingSessionResponse.dart';
 import 'package:HyCharge/model/SessionDetailResponse.dart';
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:HyCharge/model/UnlockConnectorResponse.dart';
+import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:flutter/material.dart';
 
 import 'package:HyCharge/Services/ChargingService.dart';
@@ -261,6 +262,63 @@ class ChargingProvider extends ChangeNotifier {
       return null;
     } finally {
       loading = false;
+      notifyListeners();
+    }
+  }
+
+
+
+   EstimateChargingResponse? _estimateResponse;
+  EstimateChargingResponse? get estimateResponse => _estimateResponse;
+
+  bool _loading = false;
+//  await provider.estimateCharging(
+//                 context: context,
+//                 chargingGunId: "123",
+//                 chargingStationId: "456",
+//                 connectorId: "789",
+//                 batteryCapacity: 60,
+//                 desiredEnergy: 20,
+//                 desiredDuration: 0,
+//                 currentBatteryPercentage: 40,
+//                 desiredCost: 0,
+//               );
+
+//               if (provider.estimateResponse?.success == true) {
+//                 print(provider.estimateResponse?.estimatedCost);
+//               }
+  Future<void> estimateCharging({
+    required BuildContext context,
+    required String chargingGunId,
+    required String chargingStationId,
+    required String connectorId,
+    required double batteryCapacity,
+    required double desiredEnergy,
+    required double desiredDuration,
+    required double currentBatteryPercentage,
+    required double desiredCost,
+  }) async {
+    try {
+      _loading = true;
+      notifyListeners();
+
+      _estimateResponse = await _service.estimateCharging(
+        context: context,
+        chargingGunId: chargingGunId,
+        chargingStationId: chargingStationId,
+        connectorId: connectorId,
+        batteryCapacity: batteryCapacity,
+        desiredEnergy: desiredEnergy,
+        desiredDuration: desiredDuration,
+        currentBatteryPercentage: currentBatteryPercentage,
+        desiredCost: desiredCost,
+      );
+
+    } catch (e) {
+      debugPrint("Estimate Charging Error: $e");
+      rethrow;
+    } finally {
+      _loading = false;
       notifyListeners();
     }
   }

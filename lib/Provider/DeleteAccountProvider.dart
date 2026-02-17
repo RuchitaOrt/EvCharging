@@ -23,7 +23,7 @@ class DeleteAccountProvider extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
        if (response!.success) {
-        await APIManager.clearCookies();
+        await APIManager.clearSession();
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.clear();

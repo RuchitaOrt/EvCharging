@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:HyCharge/model/estimate_charging_response.dart';
+import 'package:HyCharge/model/resend_otp_response.dart';
+import 'package:HyCharge/model/send_otp_response.dart';
+import 'package:HyCharge/model/verify_otp_response.dart';
 import 'package:dio/dio.dart';
-import 'package:dio_cookie_manager/dio_cookie_manager.dart';
-import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio/io.dart';
 import 'package:HyCharge/Utils/InternetConnection.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
@@ -30,7 +33,6 @@ import 'package:HyCharge/model/WalletResponse.dart';
 import 'package:HyCharge/model/user_vehicle_model.dart';
 import 'package:HyCharge/model/user_vehicle_update_response.dart';
 import 'package:HyCharge/model/verify_payment_response.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:HyCharge/Utils/AppEror.dart';
@@ -70,7 +72,6 @@ enum API {
   startChargingSession,
   endChargingSession,
   unlockConnector,
-  //
   charginggunstatus,
   chargingsessiondetails,
   chargingsessions,
@@ -85,7 +86,10 @@ enum API {
   razorpayKey,
   createRazorpayOrder,
   verifyRazorpayPayment,
-  
+  sendOtp,
+  verifyOtp,
+  resendOtp,
+  estimateCharging,
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -96,7 +100,6 @@ class APIManager {
   static String? apiVersion;
 
   late Dio dio;
-  static PersistCookieJar? cookieJar;
 
   /// 🔒 Singleton
   static final APIManager _instance = APIManager._privateConstructor();
@@ -114,127 +117,114 @@ class APIManager {
       ),
     );
 
-    _setupCookies();
+    _configureCookies();
     _addInterceptors();
   }
 
-  /// 🍪 COOKIE SETUP (ONLY ONE JAR)
-  Future<void> _setupCookies() async {
-    final dir = await getApplicationDocumentsDirectory();
-
-    cookieJar = PersistCookieJar(
-      storage: FileStorage("${dir.path}/cookies"),
-      ignoreExpires: true,
-    );
-
-    dio.interceptors.add(CookieManager(cookieJar!));
+  /// 🍪 CONFIGURE COOKIES FOR WEB AND MOBILE
+  void _configureCookies() {
+    if (kIsWeb) {
+      // Enable credentials for web (browser handles cookies automatically)
+      try {
+        // (dio.httpClientAdapter as BrowserHttpClientAdapter).withCredentials = true;
+        print("🌐 Web mode: Browser cookies enabled with credentials");
+      } catch (e) {
+        print("⚠️ Could not enable withCredentials: $e");
+      }
+    } else {
+      // Mobile uses default cookie handling
+      print("📱 Mobile mode: Using default cookie handling");
+    }
   }
 
   /// 🔍 LOGGING + ERROR INTERCEPTOR
-void _addInterceptors() {
-  dio.interceptors.add(
-    InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        if (!kIsWeb) {
-          final hasInternet = await hasInternetConnection();
-          if (!hasInternet) {
-            showToast("No internet connection. Please check your network.");
-            return handler.reject(
-              DioException(
-                requestOptions: options,
-                type: DioExceptionType.connectionError,
-                error: "No internet connection",
-              ),
-            );
+  void _addInterceptors() {
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Enable credentials for each web request
+          if (kIsWeb) {
+            options.extra['withCredentials'] = true;
           }
-        }
-        _logRequest(options);
-        handler.next(options);
-      },
 
-      onResponse: (response, handler) {
-        _logResponse(response);
-        print("🍪 Set-Cookie: ${response.headers['set-cookie']}");
-        handler.next(response);
-      },
+          if (!kIsWeb) {
+            final hasInternet = await hasInternetConnection();
+            if (!hasInternet) {
+              showToast("No internet connection. Please check your network.");
+              return handler.reject(
+                DioException(
+                  requestOptions: options,
+                  type: DioExceptionType.connectionError,
+                  error: "No internet connection",
+                ),
+              );
+            }
+          }
+          _logRequest(options);
+          handler.next(options);
+        },
+        onResponse: (response, handler) {
+          _logResponse(response);
+          
+          // Log cookies for debugging
+          print("🍪 Set-Cookie: ${response.headers['set-cookie']}");
+          
+          handler.next(response);
+        },
+        onError: (DioException e, handler) async {
+          if (e.response?.statusCode == 401) {
+            print("🔒 401 detected - attempting token refresh");
 
-//      onError: (DioException e, handler) async {
-//   if (e.response?.statusCode == 401) {
+            // If refresh already failed → logout immediately
+            if (_refreshFailed) {
+              await clearSession();
+              unAthorizedTokenErrorDialog(
+                routeGlobalKey.currentContext!,
+                message: "Your Session has Expired. Please Login Again",
+              );
+              return handler.reject(e);
+            }
 
-//     print("🔒 401 detected");
+            final refreshed = await _refreshToken();
 
-//     // Prevent infinite retry loop
-//     if (e.requestOptions.extra['retried'] == true) {
-//       print("⚠️ Already retried once");
+            if (refreshed) {
+              final requestOptions = e.requestOptions;
 
-//       if (!kIsWeb) {
-//         await clearCookies();
-//         unAthorizedTokenErrorDialog(
-//           routeGlobalKey.currentContext!,
-//           message: "Your Session has Expired. Please Login Again",
-//         );
-//       }
+              try {
+                final retryResponse = await dio.request(
+                  requestOptions.path,
+                  data: requestOptions.data,
+                  queryParameters: requestOptions.queryParameters,
+                  options: Options(
+                    method: requestOptions.method,
+                    headers: requestOptions.headers,
+                    extra: kIsWeb ? {'withCredentials': true} : {},
+                  ),
+                );
 
-//       return handler.next(e);
-//     }
+                return handler.resolve(retryResponse);
+              } catch (retryError) {
+                print("❌ Retry request failed: $retryError");
+                return handler.reject(e);
+              }
+            } else {
+              // ❌ Refresh failed → logout
+              await clearSession();
+              unAthorizedTokenErrorDialog(
+                routeGlobalKey.currentContext!,
+                message: "Your Session has Expired. Please Login Again",
+              );
+              return handler.reject(e);
+            }
+          }
 
-//     print("🔁 Attempting refresh...");
-//     final refreshed = await _refreshToken();
+          _logError(e);
+          handler.next(e);
+        },
+      ),
+    );
+  }
 
-//     if (refreshed) {
-//       final requestOptions = e.requestOptions;
-//       requestOptions.extra['retried'] = true;
-
-//       try {
-//         final retryResponse = await dio.request(
-//           requestOptions.path,
-//           data: requestOptions.data,
-//           queryParameters: requestOptions.queryParameters,
-//           options: Options(
-//             method: requestOptions.method,
-//             headers: requestOptions.headers,
-//           ),
-//         );
-
-//         print("✅ Retry successful");
-//         return handler.resolve(retryResponse);
-
-//       } catch (retryError) {
-//         print("❌ Retry failed");
-//         return handler.next(e);
-//       }
-//     }
-
-//     //  TEMP FIX FOR WEB
-//     if (kIsWeb) {
-//       print("⚠️ Web: skipping forced logout (temporary fix)");
-
-//       // DO NOT reject
-//       return handler.resolve(
-//         e.response ?? Response(
-//           requestOptions: e.requestOptions,
-//           statusCode: 200,
-//           data: {},
-//         ),
-//       );
-//     }
-
-//     // Mobile normal logout
-//     await clearCookies();
-//     unAthorizedTokenErrorDialog(
-//       routeGlobalKey.currentContext!,
-//       message: "Your Session has Expired. Please Login Again",
-//     );
-
-//     return handler.next(e);
-//   }
-
-//   handler.next(e);
-// }
-
-    ),
-  );
-}
   /// 📝 REQUEST LOGGER
   void _logRequest(RequestOptions options) {
     print('\n' + '=' * 60);
@@ -243,16 +233,24 @@ void _addInterceptors() {
     print('🌐 Method: ${options.method}');
     print('🔗 URL: ${options.baseUrl}${options.path}');
     print('🆔 API Endpoint: ${_getApiNameFromUrl(options.path)}');
+    print('🌍 Platform: ${kIsWeb ? "WEB" : "MOBILE"}');
 
     // Log headers (excluding sensitive info)
     if (options.headers.isNotEmpty) {
       print('📋 Headers:');
       final safeHeaders = Map<String, dynamic>.from(options.headers);
-      // Remove or mask sensitive headers
       if (safeHeaders.containsKey('authorization')) {
         safeHeaders['authorization'] = 'Bearer ********';
       }
       safeHeaders.forEach((key, value) {
+        print('  $key: $value');
+      });
+    }
+
+    // Log extra options (for web credentials)
+    if (options.extra.isNotEmpty) {
+      print('⚙️ Extra Options:');
+      options.extra.forEach((key, value) {
         print('  $key: $value');
       });
     }
@@ -270,7 +268,6 @@ void _addInterceptors() {
       print('📦 Request Body:');
       if (options.data is Map) {
         final data = options.data as Map;
-        // Mask sensitive fields
         final safeData = _maskSensitiveData(data);
         final prettyJson = JsonEncoder.withIndent('  ').convert(safeData);
         print(prettyJson);
@@ -297,10 +294,8 @@ void _addInterceptors() {
     print('📥 API RESPONSE');
     print('=' * 60);
     print('✅ Status Code: ${response.statusCode}');
-    print(
-        '🔗 URL: ${response.requestOptions.baseUrl}${response.requestOptions.path}');
-    print(
-        '🆔 API Endpoint: ${_getApiNameFromUrl(response.requestOptions.path)}');
+    print('🔗 URL: ${response.requestOptions.baseUrl}${response.requestOptions.path}');
+    print('🆔 API Endpoint: ${_getApiNameFromUrl(response.requestOptions.path)}');
 
     // Log response headers
     if (response.headers.map.isNotEmpty) {
@@ -315,8 +310,7 @@ void _addInterceptors() {
       print('📦 Response Body:');
       try {
         if (response.data is Map) {
-          final prettyJson =
-              JsonEncoder.withIndent('  ').convert(response.data);
+          final prettyJson = JsonEncoder.withIndent('  ').convert(response.data);
           print(prettyJson);
         } else if (response.data is String) {
           final jsonData = jsonDecode(response.data as String);
@@ -330,11 +324,6 @@ void _addInterceptors() {
       }
     }
 
-    // Log response time if available
-    if (response.requestOptions.receiveTimeout != null) {
-      print('⏱️ Receive Timeout: ${response.requestOptions.receiveTimeout}');
-    }
-
     print('=' * 60 + '\n');
   }
 
@@ -343,25 +332,21 @@ void _addInterceptors() {
     print('\n' + '=' * 60);
     print('❌ API ERROR');
     print('=' * 60);
-    print(
-        '🔗 URL: ${error.requestOptions.baseUrl}${error.requestOptions.path}');
+    print('🔗 URL: ${error.requestOptions.baseUrl}${error.requestOptions.path}');
     print('🆔 API Endpoint: ${_getApiNameFromUrl(error.requestOptions.path)}');
     print('📤 Method: ${error.requestOptions.method}');
     print('⚠️ Error Type: ${error.type}');
     print('📊 Status Code: ${error.response?.statusCode}');
 
-    // Log error message
     if (error.message != null) {
       print('💬 Error Message: ${error.message}');
     }
 
-    // Log response data if available
     if (error.response?.data != null) {
       print('📦 Error Response:');
       try {
         if (error.response!.data is Map) {
-          final prettyJson =
-              JsonEncoder.withIndent('  ').convert(error.response!.data);
+          final prettyJson = JsonEncoder.withIndent('  ').convert(error.response!.data);
           print(prettyJson);
         } else if (error.response!.data is String) {
           final jsonData = jsonDecode(error.response!.data as String);
@@ -375,7 +360,6 @@ void _addInterceptors() {
       }
     }
 
-    // Log stack trace for debugging
     if (error.stackTrace != null) {
       print('🔍 Stack Trace:');
       print(error.stackTrace.toString());
@@ -385,29 +369,23 @@ void _addInterceptors() {
   }
 
   /// 🎭 MASK SENSITIVE DATA
-  /// 🎭 MASK SENSITIVE DATA
   Map<String, dynamic> _maskSensitiveData(dynamic data) {
     if (data is! Map) return {};
 
     final Map<String, dynamic> safeData = {};
 
-    // Convert all keys to String
     for (var entry in data.entries) {
       final key = entry.key.toString();
       var value = entry.value;
 
-      // Mask sensitive fields
       if (_isSensitiveField(key)) {
         safeData[key] = '********';
         continue;
       }
 
-      // Handle nested maps
       if (value is Map) {
         safeData[key] = _maskSensitiveData(value);
-      }
-      // Handle lists
-      else if (value is List) {
+      } else if (value is List) {
         final List<dynamic> safeList = [];
         for (var item in value) {
           if (item is Map) {
@@ -417,9 +395,7 @@ void _addInterceptors() {
           }
         }
         safeData[key] = safeList;
-      }
-      // Handle other types
-      else {
+      } else {
         safeData[key] = value;
       }
     }
@@ -510,7 +486,6 @@ void _addInterceptors() {
         return "/HardwareMaster/battery-type-list";
       case API.chargerTypeList:
         return "/HardwareMaster/charger-type-list";
-
       case API.userVehicleList:
         return "/User/user-vehicle-list";
       case API.userVehicleAdd:
@@ -519,13 +494,10 @@ void _addInterceptors() {
         return "/User/user-vehicle-delete";
       case API.userVehicleUpdate:
         return "/User/user-vehicle-update";
-
       case API.startChargingSession:
         return "/ChargingSession/start-charging-session";
-
       case API.endChargingSession:
         return "/ChargingSession/end-charging-session";
-
       case API.unlockConnector:
         return "/ChargingSession/unlock-connector";
       case API.comprehensivelist:
@@ -536,7 +508,6 @@ void _addInterceptors() {
         return "/ChargingSession/charging-session-details";
       case API.chargingsessions:
         return "/ChargingSession/charging-sessions";
-
       case API.chargingHubReviewList:
         return "/ChargingHub/charging-hub-review-list";
       case API.chargingHubReviewAdd:
@@ -547,7 +518,6 @@ void _addInterceptors() {
         return "/ChargingHub/charging-hub-review-delete";
       case API.resetPassword:
         return "/User/reset-password";
-
       case API.deleteAccount:
         return "/User/user-delete";
       case API.refreshToken:
@@ -556,12 +526,18 @@ void _addInterceptors() {
         return "/FileStorage/upload";
       case API.razorpayKey:
         return "/Payment/razorpay-key";
-        case API.createRazorpayOrder:
-  return "/Payment/create-order";
-  case API.verifyRazorpayPayment:
-  return "/Payment/verify-payment";
-
-
+      case API.createRazorpayOrder:
+        return "/Payment/create-order";
+      case API.verifyRazorpayPayment:
+        return "/Payment/verify-payment";
+      case API.sendOtp:
+        return "/User/send-otp";
+      case API.verifyOtp:
+        return "/User/verify-otp";
+      case API.resendOtp:
+        return "/User/resend-otp";
+      case API.estimateCharging:
+        return "/ChargingSession/estimate-charging";
     }
   }
 
@@ -643,7 +619,6 @@ void _addInterceptors() {
         return ChargingHubReviewResponse.fromJson(json);
       case API.charginggunstatus:
         return ChargingGunStatusResponse.fromJson(json);
-
       case API.chargingsessions:
         return ActiveSessionResponse.fromJson(json);
       case API.chargingHubReviewAdd:
@@ -659,12 +634,18 @@ void _addInterceptors() {
         return RefreshTokenResponse.fromJson(json);
       case API.razorpayKey:
         return RazorpayKeyResponse.fromJson(json);
-        case API.createRazorpayOrder:
-  return CreateOrderResponse.fromJson(json);
-case API.verifyRazorpayPayment:
-  return VerifyPaymentResponse.fromJson(json);
-
-
+      case API.createRazorpayOrder:
+        return CreateOrderResponse.fromJson(json);
+      case API.verifyRazorpayPayment:
+        return VerifyPaymentResponse.fromJson(json);
+      case API.sendOtp:
+        return SendOtpResponse.fromJson(json);
+      case API.verifyOtp:
+        return VerifyOtpResponse.fromJson(json);
+      case API.resendOtp:
+        return ResendOtpResponse.fromJson(json);
+      case API.estimateCharging:
+        return EstimateChargingResponse.fromJson(json);
       default:
         return json;
     }
@@ -685,10 +666,12 @@ case API.verifyRazorpayPayment:
         queryParameters: queryParams,
         options: Options(
           method: apiHTTPMethod(api).name,
-          // validateStatus: (_) => true,
+          extra: kIsWeb ? {'withCredentials': true} : {},
         ),
       );
+      
       print('Response code: ${response.statusCode}');
+      
       if (response.statusCode == 200) {
         return parseResponse(api, response.data);
       }
@@ -696,24 +679,14 @@ case API.verifyRazorpayPayment:
       if (response.statusCode == 400) {
         throw BadRequestError(_serverMessage(response.data));
       }
-if (response.statusCode == 401) {
-  throw UnauthorisedError("Unauthorized");
-}
-
+      
       if (response.statusCode == 401) {
-        print("response.statusCode ${response.statusCode}");
-        // infoNormalDialog(
-        //   context,
-        //   message: response.data['message'] ?? '',
-        // );
-         print("🔒 401 detected, attempting token");
-        unAthorizedTokenErrorDialog(context,
-            message: "Your Session has Expired.Please Login Again");
         throw UnauthorisedError("Unauthorized");
       }
 
       throw FetchDataError(_serverMessage(response.data));
     } on DioException catch (e) {
+      _logError(e);
       throw FetchDataError(
         e.response != null
             ? _serverMessage(e.response?.data)
@@ -722,10 +695,11 @@ if (response.statusCode == 401) {
     }
   }
 
-  /// 🧹 LOGOUT CLEAR
-  static Future<void> clearCookies() async {
-    await cookieJar?.deleteAll();
-    print("🍪 Cookies cleared");
+  /// 🧹 CLEAR SESSION
+  static Future<void> clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    print("🍪 Session cleared");
   }
 
   String _serverMessage(dynamic data) {
@@ -738,41 +712,47 @@ if (response.statusCode == 401) {
     return data?.toString() ?? "Something went wrong";
   }
 
-Future<bool> _refreshToken() async {
-  try {
-    final refreshDio = Dio(BaseOptions(
-      baseUrl: baseURL!,
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
-      extra: {'withCredentials': true},
-    ));
+  bool _isRefreshingToken = false;
+  bool _refreshFailed = false;
 
-    if (!kIsWeb) {
-      refreshDio.interceptors.add(CookieManager(cookieJar!));
+  /// 🔄 REFRESH TOKEN
+  Future<bool> _refreshToken() async {
+    if (_isRefreshingToken || _refreshFailed) {
+      return false;
     }
 
-    final response = await refreshDio.post(
-      apiEndPoint(API.refreshToken),
-    );
+    _isRefreshingToken = true;
 
-    if (response.statusCode == 200) {
-      final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+    try {
+      final response = await dio.post(
+        apiEndPoint(API.refreshToken),
+        options: Options(
+          extra: kIsWeb ? {'withCredentials': true} : {},
+        ),
+      );
 
-      if (refreshResponse.success == false) {
-        return false;
+      if (response.statusCode == 200) {
+        final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+
+        if (refreshResponse.success == true && refreshResponse.user != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString("userId", refreshResponse.user!.recId!);
+
+          print("🔁 Token refreshed successfully");
+          _isRefreshingToken = false;
+          _refreshFailed = false; // Reset flag on success
+          return true;
+        } else {
+          print("❌ Refresh token failed: ${refreshResponse.message}");
+          _refreshFailed = true;
+        }
       }
-
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("userId", refreshResponse.user!.recId);
-      return true;
+    } catch (e) {
+      print("❌ Refresh token exception: $e");
+      _refreshFailed = true;
     }
-    return false;
-  } catch (e) {
-    print("❌ Refresh token failed: $e");
+
+    _isRefreshingToken = false;
     return false;
   }
-}
-
 }

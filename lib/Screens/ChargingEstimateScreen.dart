@@ -59,41 +59,41 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min, // ⭐ VERY IMPORTANT
               children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: CommonColors.neutral50,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.local_offer,
-                              color: Colors.orange, size: 18),
-                          SizedBox(width: 8),
-                          Text(
-                            "Apply Coupon",
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
-                      ),
-                      InkWell(
-                        onTap: () {},
-                        child: DottedUnderlineText(
-                          text: "View Coupons",
-                          dotColor: CommonColors.blue,
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: CommonColors.blue,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
+                // Container(
+                //   padding: const EdgeInsets.all(14),
+                //   decoration: BoxDecoration(
+                //     color: CommonColors.neutral50,
+                //     borderRadius: BorderRadius.circular(10),
+                //   ),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Row(
+                //         children: const [
+                //           Icon(Icons.local_offer,
+                //               color: Colors.orange, size: 18),
+                //           SizedBox(width: 8),
+                //           Text(
+                //             "Apply Coupon",
+                //             style: TextStyle(fontSize: 12),
+                //           ),
+                //         ],
+                //       ),
+                //       InkWell(
+                //         onTap: () {},
+                //         child: DottedUnderlineText(
+                //           text: "View Coupons",
+                //           dotColor: CommonColors.blue,
+                //           style: const TextStyle(
+                //             fontSize: 10,
+                //             color: CommonColors.blue,
+                //           ),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

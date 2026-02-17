@@ -87,7 +87,8 @@ Future<void> _onScroll() async {
           width: 0.3,
         ),
       ),
-      child: Row(
+      child:
+       Row(
         children: [
           Icon(Icons.search, color: CommonColors.hintGrey),
           SizedBox(width: 12),
@@ -322,7 +323,7 @@ Future<void> _onScroll() async {
                                 child: Text(
                                   hub.chargingHubName ?? 'Unnamed Station',
                                   style: const TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                     color: CommonColors.primary,
                                   ),
@@ -370,7 +371,7 @@ ExpandableText(
   text: hub.amenities ?? "",
   trimLines: 2,
   style: const TextStyle(
-    fontSize: 12,
+    fontSize: 10,
     color: CommonColors.neutral500,
   ),
 ),
@@ -412,7 +413,7 @@ ExpandableText(
       children: [
         Image.asset(icon, height: 14),
         const SizedBox(width: 4),
-        Text(text, style: const TextStyle(fontSize: 12)),
+        Text(text, style: const TextStyle(fontSize: 10)),
       ],
     );
   }
@@ -428,7 +429,7 @@ ExpandableText(
         Text(
           price,
           style: const TextStyle(
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: FontWeight.w600,
             color: CommonColors.primary,
           ),

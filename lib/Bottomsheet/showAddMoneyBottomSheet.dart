@@ -200,44 +200,44 @@ void showAddMoneyBottomSheet(BuildContext context,String currentBalance) {
             const SizedBox(height: 16),
 
             /// Apply coupon
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: CommonColors.neutral50,
-                borderRadius: BorderRadius.circular(10),
-                //  border: Border.all(color: CommonColors.neutral200),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.local_offer, color: Colors.orange, size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        "Apply Coupon",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w400, fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  InkWell(
-                    onTap: () {
-                      // open coupons
-                    },
-                    child: DottedUnderlineText(
-                      text: "View Coupons",
-                      dotColor: CommonColors.blue,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        color: CommonColors.blue,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Container(
+            //   padding: const EdgeInsets.all(14),
+            //   decoration: BoxDecoration(
+            //     color: CommonColors.neutral50,
+            //     borderRadius: BorderRadius.circular(10),
+            //     //  border: Border.all(color: CommonColors.neutral200),
+            //   ),
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //     children: [
+            //       Row(
+            //         children: [
+            //           Icon(Icons.local_offer, color: Colors.orange, size: 18),
+            //           SizedBox(width: 8),
+            //           Text(
+            //             "Apply Coupon",
+            //             style: TextStyle(
+            //                 fontWeight: FontWeight.w400, fontSize: 12),
+            //           ),
+            //         ],
+            //       ),
+            //       InkWell(
+            //         onTap: () {
+            //           // open coupons
+            //         },
+            //         child: DottedUnderlineText(
+            //           text: "View Coupons",
+            //           dotColor: CommonColors.blue,
+            //           style: const TextStyle(
+            //             fontSize: 10,
+            //             color: CommonColors.blue,
+            //             fontWeight: FontWeight.w400,
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
 
             const SizedBox(height: 20),
 

@@ -11,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'
     show LatLng, BitmapDescriptor, Marker, MarkerId;
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../Provider/HubProvider.dart';
 import '../../Utils/LocationConvert.dart';
@@ -31,6 +32,7 @@ class StationCardWidget extends StatelessWidget {
 
     return SizedBox(
       height: 145,
+      
       child: Consumer<HubProvider>(
         builder: (context, value, _) {
           return ScrollConfiguration(
@@ -168,7 +170,7 @@ class _StationCardState extends State<_StationCard> {
         }
       },
       child: SizedBox(
-        width: widget.cardWidth,
+        width:kIsWeb?600: widget.cardWidth,
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
@@ -189,13 +191,13 @@ class _StationCardState extends State<_StationCard> {
               //       CommonImagePath.frame,
               //       height: SizeConfig.blockSizeVertical * 6,
               //     ),
-    //           widget.chargingHub.chargingHubImage != null
-    // ? HubImage(
-    //     imageId: widget.chargingHub.chargingHubImage!,
-    //     height: SizeConfig.blockSizeVertical * 5,
-    //     width: SizeConfig.blockSizeVertical * 5,
-    //   )
-    // : 
+              widget.chargingHub.chargingHubImage != null
+    ? HubImage(
+        imageId: widget.chargingHub.chargingHubImage!,
+        height: SizeConfig.blockSizeVertical * 5,
+        width: SizeConfig.blockSizeVertical * 5,
+      )
+    : 
     Image.asset(
         CommonImagePath.frame,
         height: SizeConfig.blockSizeVertical * 6,

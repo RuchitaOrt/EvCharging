@@ -1,6 +1,4 @@
-
 import 'dart:io';
-// import 'dart:nativewrappers/_internal/vm/lib/developer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +19,7 @@ import 'package:HyCharge/Screens/SupportScreen.dart';
 
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/ImageHelper.dart';
+
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
@@ -79,8 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 return Center(
                   child: ConstrainedBox(
                     constraints: BoxConstraints(
-                      maxWidth:
-                          isWeb && isDesktop ? 1200 : double.infinity,
+                      maxWidth: isWeb && isDesktop ? 1200 : double.infinity,
                     ),
                     child: SingleChildScrollView(
                       padding: EdgeInsets.symmetric(
@@ -115,17 +113,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           GestureDetector(
             onTap: () async {
-              final File? file = await pickProfileImage(context);
-              if (file == null) return;
+              final pickedFile = await pickProfileImage(context);
+              if (pickedFile == null) return;
 
               final uploadProvider = context.read<UploadProvider>();
+
+              // 🔼 Convert to Uint8List for web
+              dynamic fileToUpload = pickedFile;
+              if (kIsWeb && pickedFile is! Uint8List) {
+                // If pickProfileImage returns a File on web, read its bytes
+                fileToUpload = await pickedFile.readAsBytes();
+              }
+
+              // Upload image
               final UploadResponse? response =
-                  await uploadProvider.upload(file: file);
+                  await uploadProvider.upload(file: fileToUpload);
 
               if (response?.success == true) {
-                final provider = context.read<ProfileProvider>();
+                final profileProvider = context.read<ProfileProvider>();
 
-                final success = await provider.updateProfile(
+                final success = await profileProvider.updateProfile(
                   context,
                   body: {
                     "firstName": user?.firstName ?? '',
@@ -139,8 +146,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
 
                 if (success) {
-                  uploadProvider.setImage(file);
-                  showToast(provider.message.toString());
+                  // ✅ Set image with converted data
+                  uploadProvider.setImage(fileToUpload);
+                  showToast(profileProvider.message.toString());
                 }
               }
             },
@@ -152,12 +160,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(60),
                       child: upload.selectedImage != null
-                          ? Image.file(
-                              upload.selectedImage!,
-                              width: 120,
-                              height: 120,
-                              fit: BoxFit.cover,
-                            )
+                          ? kIsWeb
+                              ? Image.memory(
+                                  upload.selectedImage as Uint8List,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  upload.selectedImage,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                )
                           : cache.image != null
                               ? Image.memory(
                                   cache.image!,
@@ -181,8 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         decoration: BoxDecoration(
                           color: CommonColors.neutral50,
                           shape: BoxShape.circle,
-                          border:
-                              Border.all(color: Colors.white, width: 3),
+                          border: Border.all(color: Colors.white, width: 3),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8),
@@ -221,7 +235,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           _profileTile(CommonImagePath.profileIcon, 'Edit Profile', () {
-            print('provider.profile!.use${provider.profile!.user!}');
             Navigator.push(
               routeGlobalKey.currentContext!,
               MaterialPageRoute(
@@ -241,23 +254,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             );
           }),
-          _profileTile(
-              CommonImagePath.chargingHistory, 'Charging History', () {
+          _profileTile(CommonImagePath.chargingHistory, 'Charging History', () {
             Navigator.push(
               routeGlobalKey.currentContext!,
-              MaterialPageRoute(
-                  builder: (_) => ChargingHistoryScreen()),
+              MaterialPageRoute(builder: (_) => ChargingHistoryScreen()),
             );
           }),
-          _profileTile(CommonImagePath.vehicle, 'Vehicle Information',
-              () {
+          _profileTile(CommonImagePath.vehicle, 'Vehicle Information', () {
             Navigator.push(
               routeGlobalKey.currentContext!,
               MaterialPageRoute(builder: (_) => MyVehicleScreen()),
             );
           }),
-          _profileTile(CommonImagePath.notification, 'Notification',
-              () {
+          _profileTile(CommonImagePath.notification, 'Notification', () {
             Navigator.push(
               routeGlobalKey.currentContext!,
               MaterialPageRoute(builder: (_) => NotificationScreen()),
@@ -274,8 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context: context,
               backgroundColor: CommonColors.white,
               shape: const RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               builder: (_) => ConfirmationSheet(
                 title: "Are you sure you want to Delete Account?",
@@ -285,10 +293,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 secondButton: 'Delete',
                 onCancel: () => Navigator.pop(context),
                 onLogout: () {
-                  context
-                      .read<DeleteAccountProvider>()
-                      .deleteAccount(context);
-                }, subHeading: '', onBackToHome: () {  }, singleButton: '',
+                  context.read<DeleteAccountProvider>().deleteAccount(context);
+                },
+                subHeading: '',
+                onBackToHome: () {},
+                singleButton: '',
               ),
             );
           }),
@@ -297,8 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               context: context,
               backgroundColor: CommonColors.white,
               shape: const RoundedRectangleBorder(
-                borderRadius:
-                    BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
               builder: (_) => ConfirmationSheet(
                 imagePath: CommonImagePath.logout,
@@ -308,7 +316,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onCancel: () => Navigator.pop(context),
                 onLogout: () {
                   context.read<AuthProvider>().logout(context);
-                }, subHeading: '', onBackToHome: () {  }, singleButton: '',
+                },
+                subHeading: '',
+                onBackToHome: () {},
+                singleButton: '',
               ),
             );
           }),

@@ -1,4 +1,5 @@
 import 'package:HyCharge/Services/charger_repository.dart';
+import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:flutter/material.dart';
 
 
@@ -20,4 +21,6 @@ class ChargerProvider extends ChangeNotifier {
     loading = false;
     notifyListeners();
   }
+
+
 }

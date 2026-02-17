@@ -1,5 +1,8 @@
 import 'package:HyCharge/model/LogoutResponse.dart';
 import 'package:HyCharge/model/ResetPasswordResponse.dart';
+import 'package:HyCharge/model/resend_otp_response.dart';
+import 'package:HyCharge/model/send_otp_response.dart';
+import 'package:HyCharge/model/verify_otp_response.dart';
 import 'package:flutter/material.dart';
 import 'package:HyCharge/Request/RegisterRequest.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
@@ -79,5 +82,8 @@ class AuthApiService {
 
     return response as ResetPasswordResponse;
   }
-  
+
+
+
+
 }

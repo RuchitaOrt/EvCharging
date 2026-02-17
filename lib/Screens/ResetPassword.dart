@@ -298,7 +298,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
               
                             if (response!.success!) {
                               // Clear cookies + force login
-                              await APIManager.clearCookies();
+                              await APIManager.clearSession();
                               showToast(provider.response!.message!);
                final prefs = await SharedPreferences.getInstance();
                       await prefs.clear();

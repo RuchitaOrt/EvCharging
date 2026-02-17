@@ -15,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
     Widget okButton = ElevatedButton(
         child: Text("OK"),
         onPressed: () async {
-           await APIManager.clearCookies();
+           await APIManager.clearSession();
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.clear();

@@ -1,5 +1,7 @@
 
 
+import 'dart:developer';
+
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/ValidationHelper.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +23,7 @@ class ProfileProvider extends ChangeNotifier {
     try {
       profile = await _repo.fetchProfile(context);
     } catch (e) {
-      print(e.toString());
+      log(e.toString());
       error = e.toString();
     }
 
