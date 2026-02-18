@@ -143,12 +143,12 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           isFieldDisabled: true,
                         autovalidateMode: AutovalidateMode.disabled,
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                      SizedBox(height:8),
                       Text(
                         CommonStrings.strOldPassword,
                         style: CommonStyles.textFieldHeading,
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 1),
+                      SizedBox(height:6),
                       TextFormField(
                         cursorColor: CommonColors.blue,
                         style: CommonStyles.textFieldHeading,
@@ -187,12 +187,12 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           counterText: "",
                         ),
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                      SizedBox(height:15),
                       Text(
                         CommonStrings.strNewPassword,
                         style: CommonStyles.textFieldHeading,
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 1),
+                      SizedBox(height:6),
                       TextFormField(
                         cursorColor: CommonColors.blue,
                         style: CommonStyles.textFieldHeading,
@@ -231,12 +231,12 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           counterText: "",
                         ),
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 2),
+                      SizedBox(height:15),
                       Text(
                         CommonStrings.strconfirmpassword,
                         style: CommonStyles.textFieldHeading,
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 1),
+                    SizedBox(height:6),
                       TextFormField(
                         cursorColor: CommonColors.blue,
                         style: CommonStyles.textFieldHeading,

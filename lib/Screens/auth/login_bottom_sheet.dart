@@ -3,6 +3,7 @@ import 'package:HyCharge/Request/LoginRequest.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/Map/MapScreen.dart';
 import 'package:HyCharge/Screens/RegistrationScreen.dart';
+import 'package:HyCharge/Screens/ResetPasswordScreen.dart';
 import 'package:HyCharge/Screens/auth/otp_bottom_sheet.dart';
 import 'package:HyCharge/Services/pdf_viewer_screen.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
@@ -275,7 +276,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                                        TextSpan(
                                          text: "I agree to the ",
                                          style: TextStyle(
-                                             fontSize: 12,
+                                             fontSize: 11,
                                              color: CommonColors.black,
                                              fontWeight: FontWeight.w400),
                                        ),
@@ -305,7 +306,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
       child: const Text(
         "Terms of Service ",
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 11,
           color: CommonColors.skyBlue,
           fontWeight: FontWeight.w400,
         ),
@@ -318,7 +319,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                                          text: "and ",
                                          style: TextStyle(
                                              color: CommonColors.black,
-                                             fontSize: 12,
+                                             fontSize: 11,
                                              fontWeight: FontWeight.w400),
                                        ),
                                        WidgetSpan(
@@ -347,7 +348,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
       child: const Text(
         "Privacy Policy ",
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 11,
           color: CommonColors.skyBlue,
           fontWeight: FontWeight.w400,
         ),
@@ -420,8 +421,63 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                             ),
                           ),
 
-                          const SizedBox(height: 50),
+                          const SizedBox(height: 25),
+isGmail?Container():GestureDetector(
+  onTap: ()
+  async {
+      Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ResetPasswordScreen()),
+                              );
+    //  if (!ValidationHelper.isValidPhone(_phoneEmailController.text)) {
+    //   showToast("Enter valid 10 digit mobile no");
+    //   return;
+    // }
+    //  await loginProvider.sendOtp(
+    //                                         context: context,
+    //                                         phoneNumber:
+    //                                             _phoneEmailController.text,
+    //                                         countryCode: "+91",
+    //                                       );
+    //                                       FocusManager.instance.primaryFocus
+    //                                           ?.unfocus();
+    //                                       // Navigator.pop(context);
+    //                                        Navigator.of(context,
+    //                                                 rootNavigator: true)
+    //                                             .pop();
+    //                                       showToast(loginProvider
+    //                                           .sendOtpResponse!.message);
+    //                                       if (loginProvider
+    //                                               .sendOtpResponse?.success ==
+    //                                           true) {
+    //                                         // FIRST close login sheet properly
+    //                                         Navigator.of(context,
+    //                                                 rootNavigator: true)
+    //                                             .pop();
 
+    //                                         // THEN open OTP sheet using root navigator
+    //                                         // Future.delayed(const Duration(milliseconds: 300), () {
+    //                                         showVerifyOTPLoginSheet(
+    //                                           context,
+    //                                           _phoneEmailController.text,
+    //                                           loginProvider
+    //                                               .sendOtpResponse!.authId!,true
+    //                                         );
+    //                                           }
+  },
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      Text(
+                                           "Forget Passsword ?",
+                                            style: TextStyle(
+                                                color: CommonColors.blue, fontSize: 14,fontWeight: FontWeight.bold),
+                                          ),
+    ],
+  ),
+),
+  const SizedBox(height: 25),
                           // Login Button / Loader
                           SizedBox(
                             width: double.infinity,
@@ -477,7 +533,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                                               context,
                                               _phoneEmailController.text,
                                               loginProvider
-                                                  .sendOtpResponse!.authId!,
+                                                  .sendOtpResponse!.authId!,false
                                             );
                                             // });
                                             // showVerifyOTPLoginSheet(
@@ -518,7 +574,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                                     });
                                   },
                                   child: Text(
-                                    "Email Login",
+                                    "Login with Password",
                                     style: TextStyle(
                                         color: CommonColors.blue, fontSize: 16),
                                   ),
@@ -531,7 +587,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
                                     });
                                   },
                                   child: Text(
-                                    "OTP Login",
+                                    "Login with OTP",
                                     style: TextStyle(
                                         color: CommonColors.blue, fontSize: 16),
                                   ),
@@ -602,7 +658,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
   }
 
   showVerifyOTPLoginSheet(
-      BuildContext context, String mobile, String authToken) {
+      BuildContext context, String mobile, String authToken,bool isForgetPassword) {
     showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -615,6 +671,7 @@ class _LoginSheetWidgetState extends State<LoginSheetWidget> {
           child: VerifyOtpBottomSheet(
             mobileNo: mobile,
             authToken: authToken,
+             isForgetPassword:isForgetPassword
           ),
         );
       },

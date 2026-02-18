@@ -1,5 +1,6 @@
 import 'package:HyCharge/Services/ChargingService.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:flutter/material.dart';
 // enum SessionFilter { thisMonth, last7Days, all }
 // class ActiveSessionProvider extends ChangeNotifier {
@@ -236,10 +237,10 @@ class ActiveSessionProvider extends ChangeNotifier {
         _totalSpent =
             response.data!.summary?.totalChargingTotalFee?.toString() ?? "0";
         _totalTime =
-            response.data!.summary?.totalChargingTime.formattedDuration ?? "0";
+            response.data!.summary?.totalChargingTime!.formattedDuration! ?? "0";
 
-        _sessions.addAll(response.data!.sessions);
-        _hasMore = response.data!.sessions.length == _pageSize;
+        _sessions.addAll(response.data!.sessions!);
+        _hasMore = response.data!.sessions!.length == _pageSize;
         _applyFilter();
       }
     } catch (e) {
@@ -270,7 +271,7 @@ class ActiveSessionProvider extends ChangeNotifier {
 
       if (response.success && response.data != null) {
         final newItems = response.data!.sessions;
-        _sessions.addAll(newItems);
+        _sessions.addAll(newItems!);
         _hasMore = newItems.length == _pageSize;
         _applyFilter();
       }

@@ -35,6 +35,8 @@ class CustomTextFieldWidget extends StatefulWidget {
   final AutovalidateMode autovalidateMode;
   final bool isMandatory;
   final Color fillColor;
+  final bool obscureText;
+
 
   const CustomTextFieldWidget(
       {super.key,
@@ -59,6 +61,8 @@ class CustomTextFieldWidget extends StatefulWidget {
       this.isRequired = true,
       this.validator,
       this.suffixIcon,
+      this.obscureText = false,
+
       this.textCapitalization = TextCapitalization.none,
       this.autovalidateMode = AutovalidateMode.always,  this.isMandatory=true,  this.fillColor=CommonColors.white,});
 
@@ -162,6 +166,8 @@ Widget _textFieldWidget() {
     controller: widget.textEditingController,
     readOnly: widget.isFieldReadOnly || widget.onTapField != null,
     focusNode: _focusNode,
+    obscureText: widget.obscureText,
+
     enabled: !widget.isFieldDisabled,
     keyboardType: widget.textInputType,
     textInputAction: TextInputAction.done,

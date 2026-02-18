@@ -5,6 +5,7 @@ import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -289,9 +290,14 @@ Widget _summaryRow() {
                 
                 children: [
                   Text(
-                    "${data.chargingStationName}",
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    "Station: ${data.chargingStationName}",
+                    style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
                   ),
+                   Text(
+                    "${data.chargingHubName}",
+                    style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
+                  ),
+                  
                   const SizedBox(height: 4),
                   // Row(
                   //   crossAxisAlignment: CrossAxisAlignment.start,
@@ -516,7 +522,7 @@ Widget _summaryRow() {
              Positioned(
         top: -10,
         left: 16,
-        child: _statusChip(data.status,data.recId),
+        child: _statusChip(data.status!,data.recId!),
       ),
           ],
         ),

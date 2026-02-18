@@ -3,6 +3,7 @@ import 'package:HyCharge/Screens/Map/MapScreen.dart';
 import 'package:HyCharge/Screens/ProfileScreen.dart';
 import 'package:HyCharge/Screens/ScanScreen.dart';
 import 'package:HyCharge/Screens/Transaction.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class _MainTabState extends State<MainTab> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
+ 
     currentIndex=widget.currentIndex;
     print(widget.isLoggedIn);
      screens = [

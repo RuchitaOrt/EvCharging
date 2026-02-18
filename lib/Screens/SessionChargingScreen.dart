@@ -16,12 +16,12 @@ import 'package:provider/provider.dart';
 
 class SessionChargingScreen extends StatefulWidget {
   // final StartChargingSessionResponse intitalResponse;
-final SessionChargingArgs args;
+  final SessionChargingArgs args;
 
-const SessionChargingScreen({
-  super.key,
-  required this.args,
-});
+  const SessionChargingScreen({
+    super.key,
+    required this.args,
+  });
 
   //  SessionChargingScreen({
   //   super.key,
@@ -36,15 +36,15 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
-int totalMinutes = 100; 
-int? remainingMinutes;
+  int totalMinutes = 100;
+  int? remainingMinutes;
   double currentMeter = 0;
   Timer? _refreshTimer;
   String? status;
   String? cost;
   String? unitConsumed;
   String? outputPower;
-  String? batteryPercentage = "0.0";
+  String? batteryPercentage="0";
   String? endMeterReading;
   @override
   void initState() {
@@ -57,12 +57,15 @@ int? remainingMinutes;
     //      widget.intitalResponse.data!.batteryStateOfCharge!.currentSoC;
     // endMeterReading = widget.intitalResponse.data!.session!.endMeterReading;
     status = widget.args.status!;
-    cost =widget.args.cost;
+    cost = widget.args.cost;
     unitConsumed = widget.args.unitConsumed;
-    outputPower =widget.args.outputPower;
-    batteryPercentage ==
-       widget.args.batteryPercentage;
-    
+    outputPower = widget.args.outputPower;
+    batteryPercentage =widget.args.batteryPercentage;
+      print("BATTERY");
+    print(outputPower);
+    print("BATTERY");
+    print(batteryPercentage);
+
     endMeterReading = widget.args.endMeterReading;
     _controller = AnimationController(
       vsync: this,
@@ -88,22 +91,26 @@ int? remainingMinutes;
                   sessionId: widget.args.sessionId!,
                 );
         setState(() {
-          status = res!.data!.session!.status ==null?"":res!.data!.session!.status;
-          cost = "${res.data!.costDetails.totalCost.toString()!}";
+          status = res!.data!.session!.status == null
+              ? ""
+              : res!.data!.session!.status;
+          cost = "${res.data!.costDetails!.totalCost!.toString()!}";
           unitConsumed =
-              "${res.data!.energyConsumption!.totalEnergy!.toString()} ${res.data!.energyConsumption!.unit}";
+              "${res.data!.session!.energyTransmitted!.toString()} ${res.data!.session!.energyTransmitted!.toString()}";
           outputPower =
               "${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}";
+         print("outputPower ${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}");
+         
           // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
-    final isActive = res?.data?.session?.active == 1;
+          final isActive = res?.data?.session?.active == 1;
 
-batteryPercentage = isActive
-    ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
-    : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
-     print("AFTER 15 sec batteryStateOfCharge");
-       print(res.data!.batteryStateOfCharge.currentSoC);
-       
-          endMeterReading = res.data!.session!.endMeterReading;
+          batteryPercentage = isActive
+              ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+              : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+          print("AFTER 15 sec batteryStateOfCharge");
+          print(res.data!.batteryStateOfCharge!.currentSoC.toString());
+
+          endMeterReading = res.data!.session!.endMeterReading.toString();
           print("AFTER 15 sec ${outputPower}");
           // 🔴 Stop polling if session completed
           if (res!.data!.isActive == false) {
@@ -127,25 +134,30 @@ batteryPercentage = isActive
     final data = provider.sessionDetails?.data;
 
     return WillPopScope(
-       onWillPop: () async {
-      Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin,currentIndex: 1,),
-              ),
-            );
-      return false; // prevent default pop
-    },
+      onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainTab(
+              isLoggedIn: GlobalLists.islLogin,
+              currentIndex: 1,
+            ),
+          ),
+        );
+        return false; // prevent default pop
+      },
       child: Scaffold(
         backgroundColor: CommonColors.white,
         appBar: CommonAppBar(
           title: "Charging Session",
-          onBack: ()
-          {
-             Navigator.push(
+          onBack: () {
+            Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin,currentIndex: 1,),
+                builder: (_) => MainTab(
+                  isLoggedIn: GlobalLists.islLogin,
+                  currentIndex: 1,
+                ),
               ),
             );
           },
@@ -156,27 +168,35 @@ batteryPercentage = isActive
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed:status=="Completed"?null: () async {
-                    // print("Charging session ID ${data!.session!.recId!}");
-                    final response = await provider.endSession(
-                        context: context,
-                        sessionId: widget.args
-                            .sessionId!, // 🔑 station id
-                        endMeterReading: endMeterReading!);
-      
-                    setState(() {
-                      status = response!.data!.session!.status;
-      
-                      cost = response.data!.cost!.toString();
-                      unitConsumed = response.data!.energyConsumed!.toString();
-                      outputPower = response.data!.session!.energyTransmitted!;
-                      batteryPercentage =response.data!.batteryStateOfCharge!.endSoC.toString();
-                      endMeterReading = response.data!.meterStop.toString();
-                    });
-                    // if (success) {
-                    //   Navigator.pop(context);
-                    // }
-                  },
+                  onPressed: status == "Completed"
+                      ? null
+                      : () async {
+                          // print("Charging session ID ${data!.session!.recId!}");
+                          final response = await provider.endSession(
+                              context: context,
+                              sessionId:
+                                  widget.args.sessionId!, // 🔑 station id
+                              endMeterReading: endMeterReading!);
+
+                          setState(() {
+                            status = response!.data!.session!.status;
+
+                            cost = response.data!.cost!.toString();
+                            unitConsumed =
+                                response.data!.session!.energyTransmitted.toString();
+                            outputPower =
+                                response.data!.session!.chargingGun!.powerOutput.toString();
+                            batteryPercentage =response
+                                .data!.batteryStateOfCharge!.endSoC==null?"0" :response
+                                .data!.batteryStateOfCharge!.endSoC
+                                .toString();
+                            endMeterReading =
+                                response.data!.meterStop.toString();
+                          });
+                          // if (success) {
+                          //   Navigator.pop(context);
+                          // }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.blue,
                     shape: RoundedRectangleBorder(
@@ -193,21 +213,25 @@ batteryPercentage = isActive
               const SizedBox(width: 12),
               Expanded(
                 child: ElevatedButton(
-                  onPressed:status=="Completed"?null: () async {
-                    print(
-                        "Charging STATION ID ${data!.session!.chargingStationId!}");
-                    print("Charging gun ID ${data.session!.chargingGunId}");
-                    final response = await provider.unlockConnector(
-                        context: context,
-                        chargingStationId:
-                            data!.session!.chargingStationId!, // 🔑 station id
-                        connectorId: int.parse(data.session!.chargingGunId!));
-                    status = response!.data!.status;
-      
-                    if (response.success) {
-                      Navigator.pop(context);
-                    }
-                  },
+                  onPressed: status == "Completed"
+                      ? null
+                      : () async {
+                          print(
+                              "Charging STATION ID ${data!.session!.chargingStationId!}");
+                          print(
+                              "Charging gun ID ${data.session!.chargingGunId}");
+                          final response = await provider.unlockConnector(
+                              context: context,
+                              chargingStationId: data!
+                                  .session!.chargingStationId!, // 🔑 station id
+                              connectorId:
+                                  int.parse(data.session!.chargingGunId!));
+                          status = response!.data!.status;
+
+                          if (response.success) {
+                            Navigator.pop(context);
+                          }
+                        },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.white,
                     side: const BorderSide(
@@ -233,38 +257,18 @@ batteryPercentage = isActive
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // _header(data),
-              //  AnimatedBuilder(
-              //     animation: _animation,
-              //     builder: (context, child) {
-              //       return CustomPaint(
-              //         painter: _ChargingPainter(_animation.value),
-              //         size: const Size(200, 200),
-              //       );
-              //     },
-              //   ),
-              // Center(
-              //   child: Transform.scale(
-              //     scale: 1.7, // 👈 increase this (1.2 – 1.6 usually perfect)
-              //     child: Lottie.asset(
-              //       'assets/lottie/animationCharger.json',
-              //       width: 200,
-              //       height: 200,
-              //       fit: BoxFit.contain,
-              //       repeat: true,
-              //     ),
-              //   ),
-              // ),
+             
               ChargerAnimation(
                 status: status!, // "Active" or "Complete"
               ),
-      
+
               status == ""
                   ? Container()
                   : Center(
                       child: Text(
                         '${status}',
-                        style: TextStyle(color: CommonColors.blue, fontSize: 22),
+                        style:
+                            TextStyle(color: CommonColors.blue, fontSize: 22),
                       ),
                     ),
               SizedBox(
@@ -272,12 +276,12 @@ batteryPercentage = isActive
               ),
               _batteryProgress(),
               _infoGrid(),
-      
+
               //  _ecoSection(data),
               // _stopChargingButton(provider, data),
-      
+
               // const Spacer(),
-      
+
               /// Bottom Buttons
             ],
           ),
@@ -285,7 +289,6 @@ batteryPercentage = isActive
       ),
     );
   }
-
 
   Widget _batteryProgress() {
     // final double percentage = 10; // data.session?.batteryPercentage ?? 0;
@@ -308,7 +311,11 @@ batteryPercentage = isActive
                   children: [
                     TweenAnimationBuilder<double>(
                       tween: Tween(
-                          begin: 0, end:batteryPercentage==null?0.0: double.parse(batteryPercentage.toString() ?? "0.0")),
+                          begin: 0,
+                          end: batteryPercentage == null
+                              ? 0.0
+                              : double.parse(
+                                  batteryPercentage.toString() ?? "0.0")),
                       duration: const Duration(seconds: 1),
                       builder: (_, value, __) {
                         return VerticalBatteryIndicator(
@@ -436,6 +443,11 @@ batteryPercentage = isActive
   // }
 
   Widget _infoGrid() {
+
+    print("UI COST $cost");
+print("UI UNIT $unitConsumed");
+print("UI OUTPUT $outputPower");
+
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -445,19 +457,22 @@ batteryPercentage = isActive
       mainAxisSpacing: 12,
       childAspectRatio: 1.8,
       children: [
-        _infoCard("Current Price", "₹ ${"${cost}" ?? 0}",CommonImagePath.current),
+        _infoCard(
+            "Current Price", "₹ ${"${cost}" ?? 0}", CommonImagePath.current),
         // _infoCard(
         //   "Battery",
         //   "${25.0 ?? 0} km",
         //   // "${data.session?.batteryKm ?? 0} km\n${data.session?.batteryPercentage ?? 0}%",
         // ),
-        _infoCard("Units ", "${unitConsumed ?? '--'}",CommonImagePath.unitconsumed),
-        _infoCard("Output Power", "${outputPower ?? '--'}",CommonImagePath.poweroutput),
+        _infoCard(
+            "Units ", "${unitConsumed ?? '--'}", CommonImagePath.unitconsumed),
+        _infoCard("Output Power", "${outputPower}",
+            CommonImagePath.poweroutput),
       ],
     );
   }
 
-  Widget _infoCard(String title, String value,String image) {
+  Widget _infoCard(String title, String value, String image) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -468,49 +483,46 @@ batteryPercentage = isActive
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SvgPicture.asset(image,width: 20,height: 20,color: Colors.white),
-          SizedBox(width: 10,),
+          SvgPicture.asset(image, width: 20, height: 20, color: Colors.white),
+          SizedBox(
+            width: 10,
+          ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(color: Colors.white70,fontSize: 14)),
+              Text(title,
+                  style: TextStyle(color: Colors.white70, fontSize: 14)),
+                 
               const Spacer(),
-              Container(
-                width: SizeConfig.blockSizeHorizontal *25,
-  child: Text(
-    value,
-    maxLines: 1,
-    overflow: TextOverflow.ellipsis,
-    style: TextStyle(
-      color: Colors.white,
-      fontSize: 16,
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-)
+              Text(
+                value,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              )
 
-      //         Text(
-      //           "9.33333rrrr33",
-      //           // value,
-      //           maxLines: 1,
-      // overflow: TextOverflow.ellipsis,
-      //           style: TextStyle(
-      //             color: Colors.white,
-      //             fontSize: 18,
-      //             fontWeight: FontWeight.bold,
-      //           ),
-      //         ),
+              //         Text(
+              //           "9.33333rrrr33",
+              //           // value,
+              //           maxLines: 1,
+              // overflow: TextOverflow.ellipsis,
+              //           style: TextStyle(
+              //             color: Colors.white,
+              //             fontSize: 18,
+              //             fontWeight: FontWeight.bold,
+              //           ),
+              //         ),
             ],
           ),
         ],
       ),
     );
   }
-
-
 }
-
-
 
 class BatteryIndicator extends StatelessWidget {
   final double percentage; // 0–100
@@ -695,6 +707,7 @@ class _ChargerAnimationState extends State<ChargerAnimation>
     );
   }
 }
+
 class SessionChargingArgs {
   final String sessionId;
   final String status;

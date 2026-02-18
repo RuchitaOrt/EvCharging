@@ -1015,6 +1015,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   // 2️⃣ Check the status
   if (statusAvailable!.data!.isAvailable == true) {
     // ✅ Status is available, navigate
+        _statusTimer?.cancel();
     Navigator.push(
       context,
       MaterialPageRoute(

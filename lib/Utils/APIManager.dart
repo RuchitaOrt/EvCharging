@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:HyCharge/model/ForgetPasswordResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
 import 'package:HyCharge/model/send_otp_response.dart';
@@ -93,8 +94,7 @@ enum API {
   verifyOtp,
   resendOtp,
   estimateCharging,
-
-  
+  forgetPassword
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -168,7 +168,7 @@ class APIManager {
             //   routeGlobalKey.currentContext!,
             //   message: "No internet connection. Please check your network.",
             // );
-showToast("No internet connection. Please check your network.");
+            showToast("No internet connection. Please check your network.");
             return;
           }
 
@@ -184,52 +184,52 @@ showToast("No internet connection. Please check your network.");
           handler.next(response);
         },
         onError: (DioException e, handler) async {
-  if (e.response?.statusCode == 401) {
-    print("🔒 401 detected");
+          if (e.response?.statusCode == 401) {
+            print("🔒 401 detected");
 
-    // If refresh already failed → logout immediately
-    if (_refreshFailed) {
-      await clearCookies();
-      unAthorizedTokenErrorDialog(
-        routeGlobalKey.currentContext!,
-        message: "Your Session has Expired. Please Login Again",
-      );
-      return handler.reject(e);
-    }
+            // If refresh already failed → logout immediately
+            if (_refreshFailed) {
+              await clearCookies();
+              unAthorizedTokenErrorDialog(
+                routeGlobalKey.currentContext!,
+                message: "Your Session has Expired. Please Login Again",
+              );
+              return handler.reject(e);
+            }
 
-    final refreshed = await _refreshToken();
+            final refreshed = await _refreshToken();
 
-    if (refreshed) {
-      final requestOptions = e.requestOptions;
+            if (refreshed) {
+              final requestOptions = e.requestOptions;
 
-      try {
-        final retryResponse = await dio.request(
-          requestOptions.path,
-          data: requestOptions.data,
-          queryParameters: requestOptions.queryParameters,
-          options: Options(
-            method: requestOptions.method,
-            headers: requestOptions.headers,
-          ),
-        );
+              try {
+                final retryResponse = await dio.request(
+                  requestOptions.path,
+                  data: requestOptions.data,
+                  queryParameters: requestOptions.queryParameters,
+                  options: Options(
+                    method: requestOptions.method,
+                    headers: requestOptions.headers,
+                  ),
+                );
 
-        return handler.resolve(retryResponse);
-      } catch (_) {
-        return handler.reject(e);
-      }
-    } else {
-      // ❌ Refresh failed → logout
-      await clearCookies();
-      unAthorizedTokenErrorDialog(
-        routeGlobalKey.currentContext!,
-        message: "Your Session has Expired. Please Login Again",
-      );
-      return handler.reject(e);
-    }
-  }
+                return handler.resolve(retryResponse);
+              } catch (_) {
+                return handler.reject(e);
+              }
+            } else {
+              // ❌ Refresh failed → logout
+              await clearCookies();
+              unAthorizedTokenErrorDialog(
+                routeGlobalKey.currentContext!,
+                message: "Your Session has Expired. Please Login Again",
+              );
+              return handler.reject(e);
+            }
+          }
 
-  handler.next(e);
-},
+          handler.next(e);
+        },
 
         // onError: (DioException e, handler) async {
         //   print("Errorcode");
@@ -604,20 +604,20 @@ showToast("No internet connection. Please check your network.");
         return "/FileStorage/upload";
       case API.razorpayKey:
         return "/Payment/razorpay-key";
-        case API.createRazorpayOrder:
-  return "/Payment/create-order";
-  case API.verifyRazorpayPayment:
-  return "/Payment/verify-payment";
-case API.sendOtp:
-  return "/User/send-otp";
-case API.verifyOtp:
-  return "/User/verify-otp";
-case API.resendOtp:
-  return "/User/resend-otp";
-case API.estimateCharging:
-  return "/ChargingSession/estimate-charging";
-
-
+      case API.createRazorpayOrder:
+        return "/Payment/create-order";
+      case API.verifyRazorpayPayment:
+        return "/Payment/verify-payment";
+      case API.sendOtp:
+        return "/User/send-otp";
+      case API.verifyOtp:
+        return "/User/verify-otp";
+      case API.resendOtp:
+        return "/User/resend-otp";
+      case API.estimateCharging:
+        return "/ChargingSession/estimate-charging";
+      case API.forgetPassword:
+        return "/User/forgot-password";
     }
   }
 
@@ -709,27 +709,29 @@ case API.estimateCharging:
         return DeleteReviewResponse.fromJson(json);
       case API.resetPassword:
         return ResetPasswordResponse.fromJson(json);
+      case API.forgetPassword:
+        return ForgetPasswordResponse.fromJson(json);
+
       case API.deleteAccount:
         return DeleteAccountResponse.fromJson(json);
       case API.refreshToken:
         return RefreshTokenResponse.fromJson(json);
       case API.razorpayKey:
         return RazorpayKeyResponse.fromJson(json);
-        case API.createRazorpayOrder:
-  return CreateOrderResponse.fromJson(json);
-case API.verifyRazorpayPayment:
-  return VerifyPaymentResponse.fromJson(json);
+      case API.createRazorpayOrder:
+        return CreateOrderResponse.fromJson(json);
+      case API.verifyRazorpayPayment:
+        return VerifyPaymentResponse.fromJson(json);
 
-case API.sendOtp:
-  return SendOtpResponse.fromJson(json);
-case API.verifyOtp:
-  return VerifyOtpResponse.fromJson(json);
+      case API.sendOtp:
+        return SendOtpResponse.fromJson(json);
+      case API.verifyOtp:
+        return VerifyOtpResponse.fromJson(json);
 
-
-case API.resendOtp:
-  return ResendOtpResponse.fromJson(json);
-case API.estimateCharging:
-  return EstimateChargingResponse.fromJson(json);
+      case API.resendOtp:
+        return ResendOtpResponse.fromJson(json);
+      case API.estimateCharging:
+        return EstimateChargingResponse.fromJson(json);
 
       default:
         return json;
@@ -804,50 +806,47 @@ case API.estimateCharging:
     return data?.toString() ?? "Something went wrong";
   }
 
-bool _isRefreshingToken = false;
-bool _refreshFailed = false;
-Future<bool> _refreshToken() async {
-  if (_isRefreshingToken || _refreshFailed) {
+  bool _isRefreshingToken = false;
+  bool _refreshFailed = false;
+  Future<bool> _refreshToken() async {
+    if (_isRefreshingToken || _refreshFailed) {
+      return false;
+    }
+
+    _isRefreshingToken = true;
+
+    try {
+      final response = await dio.post(
+        apiEndPoint(API.refreshToken),
+      );
+
+      if (response.statusCode == 200) {
+        final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+
+        if (refreshResponse.success == true && refreshResponse.user != null) {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString(
+            "userId",
+            refreshResponse.user!.recId!,
+          );
+
+          print("🔁 Token refreshed successfully");
+          _isRefreshingToken = false;
+          return true;
+        } else {
+          // ❌ Refresh token invalid
+          print("❌ Refresh token failed: ${refreshResponse.message}");
+          _refreshFailed = true;
+        }
+      }
+    } catch (e) {
+      print("❌ Refresh token exception: $e");
+      _refreshFailed = true;
+    }
+
+    _isRefreshingToken = false;
     return false;
   }
-
-  _isRefreshingToken = true;
-
-  try {
-    final response = await dio.post(
-      apiEndPoint(API.refreshToken),
-    );
-
-    if (response.statusCode == 200) {
-      final refreshResponse =
-          RefreshTokenResponse.fromJson(response.data);
-
-      if (refreshResponse.success == true &&
-          refreshResponse.user != null) {
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(
-          "userId",
-          refreshResponse.user!.recId!,
-        );
-
-        print("🔁 Token refreshed successfully");
-        _isRefreshingToken = false;
-        return true;
-      } else {
-        // ❌ Refresh token invalid
-        print("❌ Refresh token failed: ${refreshResponse.message}");
-        _refreshFailed = true;
-      }
-    }
-  } catch (e) {
-    print("❌ Refresh token exception: $e");
-    _refreshFailed = true;
-  }
-
-  _isRefreshingToken = false;
-  return false;
-}
 
   // Future<bool> _refreshToken() async {
   //   try {

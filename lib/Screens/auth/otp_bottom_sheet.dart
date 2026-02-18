@@ -1,5 +1,6 @@
 import 'package:HyCharge/Provider/LoginProvider.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/auth/ResetPassword_bottom_sheet.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
@@ -13,9 +14,10 @@ import 'package:provider/provider.dart';
 class VerifyOtpBottomSheet extends StatefulWidget {
   final String mobileNo;
   final String authToken;
+ final  bool isForgetPassword;
 
   VerifyOtpBottomSheet(
-      {super.key, required this.mobileNo, required this.authToken});
+      {super.key, required this.mobileNo, required this.authToken, required this.isForgetPassword});
 
   @override
   State<VerifyOtpBottomSheet> createState() => _VerifyOtpBottomSheetState();
@@ -91,7 +93,7 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                                 showVerifyOTPLoginSheet(
                                     context,
                                     widget.mobileNo,
-                                    loginProvider.sendOtpResponse!.authId!);
+                                    loginProvider.sendOtpResponse!.authId!,widget.isForgetPassword);
                               }
                             },
                             child: Center(
@@ -130,11 +132,22 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                                   authId: widget.authToken,
                                   otpCode: otpfielfController.text,
                                   phoneNumber: widget.mobileNo,
+                                  isReset: false
                                 );
 
                                 if (loginProvider.verifyOtpResponse?.success ==
                                     true) {
-                                  GlobalLists.islLogin = true;
+                                      if(widget.isForgetPassword)
+                                      {
+
+    showSetPasswordLoginSheet(
+                                              context,
+                                             widget.mobileNo,
+                                              loginProvider
+                                                  .sendOtpResponse!.authId!,true
+                                            );
+                                      }else{
+ GlobalLists.islLogin = true;
                                    // Close bottom sheet
   Navigator.of(context, rootNavigator: true).pop();
 
@@ -150,6 +163,8 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
     );
 
   });
+                                      }
+                                 
                                   // Navigator.of(context, rootNavigator: true)
                                   //     .pop(); // close sheet
 
@@ -190,10 +205,31 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
         ),
       ),
     );
-  }
 
+    
+  }
+   showSetPasswordLoginSheet(
+      BuildContext context, String mobile, String authToken,bool isForgetPassword) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: ResetpasswordBottomSheet(
+            mobileNo: mobile,
+            authToken: authToken,
+             isForgetPassword:isForgetPassword
+          ),
+        );
+      },
+    );
+  }
   showVerifyOTPLoginSheet(
-      BuildContext context, String mobile, String authToken) {
+      BuildContext context, String mobile, String authToken,bool isForgetPassword) {
     showModalBottomSheet(
       context: context,
       isDismissible: false,
@@ -206,11 +242,14 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
           child: VerifyOtpBottomSheet(
             mobileNo: mobile,
             authToken: authToken,
+            isForgetPassword: isForgetPassword,
+            
           ),
         );
       },
     );
   }
+
 }
 
 class OtpBoxField extends StatefulWidget {
@@ -296,4 +335,9 @@ class _OtpBoxFieldState extends State<OtpBoxField> {
       ),
     );
   }
+
+
+
+
+  
 }

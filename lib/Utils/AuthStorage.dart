@@ -19,15 +19,19 @@ class AuthStorage {
   print("📦 Local storage cleared");
 }
 
-static const String _firstTimeKey = "is_first_time";
 
-  static Future<bool> isFirstTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_firstTimeKey) ?? true;
-  }
+  static const String _firstTimeKey = "is_first_time";
 
-  static Future<void> setFirstTimeDone() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_firstTimeKey, false);
-  }
+static Future<bool> isFirstTime() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getBool(_firstTimeKey) ?? true;
+}
+
+static Future<void> setFirstTimeDone() async {
+  print("setFirstTimeDone");
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_firstTimeKey, false);
+}
+
+
 }
