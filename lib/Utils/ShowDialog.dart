@@ -1,6 +1,7 @@
   import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SplashScreen.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,8 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
         onPressed: () async {
            await APIManager.clearCookies();
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.clear();
+         await AuthStorage.clearAuthData(); 
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(builder: (_) => MainTab

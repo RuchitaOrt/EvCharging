@@ -88,77 +88,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         final uploadProvider = context.read<UploadProvider>();
 
                         final UploadResponse? resultResponse =
-                            await uploadProvider.upload(file: file!);
+                            await uploadProvider.upload(file: file!,isDP: true);
 
                         if (resultResponse?.success == true) {
                           print("✅ Uploaded: ${resultResponse!.fileId}");
                           final provider = context.read<ProfileProvider>();
-
-                          final success = await provider.updateProfile(
-                            context,
-                            body: {
-                              "firstName": "${user?.firstName ?? ''}",
-                              "lastName": "${user?.lastName ?? ''}",
-                              "eMailID": "${user?.email ?? ''}",
-                              "phoneNumber": "${user?.phoneNumber ?? ''}",
-                              "countryCode": "+91",
-                              "addressLine1": "${user?.addressLine1 ?? ''}",
-                              "profileImageID": resultResponse.fileId
-                            },
-                          );
-
-                          if (success) {
-                            context.read<UploadProvider>().setImage(file);
-                            showToast("${provider.message}");
-                            // ScaffoldMessenger.of(context).showSnackBar(
-                            //   const SnackBar(content: Text("Profile updated successfully")),
-                            // );
-                            // Navigator.pop(context);
-                          }
+ showToast("${resultResponse?.message}");
+                         
+                             context.read<UploadProvider>().setImage(file);
+                         
                         } else {
                           print("❌ Upload failed: ${resultResponse?.message}");
                         }
 
-//     if (file != null) {
-//       final uploadProvider = context.read<UploadProvider>();
 
-// final result = await uploadProvider.upload(
-//   file: file,
-//   remarks: "profile image",
-// );
-
-// if (result.success) {
-//   print("✅ Uploaded, fileId: ${result.fileId}");
-// } else {
-//   print("❌ Upload failed: ${result.message}");
-// }
-
-//       context.read<UploadProvider>().setImage(file);
-//       final response=  context.read<UploadProvider>().upload(file: file,remarks: "Profile Image").then((onValue) async {
-//      final provider = context.read<ProfileProvider>();
-
-//           final success = await provider.updateProfile(
-//             context,
-//             body: {
-//               "firstName": "${user?.firstName ?? ''}",
-//               "lastName": "${user?.lastName ?? ''}",
-//               "eMailID":"${user?.email ?? ''}",
-//               "phoneNumber": "${user?.phoneNumber ?? ''}",
-//               "countryCode": "+91",
-//               "addressLine1":"${user?.addressLine1 ?? ''}",
-//               "profileImageID": response.
-//             },
-//           );
-
-//           if (success) {
-//             showToast("${provider.message}");
-//             // ScaffoldMessenger.of(context).showSnackBar(
-//             //   const SnackBar(content: Text("Profile updated successfully")),
-//             // );
-//             // Navigator.pop(context);
-//           }
-//         });
-//     }
                       },
                       child: Consumer<UploadProvider>(
                         builder: (_, provider, __) {

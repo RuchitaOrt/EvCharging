@@ -757,6 +757,7 @@ class APIManager {
         ),
       );
       print('Response code: ${response.statusCode}');
+       print('Response code: ${response}');
       if (response.statusCode == 200) {
         return parseResponse(api, response.data);
       }

@@ -414,7 +414,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool isConfirmPasswordObscured = true;
   bool isOtpVerified = false;
   bool isOtpEnabled = false;
-  bool isVerifyEnabled = false;
+  // bool isVerifyEnabled = false;
   bool isPasswordEnabled = false;
   bool isResetEnabled = false;
 
@@ -430,7 +430,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
     otpController.addListener(() {
       setState(() {
-        isVerifyEnabled = otpController.text.length == 6;
+          otpController.text.length == 6;
       });
     });
 
@@ -440,7 +440,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
 
   void _validatePasswordMatch() {
     setState(() {
-      isResetEnabled = isOtpVerified &&
+      isResetEnabled =
           newpasswordController.text.isNotEmpty &&
           confirmpasswordController.text.isNotEmpty &&
           newpasswordController.text == confirmpasswordController.text &&
@@ -508,7 +508,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               otpController.clear();
 
                               setState(() {
-                                isOtpVerified = false;
+                                
                                 isPasswordEnabled = false;
                                 isResetEnabled = false;
                               });
@@ -540,39 +540,39 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       LengthLimitingTextInputFormatter(6),
                       FilteringTextInputFormatter.digitsOnly
                     ],
-                    suffixIcon: isOtpVerified
-                        ? const Icon(Icons.check_circle, color: Colors.green)
-                        : GestureDetector(
-                            onTap: isVerifyEnabled
-                                ? () async {
-                                    await loginProvider.verifyOtp(
-                                      context: context,
-                                      authId: loginProvider.sendOtpResponse!.authId!,
-                                      otpCode: otpController.text,
-                                      phoneNumber: mobileController.text,
-                                      isReset: true,
-                                    );
+                    // suffixIcon: isOtpVerified
+                    //     ? const Icon(Icons.check_circle, color: Colors.green)
+                    //     : GestureDetector(
+                    //         onTap: isVerifyEnabled
+                    //             ? () async {
+                    //                 await loginProvider.verifyOtp(
+                    //                   context: context,
+                    //                   authId: loginProvider.sendOtpResponse!.authId!,
+                    //                   otpCode: otpController.text,
+                    //                   phoneNumber: mobileController.text,
+                    //                   isReset: true,
+                    //                 );
 
-                                    if (loginProvider.verifyOtpResponse?.success == true) {
-                                      setState(() {
-                                        isOtpVerified = true;
-                                        isPasswordEnabled = true;
-                                      });
-                                    } else {
-                                      showToast(loginProvider.verifyOtpResponse?.message ?? "");
-                                    }
-                                  }
-                                : null,
-                            child: Text(
-                              "Verify",
-                              style: TextStyle(
-                                color: isVerifyEnabled
-                                    ? CommonColors.blue
-                                    : CommonColors.hintGrey,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
+                    //                 if (loginProvider.verifyOtpResponse?.success == true) {
+                    //                   setState(() {
+                    //                     isOtpVerified = true;
+                    //                     isPasswordEnabled = true;
+                    //                   });
+                    //                 } else {
+                    //                   showToast(loginProvider.verifyOtpResponse?.message ?? "");
+                    //                 }
+                    //               }
+                    //             : null,
+                    //         child: Text(
+                    //           "Verify",
+                    //           style: TextStyle(
+                    //             color: isVerifyEnabled
+                    //                 ? CommonColors.blue
+                    //                 : CommonColors.hintGrey,
+                    //             fontSize: 12,
+                    //           ),
+                    //         ),
+                    //       ),
                   ),
 
                   const SizedBox(height: 8),

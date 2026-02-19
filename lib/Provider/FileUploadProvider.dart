@@ -22,6 +22,7 @@ class UploadProvider extends ChangeNotifier {
 Future<UploadResponse?> upload({
   required File file,
   String? remarks,
+  bool? isDP
 }) async {
   isUploading = true;
   error = null;
@@ -31,6 +32,7 @@ Future<UploadResponse?> upload({
   final res = await _uploadService.uploadFile(
     file: file,
     remarks: remarks,
+    isDP: isDP
   );
 
   isUploading = false;

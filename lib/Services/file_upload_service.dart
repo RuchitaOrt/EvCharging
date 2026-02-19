@@ -9,6 +9,7 @@ class FileUploadService {
   Future<UploadResponse> uploadFile({
     required File file,
     String? remarks,
+    bool? isDP
   }) async {
     try {
       final fileName = file.path.split('/').last;
@@ -19,6 +20,7 @@ class FileUploadService {
           filename: fileName,
         ),
         "remarks": remarks ?? "",
+        "isDP":isDP ?? false
       });
 
       final response = await _apiManager.dio.post(

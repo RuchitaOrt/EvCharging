@@ -1,9 +1,15 @@
+import 'dart:io';
+
+import 'package:HyCharge/Provider/FileUploadProvider.dart';
+import 'package:HyCharge/Provider/ImageCacheProvider.dart';
 import 'package:HyCharge/Provider/ProfileProvider.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ImageHelper.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/model/ProfileResponse.dart';
+import 'package:HyCharge/model/UploadResponse.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,8 +45,7 @@ if(widget.user!=null)
     addressController = TextEditingController(
       text:
           "${widget.user!.addressLine1 ?? ''} "
-          "${widget.user!.addressLine2 ?? ''} "
-          "${widget.user!.addressLine3 ?? ''}",
+         
     );
 }
    
@@ -91,34 +96,118 @@ if(widget.user!=null)
 
   // 🔹 Profile Image UI
   Widget _profileImage() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(60),
-          child: Image.asset(
-            CommonImagePath.profileImage,
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-          ),
-        ),
-        Positioned(
-          bottom: -4,
-          right: -4,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: CommonColors.neutral200,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
-            ),
-            child: Image.asset(CommonImagePath.edit),
-          ),
-        ),
-      ],
-    );
+    return    GestureDetector(
+                      onTap: () async {
+                        final File? file = await pickProfileImage(context);
+                        final uploadProvider = context.read<UploadProvider>();
+
+                        final UploadResponse? resultResponse =
+                            await uploadProvider.upload(file: file!,isDP: true);
+
+                        if (resultResponse?.success == true) {
+                          print("✅ Uploaded: ${resultResponse!.fileId}");
+                          final provider = context.read<ProfileProvider>();
+ showToast("${resultResponse?.message}");
+                         
+                             context.read<UploadProvider>().setImage(file);
+                         
+                        } else {
+                          print("❌ Upload failed: ${resultResponse?.message}");
+                        }
+
+
+                      },
+                      child: Consumer<UploadProvider>(
+                        builder: (_, provider, __) {
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Consumer2<UploadProvider, ImageCacheProvider>(
+                                builder: (_, upload, cache, __) {
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(60),
+                                    child: upload.selectedImage != null
+                                        ? Image.file(
+                                            upload.selectedImage!,
+                                            width: 120,
+                                            height: 120,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : cache.image != null
+                                            ? Image.memory(
+                                                cache.image!,
+                                                width: 120,
+                                                height: 120,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  CommonImagePath.profileImage,
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.cover,
+                );
+              },
+                                              )
+                                            : Image.asset(
+                                                CommonImagePath.profileImage,
+                                                width: 120,
+                                                height: 120,
+                                                fit: BoxFit.cover,
+                                              ),
+                                  );
+                                },
+                              ),
+                              Positioned(
+                                bottom: -4,
+                                right: -4,
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: CommonColors.neutral50,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: Colors.white, width: 3),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Image.asset(CommonImagePath.edit),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    );
+    // Stack(
+    //   clipBehavior: Clip.none,
+    //   children: [
+    //     ClipRRect(
+    //       borderRadius: BorderRadius.circular(60),
+    //       child: Image.asset(
+    //         CommonImagePath.profileImage,
+    //         width: 120,
+    //         height: 120,
+    //         fit: BoxFit.cover,
+    //       ),
+    //     ),
+    //     Positioned(
+    //       bottom: -4,
+    //       right: -4,
+    //       child: Container(
+    //         width: 40,
+    //         height: 40,
+    //         decoration: BoxDecoration(
+    //           color: CommonColors.neutral200,
+    //           shape: BoxShape.circle,
+    //           border: Border.all(color: Colors.white, width: 3),
+    //         ),
+    //         child: Image.asset(CommonImagePath.edit),
+    //       ),
+    //     ),
+    //   ],
+    // );
   }
 
   // 🔹 TextField
@@ -169,6 +258,8 @@ if(widget.user!=null)
               "phoneNumber": phoneController.text.trim(),
               "countryCode": "+91",
               "addressLine1": addressController.text.trim(),
+                        "addressLine2": "",
+                                  "addressLine3": "",
             },
           );
 

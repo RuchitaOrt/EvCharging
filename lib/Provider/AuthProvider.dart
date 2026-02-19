@@ -3,6 +3,7 @@ import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Services/auth_api_service.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/Utils/AppEror.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/ValidationHelper.dart';
 import 'package:HyCharge/model/LogoutResponse.dart';
@@ -96,8 +97,7 @@ class AuthProvider extends ChangeNotifier {
       if (response.success) {
         await APIManager.clearCookies();
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.clear();
+        await AuthStorage.clearAuthData();
 
         GlobalLists.islLogin = false;
 

@@ -13,12 +13,13 @@ class AuthStorage {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyUserId);
   }
-  Future<void> clearLocalStorage() async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
-  print("📦 Local storage cleared");
-}
 
+  /// Remove only login related data
+  static Future<void> clearAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyUserId);
+    print("🔐 Auth data cleared (userId only)");
+  }
 
   static const String _firstTimeKey = "is_first_time";
 
