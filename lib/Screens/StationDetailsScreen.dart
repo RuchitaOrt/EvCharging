@@ -1021,8 +1021,15 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                         isAvailable: isAvailable,
                         onTap: () {
                           setState(() {
-                            _selectedCharger = charger;
+                            try{
+_selectedCharger = charger;
                             selectedStationID = station.recId;
+                             showToast(_selectedCharger!.connectorName!);
+                            }catch(e)
+                            {
+                              showToast(e.toString());
+                            }
+                            
                           });
                         },
                       );

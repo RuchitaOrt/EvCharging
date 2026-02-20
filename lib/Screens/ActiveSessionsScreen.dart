@@ -110,6 +110,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                   outputPower: session!.chargingGun!.powerOutput!.toString() ?? "0",
                   batteryPercentage: session!.soCStart.toString() ?? "0",
                   endMeterReading: session.endMeterReading.toString() ?? "0",
+                  duration: session.duration.toString() ?? "0"
                 ),
               ),
             ),

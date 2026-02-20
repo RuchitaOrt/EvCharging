@@ -166,6 +166,7 @@ print(enteredAmount);
                           outputPower: response.data!.session!.chargingGun!.powerOutput.toString() ?? "0",
                           batteryPercentage:response.data!.batteryStateOfCharge!.startSoC==null?"0": response.data!.batteryStateOfCharge!.startSoC.toString() ?? "0",
                           endMeterReading: response.data!.session!.endMeterReading!.toString() ?? "0",
+                          duration: response.data!.session!.duration.toString() ??"0"
                         ),
                       ),
                     ),

@@ -11,7 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:math' as math;
 import 'dart:async';
-
+  import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class SessionChargingScreen extends StatefulWidget {
@@ -46,9 +46,21 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
   String? outputPower;
   String? batteryPercentage="0";
   String? endMeterReading;
+Timer? _durationTimer;
+DateTime? _sessionStartTime;
+String duration = "00:00";
+final String recId ="";
   @override
   void initState() {
     super.initState();
+    // Example: if you pass startTime in args
+// _sessionStartTime = DateTime.parse(widget.args.startTime);
+
+// If not available, start from now
+_sessionStartTime = DateTime.now();
+
+_startDurationTimer();
+
     // status = widget.intitalResponse.data!.session!.status!;
     // cost = widget.intitalResponse.data!.session!.chargingTotalFee!;
     // unitConsumed = widget.intitalResponse.data!.session!.chargingSpeed!;
@@ -56,6 +68,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     // batteryPercentage ==
     //      widget.intitalResponse.data!.batteryStateOfCharge!.currentSoC;
     // endMeterReading = widget.intitalResponse.data!.session!.endMeterReading;
+    
     status = widget.args.status!;
     cost = widget.args.cost;
     unitConsumed = widget.args.unitConsumed;
@@ -80,6 +93,24 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     _controller.repeat();
     _startPolling();
   }
+void _startDurationTimer() {
+  _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    if (_sessionStartTime == null) return;
+
+    final diff = DateTime.now().difference(_sessionStartTime!);
+
+    final minutes = diff.inMinutes.remainder(60);
+    final seconds = diff.inSeconds.remainder(60);
+    final hours = diff.inHours;
+
+    setState(() {
+      duration =
+          "${hours.toString().padLeft(2, '0')}:"
+          "${minutes.toString().padLeft(2, '0')}:"
+          "${seconds.toString().padLeft(2, '0')}";
+    });
+  });
+}
 
   void _startPolling() {
     _refreshTimer = Timer.periodic(
@@ -115,6 +146,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
           // 🔴 Stop polling if session completed
           if (res!.data!.isActive == false) {
             _refreshTimer?.cancel();
+              _durationTimer?.cancel(); 
           }
         });
       },
@@ -179,6 +211,8 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
                               endMeterReading: endMeterReading!);
 
                           setState(() {
+                            _durationTimer?.cancel();
+
                             status = response!.data!.session!.status;
 
                             cost = response.data!.cost!.toString();
@@ -216,6 +250,8 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
                   onPressed: status == "Completed"
                       ? null
                       : () async {
+                        _durationTimer?.cancel();
+
                           print(
                               "Charging STATION ID ${data!.session!.chargingStationId!}");
                           print(
@@ -257,20 +293,86 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
+            
               ChargerAnimation(
                 status: status!, // "Active" or "Complete"
               ),
 
               status == ""
                   ? Container()
-                  : Center(
-                      child: Text(
-                        '${status}',
-                        style:
-                            TextStyle(color: CommonColors.blue, fontSize: 22),
-                      ),
-                    ),
+                  : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Center(
+                          child: Text(
+                            '${status}',
+                            style:
+                                TextStyle(color: CommonColors.blue, fontSize: 22),
+                          ),
+                        ),
+                       SizedBox(width: 60,),
+                         GestureDetector(
+                          onTap: ()
+                          async {
+print("REFRESH CLICKED");
+final res =
+            await context.read<ChargingProvider>().fetchChargingSessionDetails(
+                  context: context,
+                  sessionId: widget.args.sessionId!,
+                );
+        setState(() {
+          status = res!.data!.session!.status == null
+              ? ""
+              : res!.data!.session!.status;
+          cost = "${res.data!.costDetails!.totalCost!.toString()!}";
+          unitConsumed =
+              "${res.data!.session!.energyTransmitted!.toString()} ${res.data!.session!.energyTransmitted!.toString()}";
+          outputPower =
+              "${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}";
+         print("outputPower ${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}");
+         
+          // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
+          final isActive = res?.data?.session?.active == 1;
+
+          batteryPercentage = isActive
+              ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+              : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+          print("AFTER 15 sec batteryStateOfCharge");
+          print(res.data!.batteryStateOfCharge!.currentSoC.toString());
+
+          endMeterReading = res.data!.session!.endMeterReading.toString();
+        
+       
+        });
+
+                            
+                          },
+                          child: Icon(Icons.refresh)),
+                    ],
+                  ),
+                
+
+Row(
+  children: [
+    Expanded(
+      child: SelectableText(
+        "${widget.args.sessionId}",
+        style: TextStyle(fontSize: 12),
+      ),
+    ),
+    IconButton(
+      icon: Icon(Icons.copy),
+      onPressed: () {
+        Clipboard.setData( ClipboardData(text:  "${widget.args.sessionId}",));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Copied to clipboard")),
+        );
+      },
+    )
+  ],
+)
+,
+               
               SizedBox(
                 height: 10,
               ),
@@ -312,7 +414,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
                     TweenAnimationBuilder<double>(
                       tween: Tween(
                           begin: 0,
-                          end: batteryPercentage == null
+                          end: (batteryPercentage == null || batteryPercentage == "null")
                               ? 0.0
                               : double.parse(
                                   batteryPercentage.toString() ?? "0.0")),
@@ -468,6 +570,9 @@ print("UI OUTPUT $outputPower");
             "Units ", "${unitConsumed ?? '--'}", CommonImagePath.unitconsumed),
         _infoCard("Output Power", "${outputPower}",
             CommonImagePath.poweroutput),
+           
+             _infoCard("Duration", "${duration}",
+            CommonImagePath.poweroutput), 
       ],
     );
   }
@@ -678,6 +783,7 @@ class _ChargerAnimationState extends State<ChargerAnimation>
   @override
   void dispose() {
     _controller.dispose();
+   
     super.dispose();
   }
 
@@ -716,6 +822,7 @@ class SessionChargingArgs {
   final String outputPower;
   final String batteryPercentage;
   final String endMeterReading;
+  final String duration;
 
   SessionChargingArgs({
     required this.sessionId,
@@ -724,6 +831,6 @@ class SessionChargingArgs {
     required this.unitConsumed,
     required this.outputPower,
     required this.batteryPercentage,
-    required this.endMeterReading,
+    required this.endMeterReading, required this.duration,
   });
 }
