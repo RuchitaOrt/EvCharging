@@ -1,6 +1,6 @@
 {
-    "name": "HyCharge",
-    "short_name": "HyCharge",
+    "name": "hycharge",
+    "short_name": "hycharge",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

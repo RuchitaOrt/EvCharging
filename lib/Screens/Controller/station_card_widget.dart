@@ -120,6 +120,7 @@ class _StationCardState extends State<_StationCard> {
   }
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     final openingTime = _formatTime(widget.chargingHub.openingTime);
     final closingTime = _formatTime(widget.chargingHub.closingTime);
     final hours = '$openingTime - $closingTime';
@@ -170,7 +171,9 @@ class _StationCardState extends State<_StationCard> {
         }
       },
       child: SizedBox(
-        width:kIsWeb?600: widget.cardWidth,
+        width:kIsWeb && screenWidth >= 768
+      ? 600
+      : widget.cardWidth,
         child: Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(

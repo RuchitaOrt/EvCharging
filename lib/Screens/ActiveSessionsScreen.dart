@@ -103,10 +103,10 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
               builder: (_) => SessionChargingScreen(
                 args: SessionChargingArgs(
                   sessionId: session.recId,
-                  status: session!.status ?? "",
-                  cost: session!.chargingTotalFee ?? "0",
-                  unitConsumed: session!.chargingSpeed ?? "0",
-                  outputPower: session!.energyTransmitted ?? "0",
+                  status: session.status ?? "",
+                  cost: session.chargingTotalFee ?? "0",
+                  unitConsumed: session.chargingSpeed ?? "0",
+                  outputPower: session.energyTransmitted ?? "0",
                   batteryPercentage: session.soCStart.toString() ?? "0",
                   endMeterReading: session.endMeterReading ?? "0",
                 ),

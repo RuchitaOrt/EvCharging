@@ -1,9 +1,13 @@
+import 'package:HyCharge/Provider/FileUploadProvider.dart';
+import 'package:HyCharge/Provider/ImageCacheProvider.dart';
 import 'package:HyCharge/Provider/ProfileProvider.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ImageHelper.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/model/ProfileResponse.dart';
+import 'package:HyCharge/model/UploadResponse.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -100,36 +104,103 @@ if(widget.user!=null)
   }
 
   // 🔹 Profile Image UI
-  Widget _profileImage() {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(60),
-          child: Image.asset(
-            CommonImagePath.profileImage,
-            width: 120,
-            height: 120,
-            fit: BoxFit.cover,
-          ),
-        ),
-        Positioned(
-          bottom: -4,
-          right: -4,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: CommonColors.neutral200,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 3),
+Widget _profileImage() {
+  return GestureDetector(
+    onTap: () async {
+      final pickedFile = await pickProfileImage(context);
+      if (pickedFile == null) return;
+
+      final uploadProvider = context.read<UploadProvider>();
+
+      dynamic fileToUpload = pickedFile;
+
+      if (kIsWeb && pickedFile is! Uint8List) {
+        fileToUpload = await pickedFile.readAsBytes();
+      }
+
+      final UploadResponse? response =
+          await uploadProvider.upload(file: fileToUpload);
+
+      if (response?.success == true) {
+        final profileProvider = context.read<ProfileProvider>();
+
+        final success = await profileProvider.updateProfile(
+          context,
+          body: {
+            "firstName": firstNameController.text.trim(),
+            "lastName": lastNameController.text.trim(),
+            "eMailID": emailController.text.trim(),
+            "phoneNumber": phoneController.text.trim(),
+            "countryCode": "+91",
+            "addressLine1": addressController.text.trim(),
+            "profileImageID": response!.fileId,
+          },
+        );
+
+        if (success) {
+          uploadProvider.setImage(fileToUpload);
+          showToast(profileProvider.message.toString());
+        }
+      }
+    },
+    child: Consumer2<UploadProvider, ImageCacheProvider>(
+      builder: (_, upload, cache, __) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(60),
+              child: upload.selectedImage != null
+                  ? kIsWeb
+                      ? Image.memory(
+                          upload.selectedImage as Uint8List,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          upload.selectedImage,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        )
+                  : cache.image != null
+                      ? Image.memory(
+                          cache.image!,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          CommonImagePath.profileImage,
+                          width: 120,
+                          height: 120,
+                          fit: BoxFit.cover,
+                        ),
             ),
-            child: Image.asset(CommonImagePath.edit),
-          ),
-        ),
-      ],
-    );
-  }
+            Positioned(
+              bottom: -4,
+              right: -4,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: CommonColors.neutral200,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 3),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Image.asset(CommonImagePath.edit),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
 
   // 🔹 TextField
   Widget _inputField(
@@ -184,9 +255,7 @@ if(widget.user!=null)
 
           if (success) {
             showToast("${provider.message}");
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   const SnackBar(content: Text("Profile updated successfully")),
-            // );
+       
             Navigator.pop(context);
           }
         },
