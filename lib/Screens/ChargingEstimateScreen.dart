@@ -135,7 +135,7 @@ print(enteredAmount);
                 // ✅ start session
                 final response = await provider.startSession(
                   context: context,
-                  chargingGunId: widget.selectedCharger!.connectorName!,
+                  chargingGunId: widget.selectedCharger!.recId!,
                   chargingStationId: widget.selectedStationID!,
                   userId: userId,
                   chargeTagId: "B4A63CDF",

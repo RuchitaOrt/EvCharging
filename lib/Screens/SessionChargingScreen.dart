@@ -57,9 +57,17 @@ final String recId ="";
 // _sessionStartTime = DateTime.parse(widget.args.startTime);
 
 // If not available, start from now
-_sessionStartTime = DateTime.now();
+ // 1️⃣ Get backend duration
+  duration = formatBackendDuration(widget.args.duration);
 
-_startDurationTimer();
+  // 2️⃣ Convert to seconds
+  _elapsedSeconds = durationToSeconds(duration);
+
+  // 3️⃣ Start timer from backend value
+  _startDurationTimer();
+// _sessionStartTime = DateTime.now();
+
+// _startDurationTimer();
 
     // status = widget.intitalResponse.data!.session!.status!;
     // cost = widget.intitalResponse.data!.session!.chargingTotalFee!;
@@ -93,15 +101,42 @@ _startDurationTimer();
     _controller.repeat();
     _startPolling();
   }
+  int _elapsedSeconds = 0;
+  String formatBackendDuration(String? raw) {
+  if (raw == null || raw.isEmpty) return "00:00:00";
+
+  // Case 1: 01:19:22:07372260.0  → take first 3 parts
+  final parts = raw.split(':');
+
+  if (parts.length >= 3) {
+    final hours = parts[0].padLeft(2, '0');
+    final minutes = parts[1].padLeft(2, '0');
+
+    // seconds may contain decimals
+    final secondsPart = parts[2].split('.').first.padLeft(2, '0');
+
+    return "$hours:$minutes:$secondsPart";
+  }
+
+  return "00:00:00";
+}
+int durationToSeconds(String duration) {
+  final parts = duration.split(':');
+  if (parts.length != 3) return 0;
+
+  final hours = int.tryParse(parts[0]) ?? 0;
+  final minutes = int.tryParse(parts[1]) ?? 0;
+  final seconds = int.tryParse(parts[2]) ?? 0;
+
+  return hours * 3600 + minutes * 60 + seconds;
+}
 void _startDurationTimer() {
   _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-    if (_sessionStartTime == null) return;
+    _elapsedSeconds++;
 
-    final diff = DateTime.now().difference(_sessionStartTime!);
-
-    final minutes = diff.inMinutes.remainder(60);
-    final seconds = diff.inSeconds.remainder(60);
-    final hours = diff.inHours;
+    final hours = _elapsedSeconds ~/ 3600;
+    final minutes = (_elapsedSeconds % 3600) ~/ 60;
+    final seconds = _elapsedSeconds % 60;
 
     setState(() {
       duration =
@@ -111,6 +146,25 @@ void _startDurationTimer() {
     });
   });
 }
+
+// void _startDurationTimer() {
+//   _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+//     if (_sessionStartTime == null) return;
+
+//     final diff = DateTime.now().difference(_sessionStartTime!);
+
+//     final minutes = diff.inMinutes.remainder(60);
+//     final seconds = diff.inSeconds.remainder(60);
+//     final hours = diff.inHours;
+
+//     setState(() {
+//       duration =
+//           "${hours.toString().padLeft(2, '0')}:"
+//           "${minutes.toString().padLeft(2, '0')}:"
+//           "${seconds.toString().padLeft(2, '0')}";
+//     });
+//   });
+// }
 
   void _startPolling() {
     _refreshTimer = Timer.periodic(
@@ -129,8 +183,8 @@ void _startDurationTimer() {
           unitConsumed =
               "${res.data!.session!.energyTransmitted!.toString()} ${res.data!.session!.energyTransmitted!.toString()}";
           outputPower =
-              "${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}";
-         print("outputPower ${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}");
+              "${res.data!.chargerDetails!.powerOutput} KW";
+         print("outputPower ${res.data!.chargerDetails!.powerOutput} KW");
          
           // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
           final isActive = res?.data?.session?.active == 1;
@@ -328,8 +382,8 @@ final res =
           unitConsumed =
               "${res.data!.session!.energyTransmitted!.toString()} ${res.data!.session!.energyTransmitted!.toString()}";
           outputPower =
-              "${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}";
-         print("outputPower ${res.data!.chargerDetails!.powerOutput} ${res.data!.chargerDetails!.tariffUnit}");
+              "${res.data!.chargerDetails!.powerOutput} KW";
+         print("outputPower ${res.data!.chargerDetails!.powerOutput} KW");
          
           // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
           final isActive = res?.data?.session?.active == 1;
