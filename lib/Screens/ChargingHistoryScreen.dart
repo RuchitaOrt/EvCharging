@@ -1,5 +1,7 @@
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/PaymentProvider.dart';
+import 'package:HyCharge/Screens/BookingDetailsScreen.dart';
+import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
@@ -254,277 +256,338 @@ Widget _summaryRow() {
   Widget _historyCard(ChargingSession data) {
     return Column(
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: CommonColors.white,
-                border: Border.all(color: CommonColors.neutral200),
-                borderRadius: BorderRadius.circular(14),
-              ),
+        GestureDetector(
+          onTap: ()
+          {
+             data.status == "Active"?null:
+             Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BookingDetailsScreen(recID: data.recId!,
+            
+            ),
+          ),
+        );
+          },
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: CommonColors.white,
+                  border: Border.all(color: CommonColors.neutral200),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 8,),
+                   Container(
+            width: SizeConfig.blockSizeHorizontal * 90,
+            decoration: BoxDecoration(
+              color: CommonColors.neutral50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 8,),
-                 Container(
-  width: SizeConfig.blockSizeHorizontal * 90,
-  decoration: BoxDecoration(
-    color: CommonColors.neutral50,
-    borderRadius: BorderRadius.circular(8),
-  ),
-  child: Padding(
-    padding: const EdgeInsets.all(8.0),
-    child: Column(
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            
+            children: [
           
-          children: [
-        
-            /// LEFT SIDE (FIXED)
-            Expanded( // ✅ KEY FIX
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                
+              /// LEFT SIDE (FIXED)
+              Expanded( // ✅ KEY FIX
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  
+                  children: [
+                    Text(
+                      "Station: ${data.chargingStationName}",
+                      style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
+                    ),
+                     Text(
+                      "${data.chargingHubName}",
+                      style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
+                    ),
+                    
+                    const SizedBox(height: 4),
+                    // Row(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   children: [
+                    //    Padding(
+                    //      padding: const EdgeInsets.only(top: 4),
+                    //      child: Image.asset( CommonImagePath.redpin,),
+                    //    ),
+                    //     const SizedBox(width: 4),
+                       
+                    //   ],
+                    // ),
+                  ],
+                ),
+              ),
+          
+              const SizedBox(width: 8),
+          
+              /// RIGHT SIDE (AUTO WIDTH)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    "Station: ${data.chargingStationName}",
-                    style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
+                    formatTime("${data.createdOn}"),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: CommonColors.black,
+                      fontSize: 12,
+                    ),
                   ),
-                   Text(
-                    "${data.chargingHubName}",
-                    style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
+                  Text(
+                    data.status == "Active"
+                        ? formatonlyTime("${data.startTime}")
+                        : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      color: CommonColors.neutral500,
+                      fontSize: 12,
+                    ),
                   ),
+          
                   
-                  const SizedBox(height: 4),
-                  // Row(
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   children: [
-                  //    Padding(
-                  //      padding: const EdgeInsets.only(top: 4),
-                  //      child: Image.asset( CommonImagePath.redpin,),
-                  //    ),
-                  //     const SizedBox(width: 4),
-                     
-                  //   ],
-                  // ),
+                ],
+              ),
+            ],
+          ),
+          
                 ],
               ),
             ),
-        
-            const SizedBox(width: 8),
-        
-            /// RIGHT SIDE (AUTO WIDTH)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  formatTime("${data.createdOn}"),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    color: CommonColors.black,
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  data.status == "Active"
-                      ? formatonlyTime("${data.startTime}")
-                      : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w400,
-                    color: CommonColors.neutral500,
-                    fontSize: 12,
-                  ),
-                ),
-        
-                
-              ],
-            ),
-          ],
-        ),
-        
-      ],
-    ),
-  ),
-),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
+          ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Energy",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: CommonColors.neutral500,
+                                      fontSize: 12)),
+                              Text("${data.energyTransmitted} kW",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text("Duration",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: CommonColors.neutral500,
+                                      fontSize: 12)),
+                              Text("${data.duration}",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                         Expanded(
+                          child: Column(
+                            children: [
+                              Text("Fee",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: CommonColors.neutral500,
+                                      fontSize: 12)),
+                              Text("₹${data.chargingTotalFee}",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600, fontSize: 12)),
+                            ],
+                          ),
+                        ),
+                        // Expanded(
+                        //   child: Column(
+                        //     children: [
+                        //       Text("Plug Type",
+                        //           style: TextStyle(
+                        //               fontWeight: FontWeight.w400,
+                        //               color: CommonColors.neutral500,
+                        //               fontSize: 12)),
+                        //       Text("${data.chargingTariff}",
+                        //           style: TextStyle(
+                        //               fontWeight: FontWeight.w600, fontSize: 12)),
+                        //     ],
+                        //   ),
+                        // ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Energy",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text("${data.energyTransmitted} kW",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            Text("Duration",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text("${data.duration}",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                       Expanded(
-                        child: Column(
-                          children: [
-                            Text("Fee",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text("₹${data.chargingTotalFee}",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                          ],
-                        ),
-                      ),
-                      // Expanded(
-                      //   child: Column(
-                      //     children: [
-                      //       Text("Plug Type",
-                      //           style: TextStyle(
-                      //               fontWeight: FontWeight.w400,
-                      //               color: CommonColors.neutral500,
-                      //               fontSize: 12)),
-                      //       Text("${data.chargingTariff}",
-                      //           style: TextStyle(
-                      //               fontWeight: FontWeight.w600, fontSize: 12)),
-                      //     ],
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                            Text("Start Battery",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w400,
-                                  color: CommonColors.neutral500,
-                                  fontSize: 12)),
-                          Text(
-                            
-                            
-                            data.soCStart==null?"-":"${data.soCStart} %",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w600, fontSize: 12)),
-                         
-                        ],
-                      ),
-                       Expanded(
-                        child: Column(
-                          children: [
-                            Text("End Battery",
+                              Text("Start Battery",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     color: CommonColors.neutral500,
                                     fontSize: 12)),
                             Text(
                               
-                             data.soCEnd==null?"-": "${data.soCEnd} %",
+                              
+                              data.soCStart==null?"-":"${data.soCStart} %",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w600, fontSize: 12)),
+                           
                           ],
                         ),
-                      ),
-                      // Expanded(
-                      //   child: Column(
-                      //     children: [
-                      //       Text("Fee",
-                      //           style: TextStyle(
-                      //               fontWeight: FontWeight.w400,
-                      //               color: CommonColors.neutral500,
-                      //               fontSize: 12)),
-                      //       Text("₹${data.chargingTotalFee}",
-                      //           style: TextStyle(
-                      //               fontWeight: FontWeight.w600, fontSize: 12)),
-                      //     ],
-                      //   ),
-                      // ),
-                     
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  //  Column(
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //    children: [
-                  //      Text("Location",
-                  //          style: TextStyle(
-                  //              fontWeight: FontWeight.w400,
-                  //              color: CommonColors.neutral500,
-                  //              fontSize: 12)),
-                  //     Text(
-                  //            "${data.chargingHubName}",
-                  //             maxLines: 2,
-                  //             overflow: TextOverflow.ellipsis,
-                  //             style: const TextStyle(
-                  //               fontWeight: FontWeight.w600,
-                  //               fontSize: 12,
-                  //             ),
-                  //           ),
-                  //    ],
-                  //  ),
-                    const SizedBox(height: 16),
-                  Container(
-                    width: SizeConfig.blockSizeHorizontal * 90,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CommonColors.white,
-                        foregroundColor: CommonColors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(
-                            color: CommonColors.blue.withOpacity(0.4),
-                            width: 0.8,
+                         Expanded(
+                          child: Column(
+                            children: [
+                              Text("End Battery",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w400,
+                                      color: CommonColors.neutral500,
+                                      fontSize: 12)),
+                              Text(
+                                
+                               data.soCEnd==null?"-": "${data.soCEnd} %",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.w600, fontSize: 12)),
+                            ],
                           ),
                         ),
-                      ),
-                      child: const Text(
-                        "Download Receipt",
-                        style: TextStyle(
-                            fontSize: 12,
-                            color: CommonColors.blue,
-                            fontWeight: FontWeight.w600),
-                      ),
+                        // Expanded(
+                        //   child: Column(
+                        //     children: [
+                        //       Text("Fee",
+                        //           style: TextStyle(
+                        //               fontWeight: FontWeight.w400,
+                        //               color: CommonColors.neutral500,
+                        //               fontSize: 12)),
+                        //       Text("₹${data.chargingTotalFee}",
+                        //           style: TextStyle(
+                        //               fontWeight: FontWeight.w600, fontSize: 12)),
+                        //     ],
+                        //   ),
+                        // ),
+                       
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    //  Column(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //    children: [
+                    //      Text("Location",
+                    //          style: TextStyle(
+                    //              fontWeight: FontWeight.w400,
+                    //              color: CommonColors.neutral500,
+                    //              fontSize: 12)),
+                    //     Text(
+                    //            "${data.chargingHubName}",
+                    //             maxLines: 2,
+                    //             overflow: TextOverflow.ellipsis,
+                    //             style: const TextStyle(
+                    //               fontWeight: FontWeight.w600,
+                    //               fontSize: 12,
+                    //             ),
+                    //           ),
+                    //    ],
+                    //  ),
+                      const SizedBox(height: 16),
+                  data.status == "Active"?
+                   Container(
+                      width: SizeConfig.blockSizeHorizontal * 90,
+                      child: ElevatedButton(
+                        onPressed: () {
+                             Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SessionChargingScreen(
+                args: SessionChargingArgs(
+          sessionId: data?.recId ?? "",
+          status: data?.status ?? "",
+          cost: data?.chargingTotalFee?.toString() ?? "0",
+          unitConsumed: data?.energyTransmitted?.toString() ?? "0",
+          outputPower: (data?.chargingGun?.powerOutput == null ||
+                  data?.chargingGun?.powerOutput == "null")
+              ? "0"
+              : data!.chargingGun!.powerOutput.toString(),
+          batteryPercentage: data?.soCStart?.toString() ?? "0",
+          endMeterReading: data?.endMeterReading?.toString() ?? "0",
+          duration: data?.duration?.toString() ?? "0",
+                ),
               ),
             ),
-             Positioned(
-        top: -10,
-        left: 16,
-        child: _statusChip(data.status!,data.recId!),
-      ),
-          ],
+          );
+          
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CommonColors.white,
+                          foregroundColor: CommonColors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: CommonColors.blue.withOpacity(0.4),
+                              width: 0.8,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          "View Session",
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: CommonColors.blue,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    )
+                  :   Container(
+                      width: SizeConfig.blockSizeHorizontal * 90,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CommonColors.white,
+                          foregroundColor: CommonColors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: CommonColors.blue.withOpacity(0.4),
+                              width: 0.8,
+                            ),
+                          ),
+                        ),
+                        child: const Text(
+                          "Download Receipt",
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: CommonColors.blue,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+               Positioned(
+          top: -10,
+          left: 16,
+          child: _statusChip(data.status!,data.recId!),
+                ),
+            ],
+          ),
         ),
       ],
     );

@@ -98,24 +98,44 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
       ),
       child: GestureDetector(
         onTap: () {
-          Navigator.push(
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (_) => SessionChargingScreen(
+          //       args: SessionChargingArgs(
+          //         sessionId: session.recId!,
+          //         status: session!.status ?? "",
+          //         cost: session!.chargingTotalFee.toString() ?? "0",
+          //         unitConsumed: session!.energyTransmitted.toString() ?? "0",
+          //         outputPower: session!.chargingGun!.powerOutput!.toString() ?? "0",
+          //         batteryPercentage: session!.soCStart.toString() ?? "0",
+          //         endMeterReading: session.endMeterReading.toString() ?? "0",
+          //         duration: session.duration.toString() ?? "0"
+          //       ),
+          //     ),
+          //   ),
+          // );
+ Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => SessionChargingScreen(
                 args: SessionChargingArgs(
-                  sessionId: session.recId!,
-                  status: session!.status ?? "",
-                  cost: session!.chargingTotalFee.toString() ?? "0",
-                  unitConsumed: session!.energyTransmitted.toString() ?? "0",
-                  outputPower: session!.chargingGun!.powerOutput!.toString() ?? "0",
-                  batteryPercentage: session!.soCStart.toString() ?? "0",
-                  endMeterReading: session.endMeterReading.toString() ?? "0",
-                  duration: session.duration.toString() ?? "0"
+          sessionId: session?.recId ?? "",
+          status: session?.status ?? "",
+          cost: session?.chargingTotalFee?.toString() ?? "0",
+          unitConsumed: session?.energyTransmitted?.toString() ?? "0",
+          outputPower: (session?.chargingGun?.powerOutput == null ||
+                  session?.chargingGun?.powerOutput == "null")
+              ? "0"
+              : session!.chargingGun!.powerOutput.toString(),
+          batteryPercentage: session?.soCStart?.toString() ?? "0",
+          endMeterReading: session?.endMeterReading?.toString() ?? "0",
+          duration: session?.duration?.toString() ?? "0",
                 ),
               ),
             ),
           );
-
+          
           // Navigator.push(
           //                   routeGlobalKey.currentContext!,
           //                   MaterialPageRoute(
