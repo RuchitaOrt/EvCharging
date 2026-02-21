@@ -75,10 +75,10 @@ Future<void> loadData() async {
               ),
             ),
             const SizedBox(height: 8),
-            TextButton(
-              onPressed: () {},
-              child:  Text("View invoice",style: TextStyle(color: CommonColors.blue,),),
-            ),
+            // TextButton(
+            //   onPressed: () {},
+            //   child:  Text("View invoice",style: TextStyle(color: CommonColors.blue,),),
+            // ),
 
           
             /// Booking ID Card
@@ -147,11 +147,11 @@ Future<void> loadData() async {
           // _item("Vehicle details", "MH05EV5322"),
           _item("Total kW used", "₹ ${response!.data!.session!.energyTransmitted}"),
           _item("Total charging time", "${response!.data!.timing!.duration!.formattedDuration}"),
-          _item("Service charge", "₹173.48"),
-          // _item("Discount", "₹0.0"),
-          // _item("Cashback", "0.0"),
-          _item("SGST (9%)", "₹15.62"),
-          _item("CGST (9%)", "₹15.61"),
+          // _item("Service charge", "₹173.48"),
+          // // _item("Discount", "₹0.0"),
+          // // _item("Cashback", "0.0"),
+          // _item("SGST (9%)", "₹15.62"),
+          // _item("CGST (9%)", "₹15.61"),
           // _item("Charge coins used", "0"),
           // _item("Charge coins credited", "55"),
 
