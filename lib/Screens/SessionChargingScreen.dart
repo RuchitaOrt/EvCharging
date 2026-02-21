@@ -406,26 +406,26 @@ final res =
                   ),
                 
 
-Row(
-  children: [
-    Expanded(
-      child: SelectableText(
-        "${widget.args.sessionId}",
-        style: TextStyle(fontSize: 12),
-      ),
-    ),
-    IconButton(
-      icon: Icon(Icons.copy),
-      onPressed: () {
-        Clipboard.setData( ClipboardData(text:  "${widget.args.sessionId}",));
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Copied to clipboard")),
-        );
-      },
-    )
-  ],
-)
-,
+// Row(
+//   children: [
+//     Expanded(
+//       child: SelectableText(
+//         "${widget.args.sessionId}",
+//         style: TextStyle(fontSize: 12),
+//       ),
+//     ),
+//     IconButton(
+//       icon: Icon(Icons.copy),
+//       onPressed: () {
+//         Clipboard.setData( ClipboardData(text:  "${widget.args.sessionId}",));
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text("Copied to clipboard")),
+//         );
+//       },
+//     )
+//   ],
+// )
+// ,
                
               SizedBox(
                 height: 10,
