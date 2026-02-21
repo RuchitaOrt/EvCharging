@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:HyCharge/Request/LoginRequest.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/ForgetPasswordResponse.dart';
+import 'package:HyCharge/model/ResetPasswordResponse.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
 import 'package:HyCharge/model/send_otp_response.dart';
 import 'package:HyCharge/model/verify_otp_response.dart';
@@ -86,4 +88,69 @@ Future<ResendOtpResponse> resendOtp({
   return response as ResendOtpResponse;
 }
 
+
+//  Future<ForgetPasswordResponse?> forgetPassword({
+//     required BuildContext context,
+//     required String emailOrPhone,
+//     required String otpCode,
+//     required String authId,
+//     required String newPassword,
+//     required String confirmPassword,
+//   }) async {
+//     try {
+//       final response = await _apiManager.apiRequest(
+//         context,
+//         API.forgetPassword,
+//         jsonval: {
+//           "emailOrPhone": emailOrPhone,
+//           "otpCode": otpCode,
+//           "authId": authId,
+//           "newPassword": newPassword,
+//           "confirmPassword": confirmPassword,
+//         },
+//       ) as ForgetPasswordResponse?;
+//       print("forget status code ${response}");
+//       print("FORGET IN SERVICE");
+//         print(response!.message);
+//          print(response!.success);
+//       return response;
+//     } catch (e) {
+//       print("❌ Reset password failed: $e");
+//        return ForgetPasswordResponse(
+//     success: false,
+//     message: e.toString(),
+//     user: null,
+//   );
+    
+//     }
+
+//   }
+
+
+
+  Future<ForgetPasswordResponse> forgetPassword({
+    required BuildContext context,
+    required String emailOrPhone,
+    required String otpCode,
+    required String authId,
+    required String newPassword,
+    required String confirmPassword,
+    String purpose = "Login",
+  }) async {
+    final body = {
+      "emailOrPhone": emailOrPhone,
+          "otpCode": otpCode,
+          "authId": authId,
+          "newPassword": newPassword,
+          "confirmPassword": confirmPassword,
+    };
+
+    final response = await _apiManager.apiRequest(
+      context,
+      API.forgetPassword,
+      jsonval: body,
+    );
+
+    return response as ForgetPasswordResponse;
+  }
 }

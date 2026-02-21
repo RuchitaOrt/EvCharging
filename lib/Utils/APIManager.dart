@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:HyCharge/model/ForgetPasswordResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
 import 'package:HyCharge/model/send_otp_response.dart';
@@ -90,6 +91,9 @@ enum API {
   verifyOtp,
   resendOtp,
   estimateCharging,
+
+  forgetPassword
+
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -142,9 +146,11 @@ class APIManager {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+
           // Enable credentials for each web request
           if (kIsWeb) {
             options.extra['withCredentials'] = true;
+
           }
 
           if (!kIsWeb) {
@@ -173,11 +179,13 @@ class APIManager {
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401) {
+
             print("🔒 401 detected - attempting token refresh");
 
             // If refresh already failed → logout immediately
             if (_refreshFailed) {
               await clearSession();
+
               unAthorizedTokenErrorDialog(
                 routeGlobalKey.currentContext!,
                 message: "Your Session has Expired. Please Login Again",
@@ -198,18 +206,24 @@ class APIManager {
                   options: Options(
                     method: requestOptions.method,
                     headers: requestOptions.headers,
+
                     extra: kIsWeb ? {'withCredentials': true} : {},
+
                   ),
                 );
 
                 return handler.resolve(retryResponse);
+
               } catch (retryError) {
                 print("❌ Retry request failed: $retryError");
+
                 return handler.reject(e);
               }
             } else {
               // ❌ Refresh failed → logout
+
               await clearSession();
+
               unAthorizedTokenErrorDialog(
                 routeGlobalKey.currentContext!,
                 message: "Your Session has Expired. Please Login Again",
@@ -218,9 +232,11 @@ class APIManager {
             }
           }
 
+
           _logError(e);
           handler.next(e);
         },
+
       ),
     );
   }
@@ -538,6 +554,10 @@ class APIManager {
         return "/User/resend-otp";
       case API.estimateCharging:
         return "/ChargingSession/estimate-charging";
+
+      case API.forgetPassword:
+        return "/User/forgot-password";
+
     }
   }
 
@@ -628,6 +648,9 @@ class APIManager {
         return DeleteReviewResponse.fromJson(json);
       case API.resetPassword:
         return ResetPasswordResponse.fromJson(json);
+      case API.forgetPassword:
+        return ForgetPasswordResponse.fromJson(json);
+
       case API.deleteAccount:
         return DeleteAccountResponse.fromJson(json);
       case API.refreshToken:
@@ -638,14 +661,18 @@ class APIManager {
         return CreateOrderResponse.fromJson(json);
       case API.verifyRazorpayPayment:
         return VerifyPaymentResponse.fromJson(json);
+
+
       case API.sendOtp:
         return SendOtpResponse.fromJson(json);
       case API.verifyOtp:
         return VerifyOtpResponse.fromJson(json);
+
       case API.resendOtp:
         return ResendOtpResponse.fromJson(json);
       case API.estimateCharging:
         return EstimateChargingResponse.fromJson(json);
+
       default:
         return json;
     }
@@ -671,7 +698,7 @@ class APIManager {
       );
       
       print('Response code: ${response.statusCode}');
-      
+
       if (response.statusCode == 200) {
         return parseResponse(api, response.data);
       }
@@ -715,7 +742,6 @@ class APIManager {
   bool _isRefreshingToken = false;
   bool _refreshFailed = false;
 
-  /// 🔄 REFRESH TOKEN
   Future<bool> _refreshToken() async {
     if (_isRefreshingToken || _refreshFailed) {
       return false;
@@ -726,9 +752,10 @@ class APIManager {
     try {
       final response = await dio.post(
         apiEndPoint(API.refreshToken),
-        options: Options(
+    options: Options(
           extra: kIsWeb ? {'withCredentials': true} : {},
         ),
+
       );
 
       if (response.statusCode == 200) {
@@ -736,6 +763,7 @@ class APIManager {
 
         if (refreshResponse.success == true && refreshResponse.user != null) {
           final prefs = await SharedPreferences.getInstance();
+
           await prefs.setString("userId", refreshResponse.user!.recId!);
 
           print("🔁 Token refreshed successfully");
@@ -743,6 +771,7 @@ class APIManager {
           _refreshFailed = false; // Reset flag on success
           return true;
         } else {
+
           print("❌ Refresh token failed: ${refreshResponse.message}");
           _refreshFailed = true;
         }
@@ -755,4 +784,36 @@ class APIManager {
     _isRefreshingToken = false;
     return false;
   }
+
+
+  // Future<bool> _refreshToken() async {
+  //   try {
+  //     final response = await dio.post(
+  //       apiEndPoint(API.refreshToken),
+  //       // options: Options(validateStatus: (_) => true),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final refreshResponse = RefreshTokenResponse.fromJson(response.data);
+
+  //       // Cookies are already updated automatically by CookieManager
+  //       print("🔁 Token refreshed successfully");
+  //       if (refreshResponse.success == false) {
+  //         unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+  //             message: "Your Session has Expired.Please Login Again");
+  //       } else {
+  //         final prefs = await SharedPreferences.getInstance();
+  //         await prefs.setString("userId", refreshResponse!.user!.recId!);
+  //       }
+  //       return true;
+  //     } else {
+  //        unAthorizedTokenErrorDialog(routeGlobalKey.currentContext!,
+  //             message: "Your Session has Expired.Please Login Again");
+  //     }
+  //   } catch (e) {
+  //     print("❌ Refresh token failed: $e");
+  //   }
+  //   return false;
+  // }
+
 }

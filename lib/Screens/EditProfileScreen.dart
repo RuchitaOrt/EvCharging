@@ -3,10 +3,12 @@ import 'package:HyCharge/Provider/ImageCacheProvider.dart';
 import 'package:HyCharge/Provider/ProfileProvider.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/ImageHelper.dart';
+import 'package:HyCharge/Utils/ImageHelper.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/model/ProfileResponse.dart';
+import 'package:HyCharge/model/UploadResponse.dart';
 import 'package:HyCharge/model/UploadResponse.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
@@ -44,8 +46,7 @@ if(widget.user!=null)
     addressController = TextEditingController(
       text:
           "${widget.user!.addressLine1 ?? ''} "
-          "${widget.user!.addressLine2 ?? ''} "
-          "${widget.user!.addressLine3 ?? ''}",
+         
     );
 }
    
@@ -250,6 +251,8 @@ Widget _profileImage() {
               "phoneNumber": phoneController.text.trim(),
               "countryCode": "+91",
               "addressLine1": addressController.text.trim(),
+                        "addressLine2": "",
+                                  "addressLine3": "",
             },
           );
 

@@ -21,6 +21,10 @@ class ChargingProvider extends ChangeNotifier {
     required int connectorId,
     required String startMeterReading,
     required String chargingTariff,
+    required String energyLimit,
+     required String costLimit,
+      required String timeLimit,
+       required String batteryIncreaseLimit,
   }) async {
     loading = true;
     notifyListeners();
@@ -33,10 +37,10 @@ class ChargingProvider extends ChangeNotifier {
       "connectorId": connectorId,
       "startMeterReading": startMeterReading,
       "chargingTariff": chargingTariff,
-      // "energyLimit": "0",
-      // "costLimit": "0",
-      // "timeLimit": "0",
-      // "batteryIncreaseLimit": "0"
+      // "energyLimit": energyLimit,
+      "costLimit": costLimit,
+      // "timeLimit": timeLimit,
+      // "batteryIncreaseLimit": batteryIncreaseLimit
     };
 
     try {
@@ -44,7 +48,7 @@ class ChargingProvider extends ChangeNotifier {
       sessionResponse = res;
 
       if (!res.success) {
-        showToast(res.message);
+        showToast(res.message!);
       }
  loading = false;
       notifyListeners();
@@ -61,81 +65,6 @@ class ChargingProvider extends ChangeNotifier {
     }
   }
 
-  // Future<bool> startSession({
-  //   required BuildContext context,
-  //   required String chargingGunId,
-  //   required String chargingStationId,
-  //   required String userId,
-  //   required String chargeTagId,
-  //   required int connectorId,
-  //   required String startMeterReading,
-  //   required String chargingTariff,
-  // }) async {
-  //   loading = true;
-  //   notifyListeners();
-
-  //   final payload = {
-  //     "chargingGunId": chargingGunId,
-  //     "chargingStationId": chargingStationId,
-  //     "userId": userId,
-  //     "chargeTagId": chargeTagId,
-  //     "connectorId": connectorId,
-  //     "startMeterReading": startMeterReading,
-  //     "chargingTariff": chargingTariff,
-  //   };
-
-  //   try {
-  //     final res = await _service.startChargingSession(context, payload);
-  //     sessionResponse = res;
-
-  //     if (res.success) {
-  //       return true;
-  //     } else {
-  //       showToast(res.message);
-  //     }
-  //   } catch (e) {
-  //     showToast("Failed to start session: $e");
-  //   } finally {
-  //     loading = false;
-  //     notifyListeners();
-  //   }
-  //   return false;
-  // }
-
-  // EndChargingSessionResponse? endSessionResponse;
-
-  // Future<bool> endSession({
-  //   required BuildContext context,
-  //   required String sessionId,
-  //   required String endMeterReading,
-  // }) async {
-  //   loading = true;
-  //   notifyListeners();
-
-  //   final payload = {
-  //     "sessionId": sessionId,
-  //     "endMeterReading": endMeterReading,
-  //   };
-
-  //   try {
-  //     final res = await _service.endChargingSession(context, payload);
-  //     endSessionResponse = res;
-
-  //     if (res.success!) {
-  //       showToast(res.message!);
-  //       return true;
-  //     } else {
-  //       showToast(res.message!);
-  //     }
-  //   } catch (e) {
-  //     showToast("Failed to end session: $e");
-  //   } finally {
-  //     loading = false;
-  //     notifyListeners();
-  //   }
-
-  //   return false;
-  // }
   EndChargingSessionResponse? endSessionResponse;
 
   Future<EndChargingSessionResponse?> endSession({
@@ -268,58 +197,4 @@ class ChargingProvider extends ChangeNotifier {
 
 
 
-   EstimateChargingResponse? _estimateResponse;
-  EstimateChargingResponse? get estimateResponse => _estimateResponse;
-
-  bool _loading = false;
-//  await provider.estimateCharging(
-//                 context: context,
-//                 chargingGunId: "123",
-//                 chargingStationId: "456",
-//                 connectorId: "789",
-//                 batteryCapacity: 60,
-//                 desiredEnergy: 20,
-//                 desiredDuration: 0,
-//                 currentBatteryPercentage: 40,
-//                 desiredCost: 0,
-//               );
-
-//               if (provider.estimateResponse?.success == true) {
-//                 print(provider.estimateResponse?.estimatedCost);
-//               }
-  Future<void> estimateCharging({
-    required BuildContext context,
-    required String chargingGunId,
-    required String chargingStationId,
-    required String connectorId,
-    required double batteryCapacity,
-    required double desiredEnergy,
-    required double desiredDuration,
-    required double currentBatteryPercentage,
-    required double desiredCost,
-  }) async {
-    try {
-      _loading = true;
-      notifyListeners();
-
-      _estimateResponse = await _service.estimateCharging(
-        context: context,
-        chargingGunId: chargingGunId,
-        chargingStationId: chargingStationId,
-        connectorId: connectorId,
-        batteryCapacity: batteryCapacity,
-        desiredEnergy: desiredEnergy,
-        desiredDuration: desiredDuration,
-        currentBatteryPercentage: currentBatteryPercentage,
-        desiredCost: desiredCost,
-      );
-
-    } catch (e) {
-      debugPrint("Estimate Charging Error: $e");
-      rethrow;
-    } finally {
-      _loading = false;
-      notifyListeners();
-    }
-  }
 }

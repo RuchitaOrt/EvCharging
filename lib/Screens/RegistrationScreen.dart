@@ -100,7 +100,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           style: CommonStyles.tsblackHeading,
                         ),
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 5),
+                      SizedBox(height:20),
                       Row(
                         children: [
                           Expanded(
@@ -152,10 +152,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         textEditingController: emailController,
                         autovalidateMode: AutovalidateMode.disabled,
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 2),
-                      Text(
-                        CommonStrings.strPassword,
-                        style: CommonStyles.textFieldHeading,
+                      
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
+                        child: Text(
+                          CommonStrings.strPassword,
+                          style: CommonStyles.textFieldHeading,
+                        ),
                       ),
                       SizedBox(height: SizeConfig.blockSizeVertical * 1),
                       TextFormField(
@@ -196,10 +199,13 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           counterText: "",
                         ),
                       ),
-                      SizedBox(height: SizeConfig.blockSizeVertical * 2),
-                      Text(
-                        CommonStrings.strconfirmpassword,
-                        style: CommonStyles.textFieldHeading,
+                     
+                      Padding(
+                        padding: const EdgeInsets.only(top: 14),
+                        child: Text(
+                          CommonStrings.strconfirmpassword,
+                          style: CommonStyles.textFieldHeading,
+                        ),
                       ),
                       SizedBox(height: SizeConfig.blockSizeVertical * 1),
                       TextFormField(

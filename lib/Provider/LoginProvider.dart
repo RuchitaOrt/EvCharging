@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart'; // ✅ Instead of dart:io
 import 'package:HyCharge/Request/LoginRequest.dart';
 import 'package:HyCharge/Services/login_api_service.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/model/ForgetPasswordResponse.dart';
+import 'package:HyCharge/model/ResetPasswordResponse.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
 import 'package:HyCharge/model/send_otp_response.dart';
 import 'package:HyCharge/model/verify_otp_response.dart';
@@ -188,6 +190,7 @@ Future<void> verifyOtp({
   required String authId,
   required String otpCode,
   required String phoneNumber,
+  required bool isReset,
 }) async {
   try {
     _loading = true;
@@ -200,7 +203,7 @@ Future<void> verifyOtp({
       phoneNumber: phoneNumber,
     );
 
-    if (_verifyOtpResponse?.success == true) {
+    if (_verifyOtpResponse?.success == true && isReset==false) {
       await _saveLoginData(_verifyOtpResponse!);
     }
 
@@ -254,4 +257,35 @@ Future<void> _saveLoginData(VerifyOtpResponse response) async {
 
   print("✅ Login Data Saved");
 }
+
+
+
+ ForgetPasswordResponse? forgetPasswordResponse;
+ 
+
+  Future<void> forgetPassword({
+    required BuildContext context,
+    required String emailOrPhone,
+    required String otpCode,
+    required String authId,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    isLoading = true;
+    notifyListeners();
+
+    forgetPasswordResponse = await _loginService.forgetPassword(
+      context: context,
+      emailOrPhone: emailOrPhone,
+      otpCode: otpCode,
+      authId: authId,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
+    );
+    print("forget");
+    
+print(forgetPasswordResponse);
+    isLoading = false;
+    notifyListeners();
+  }
 }

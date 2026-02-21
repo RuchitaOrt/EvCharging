@@ -143,27 +143,55 @@ Future<ChargingGunStatusResponse> getChargingGunStatus({
 
    Future<EstimateChargingResponse> estimateCharging({
     required BuildContext context,
-    required String chargingGunId,
-    required String chargingStationId,
-    required String connectorId,
-    required double batteryCapacity,
-    required double desiredEnergy,
-    required double desiredDuration,
-    required double currentBatteryPercentage,
-    required double desiredCost,
-  }) async {
-    final body = {
-      "chargingGunId": chargingGunId,
-      "chargingStationId": chargingStationId,
-      "connectorId": connectorId,
-      "batteryCapacity": batteryCapacity,
-      "desiredEnergy": desiredEnergy,
-      "desiredDuration": desiredDuration,
-      "currentBatteryPercentage": currentBatteryPercentage,
-      "desiredCost": desiredCost,
-    };
+  required String chargingGunId,
+  required String chargingStationId,
+  required String connectorId,
 
-    final response = await  APIManager()..apiRequest(
+  double? batteryCapacity,
+  double? desiredEnergy,
+  int? desiredDuration,
+  double? currentBatteryPercentage,
+  double? desiredCost,
+  }) async {
+    
+    final Map<String, dynamic> body = {
+  "chargingGunId": chargingGunId,
+  "chargingStationId": chargingStationId,
+  "connectorId": connectorId,
+};
+
+if (batteryCapacity != null) {
+  body["batteryCapacity"] = batteryCapacity;
+}
+
+if (desiredEnergy != null) {
+  body["desiredEnergy"] = desiredEnergy;
+}
+
+if (desiredDuration != null) {
+  body["desiredDuration"] = desiredDuration;
+}
+
+if (currentBatteryPercentage != null) {
+  body["currentBatteryPercentage"] = currentBatteryPercentage;
+}
+
+if (desiredCost != null) {
+  body["desiredCost"] = desiredCost;
+}
+
+    // final body = {
+    //   "chargingGunId": chargingGunId,
+    //   "chargingStationId": chargingStationId,
+    //   "connectorId": connectorId,
+    //   "batteryCapacity": batteryCapacity,
+    //   "desiredEnergy": desiredEnergy,
+    //   "desiredDuration": desiredDuration,
+    //   "currentBatteryPercentage": currentBatteryPercentage,
+    //   "desiredCost": desiredCost,
+    // };
+print(body);
+    final response = await  APIManager().apiRequest(
       context,
       API.estimateCharging,
       jsonval: body,

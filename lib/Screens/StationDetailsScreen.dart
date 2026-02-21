@@ -4,6 +4,7 @@ import 'package:HyCharge/Provider/ChargingEstimateProvider.dart';
 import 'package:HyCharge/Provider/ChargingGunStatusProvider.dart';
 import 'package:HyCharge/Provider/ChargingHubReviewProvider.dart';
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Provider/HubProvider.dart';
 import 'package:HyCharge/Provider/WalletProvider.dart';
 import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
 import 'package:HyCharge/Screens/Controller/map_controller.dart';
@@ -202,18 +203,66 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// 👤 Avatar
+            // CircleAvatar(
+            //   radius: 18,
+            //   backgroundColor: CommonColors.blue.withOpacity(0.15),
+            //   child: Text(
+            //     initials,
+            //     style: const TextStyle(
+            //       fontSize: 14,
+            //       fontWeight: FontWeight.w600,
+            //       color: CommonColors.blue,
+            //     ),
+            //   ),
+            // ),
             CircleAvatar(
-              radius: 18,
-              backgroundColor: CommonColors.blue.withOpacity(0.15),
-              child: Text(
+  radius: 18,
+  backgroundColor: CommonColors.blue.withOpacity(0.15),
+  child: review.userProfileImage != null &&
+          review.userProfileImage!.isNotEmpty
+      ? FutureBuilder<Uint8List>(
+          future: context
+              .read<HubProvider>()   // 👈 your provider class
+              .downloadImage(review.userProfileImage!),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const SizedBox(
+                height: 16,
+                width: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              );
+            }
+
+            if (snapshot.hasError || !snapshot.hasData) {
+              return Text(
                 initials,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: CommonColors.blue,
                 ),
+              );
+            }
+
+            return ClipOval(
+              child: Image.memory(
+                snapshot.data!,
+                fit: BoxFit.cover,
+                width: 36,
+                height: 36,
               ),
-            ),
+            );
+          },
+        )
+      : Text(
+          initials,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: CommonColors.blue,
+          ),
+        ),
+),
             SizedBox(
               width: 10,
             ),
@@ -222,13 +271,15 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  
+                      Text(
                     review.userName ?? "UnKnown",
                     style: const TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 13,
                     ),
                   ),
+                     
                   Text(
                     formatReviewTime("${review.reviewTime}") ?? "UnKnown",
                     style: const TextStyle(
@@ -970,8 +1021,15 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                         isAvailable: isAvailable,
                         onTap: () {
                           setState(() {
-                            _selectedCharger = charger;
+                            try{
+_selectedCharger = charger;
                             selectedStationID = station.recId;
+                             showToast(_selectedCharger!.connectorName!);
+                            }catch(e)
+                            {
+                              showToast(e.toString());
+                            }
+                            
                           });
                         },
                       );
@@ -1015,6 +1073,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   // 2️⃣ Check the status
   if (statusAvailable!.data!.isAvailable == true) {
     // ✅ Status is available, navigate
+        _statusTimer?.cancel();
     Navigator.push(
       context,
       MaterialPageRoute(

@@ -13,21 +13,26 @@ class AuthStorage {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_keyUserId);
   }
-  Future<void> clearLocalStorage() async {
+
+  /// Remove only login related data
+  static Future<void> clearAuthData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyUserId);
+    print("🔐 Auth data cleared (userId only)");
+  }
+
+  static const String _firstTimeKey = "is_first_time";
+
+static Future<bool> isFirstTime() async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
-  print("📦 Local storage cleared");
+  return prefs.getBool(_firstTimeKey) ?? true;
 }
 
-static const String _firstTimeKey = "is_first_time";
+static Future<void> setFirstTimeDone() async {
+  print("setFirstTimeDone");
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool(_firstTimeKey, false);
+}
 
-  static Future<bool> isFirstTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_firstTimeKey) ?? true;
-  }
 
-  static Future<void> setFirstTimeDone() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_firstTimeKey, false);
-  }
 }

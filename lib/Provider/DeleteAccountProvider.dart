@@ -1,6 +1,7 @@
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Services/DeleteAccountService.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:HyCharge/model/DeleteAccountResponse.dart';
@@ -25,8 +26,7 @@ class DeleteAccountProvider extends ChangeNotifier {
        if (response!.success) {
         await APIManager.clearSession();
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.clear();
+        await AuthStorage.clearAuthData();
 
         GlobalLists.islLogin = false;
 

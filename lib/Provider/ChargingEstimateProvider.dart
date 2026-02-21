@@ -1,63 +1,181 @@
+import 'package:HyCharge/Services/ChargingService.dart';
+import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:flutter/material.dart';
 
 class ChargingEstimateProvider extends ChangeNotifier {
   // 🔌 Config (normally from API)
-  final double chargerPowerKW = 7.4;
-  final double pricePerUnit = 18;
-  final double batteryCapacity = 40;
-  final double efficiency = 0.9;
+  final double? chargerPowerKW =null;
+  final double? pricePerUnit=null;
+  final double? batteryCapacity=null;
+  final double? efficiency=null;
  final controller = TextEditingController();
   double amount = 0;
   double units = 0;
   double time = 0;
   double percentage = 0;
 
-  void updateByAmount(double value) {
-    amount = value;
-    units = amount / pricePerUnit;
-    time = units / (chargerPowerKW * efficiency);
-    percentage = (units / batteryCapacity) * 100;
-    _capValues();
-  }
+ 
+bool isDragging = false;
 
-  void updateByUnits(double value) {
-    units = value;
-    amount = units * pricePerUnit;
-    time = units / (chargerPowerKW * efficiency);
-    percentage = (units / batteryCapacity) * 100;
-    _capValues();
-  }
+String activeMode = "amount"; // amount / units / time
+void setUnits(double value) {
+  units = value;
+  notifyListeners();
+}
 
-  void updateByTime(double value) {
-    time = value;
-    units = time * chargerPowerKW * efficiency;
-    amount = units * pricePerUnit;
-    percentage = (units / batteryCapacity) * 100;
-    _capValues();
-  }
+void setTime(double value) {
+  time = value;
+  notifyListeners();
+}
 
-  void updateByPercentage(double value) {
-    percentage = value;
-    units = (percentage / 100) * batteryCapacity;
-    time = units / (chargerPowerKW * efficiency);
-    amount = units * pricePerUnit;
-    _capValues();
-  }
+void setAmount(String value) {
+  amount = double.tryParse(value) ?? 0;
+  notifyListeners();
+}
 
-  void _capValues() {
-    percentage = percentage.clamp(0, 100);
-    units = units.clamp(0, batteryCapacity);
-    notifyListeners();
+
+   EstimateChargingResponse? _estimateResponse;
+  EstimateChargingResponse? get estimateResponse => _estimateResponse;
+
+  bool _loading = false;
+ final ChargingService _service = ChargingService();
+ Future<void> estimateCharging({
+  required BuildContext context,
+  required String chargingGunId,
+  required String chargingStationId,
+  required String connectorId,
+  double? desiredEnergy,
+  int? desiredDuration,
+  double? desiredCost,
+  double? currentBatteryPercentage,
+}) async {
+  try {
+    _loading = true;
+
+    _estimateResponse = await _service.estimateCharging(
+      context: context,
+      chargingGunId: chargingGunId,
+      chargingStationId: chargingStationId,
+      connectorId: connectorId,
+      batteryCapacity: batteryCapacity,
+      desiredEnergy: desiredEnergy,
+      desiredDuration: desiredDuration,
+      currentBatteryPercentage: currentBatteryPercentage,
+      desiredCost: desiredCost,
+    );
+
+    if (_estimateResponse != null && _estimateResponse!.success) {
+
+      if (!isDragging) {
+        if (activeMode != "units") {
+          units = _estimateResponse!.estimatedEnergy;
+        }
+
+        if (activeMode != "time") {
+          time = _estimateResponse!.estimatedTimeMinutes;
+        }
+
+        if (activeMode != "amount") {
+          amount = _estimateResponse!.estimatedCost;
+          controller.text = amount.toStringAsFixed(0);
+        }
+      }
+
+      percentage = _estimateResponse!.estimatedBatteryIncrease;
+    }
+
+  } catch (e) {
+    debugPrint("Estimate Charging Error: $e");
+  } finally {
+    _loading = false;
+    notifyListeners(); // ✅ ONLY ONE NOTIFY HERE
   }
-    final double chargerPower = 7.4;
-  
-  void calculateFromAmount(double value) {
-    amount = value;
-    print("Setted value");
-    print(amount);
-    units = amount / pricePerUnit;
-    time = units / chargerPower;
-    percentage = (units / batteryCapacity) * 100;
-    notifyListeners();
-  }
+}
+
+//  Future<void> estimateCharging({
+//   required BuildContext context,
+//   required String chargingGunId,
+//   required String chargingStationId,
+//   required String connectorId,
+
+//   double? desiredEnergy,
+//   int? desiredDuration,
+//   double? desiredCost,
+//   double? currentBatteryPercentage,
+// }) async {
+//   try {
+//     _loading = true;
+//     notifyListeners();
+
+//     _estimateResponse = await _service.estimateCharging(
+//       context: context,
+//       chargingGunId: chargingGunId,
+//       chargingStationId: chargingStationId,
+//       connectorId: connectorId,
+//       batteryCapacity: batteryCapacity,
+//       desiredEnergy: desiredEnergy,
+//       desiredDuration: desiredDuration,
+//       currentBatteryPercentage: currentBatteryPercentage,
+//       desiredCost: desiredCost,
+//     );
+//  print("coming");
+//  print(_estimateResponse);
+//     if (_estimateResponse != null &&
+//         _estimateResponse!.success) {
+//       print("coming here");
+//       // units = _estimateResponse!.estimatedEnergy;
+//       // time = _estimateResponse!.estimatedTimeMinutes;
+//       // percentage = _estimateResponse!.estimatedBatteryIncrease;
+//       // amount = _estimateResponse!.estimatedCost;
+// // if (activeMode != "units") {
+// //   units = _estimateResponse!.estimatedEnergy;
+// // }
+
+// // if (activeMode != "time") {
+// //   time = _estimateResponse!.estimatedTimeMinutes;
+// // }
+
+// // if (activeMode != "amount") {
+// //   amount = _estimateResponse!.estimatedCost;
+// // }
+// // if (activeMode != "units") {
+// //   units = _estimateResponse!.estimatedEnergy;
+// // }
+
+// // if (activeMode != "time") {
+// //   time = _estimateResponse!.estimatedTimeMinutes;
+// // }
+
+// // if (activeMode != "amount") {
+// //   amount = _estimateResponse!.estimatedCost;
+// // }
+// if (!isDragging) {
+
+//   if (activeMode != "units") {
+//     units = _estimateResponse!.estimatedEnergy;
+//   }
+
+//   if (activeMode != "time") {
+//     time = _estimateResponse!.estimatedTimeMinutes;
+//   }
+
+//   if (activeMode != "amount") {
+//     amount = _estimateResponse!.estimatedCost;
+//   }
+
+// }
+
+// percentage = _estimateResponse!.estimatedBatteryIncrease;
+
+//       notifyListeners();
+//     }
+
+//   } catch (e) {
+//     debugPrint("Estimate Charging Error: $e");
+//   } finally {
+//     _loading = false;
+//     notifyListeners();
+//   }
+// }
+
 }

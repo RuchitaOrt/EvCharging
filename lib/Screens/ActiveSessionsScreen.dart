@@ -5,6 +5,7 @@ import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
+import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -102,13 +103,14 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
             MaterialPageRoute(
               builder: (_) => SessionChargingScreen(
                 args: SessionChargingArgs(
-                  sessionId: session.recId,
-                  status: session.status ?? "",
-                  cost: session.chargingTotalFee ?? "0",
-                  unitConsumed: session.chargingSpeed ?? "0",
-                  outputPower: session.energyTransmitted ?? "0",
-                  batteryPercentage: session.soCStart.toString() ?? "0",
-                  endMeterReading: session.endMeterReading ?? "0",
+                  sessionId: session.recId!,
+                  status: session!.status ?? "",
+                  cost: session!.chargingTotalFee.toString() ?? "0",
+                  unitConsumed: session!.energyTransmitted.toString() ?? "0",
+                  outputPower: session!.chargingGun!.powerOutput!.toString() ?? "0",
+                  batteryPercentage: session!.soCStart.toString() ?? "0",
+                  endMeterReading: session.endMeterReading.toString() ?? "0",
+                  duration: session.duration.toString() ?? "0"
                 ),
               ),
             ),
@@ -167,7 +169,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              session.chargingStationName,
+                              session.chargingStationName!,
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -175,7 +177,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              session.chargingHubName,
+                              session.chargingHubName!,
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,
@@ -194,7 +196,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
-                          session.status,
+                          session.status!,
                           style: const TextStyle(
                             color: Colors.green,
                             fontWeight: FontWeight.w600,
@@ -267,8 +269,8 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                       //                   // print("Charging session ID ${data!.session!.recId!}");
                       final response = await providerEndSession.endSession(
                           context: context,
-                          sessionId: session.recId, // 🔑 station id
-                          endMeterReading: session.endMeterReading!);
+                          sessionId: session.recId!, // 🔑 station id
+                          endMeterReading: session.endMeterReading!.toString());
 
                       if (response!.success!) {
                         final provider = context.read<ActiveSessionProvider>();

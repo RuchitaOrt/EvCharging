@@ -11,6 +11,7 @@ class FileUploadService {
   Future<UploadResponse> uploadFile({
     required dynamic file,
     String? remarks,
+    bool? isDP
   }) async {
     try {
       FormData formData;
