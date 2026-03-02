@@ -210,31 +210,37 @@ class _AddehicleScreenState extends State<AddVehicleScreen> {
   int selectedUnitsIndex = 2;
 bool _validateForm() {
   if (selectedManufacturerID == null) {
+    FocusScope.of(context).unfocus();
     showToast("Please select manufacturer");
     return false;
   }
 
   if (selectedModelID == null) {
+    FocusScope.of(context).unfocus();
     showToast("Please select model");
     return false;
   }
 
   if (registrationNoController.text.trim().isEmpty) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter vehicle registration number");
     return false;
   }
 
   if (selectedBatteryTypeID == null) {
+    FocusScope.of(context).unfocus();
     showToast("Please select battery type");
     return false;
   }
 
   if (selectedBatteryCapacityID == null) {
+    FocusScope.of(context).unfocus();
     showToast("Please select battery capacity");
     return false;
   }
 
   if (selectedChargerTypeId == null) {
+    FocusScope.of(context).unfocus();
     showToast("Please select charger type");
     return false;
   }
@@ -280,10 +286,12 @@ bool _validateForm() {
                 );
 
                 if (provider.vehicle != null) {
+                  FocusScope.of(context).unfocus();
                   showToast("${provider.message}");
 
                   Navigator.pop(context); // or move to another screen
                 } else {
+                  FocusScope.of(context).unfocus();
                   showToast("${provider.message}");
                 }
                 Navigator.push(
@@ -305,9 +313,11 @@ bool _validateForm() {
                         );
 
                 if (ok) {
+                  FocusScope.of(context).unfocus();
                   showToast("${provider.message}");
                   Navigator.pop(context);
                 } else {
+                  FocusScope.of(context).unfocus();
                   showToast("${provider.message}");
                 }
 

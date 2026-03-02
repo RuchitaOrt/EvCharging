@@ -39,36 +39,43 @@ String? message;
 }) async {
   // 🔹 Validation
   if (!ValidationHelper.isNotEmpty(body['firstName'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter first name");
     return false;
   }
 
   if (!ValidationHelper.isNotEmpty(body['lastName'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter last name");
     return false;
   }
 
   if (!ValidationHelper.isNotEmpty(body['addressLine1'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter address");
     return false;
   }
 
   if (!ValidationHelper.isNotEmpty(body['phoneNumber'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter phone number");
     return false;
   }
 
   if (!ValidationHelper.isValidPhone(body['phoneNumber'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter a valid phone number");
     return false;
   }
 
   if (!ValidationHelper.isNotEmpty(body['eMailID'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter email");
     return false;
   }
 
   if (!ValidationHelper.isEmailValid(body['eMailID'])) {
+    FocusScope.of(context).unfocus();
     showToast("Please enter a valid email address");
     return false;
   }

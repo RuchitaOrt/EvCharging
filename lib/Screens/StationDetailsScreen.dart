@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:HyCharge/Provider/ChargingEstimateProvider.dart';
 import 'package:HyCharge/Provider/ChargingGunStatusProvider.dart';
 import 'package:HyCharge/Provider/ChargingHubReviewProvider.dart';
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Provider/FileUploadProvider.dart';
 import 'package:HyCharge/Provider/HubProvider.dart';
 import 'package:HyCharge/Provider/WalletProvider.dart';
 import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
@@ -16,6 +18,7 @@ import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/ValidationHelper.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
@@ -31,6 +34,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -306,6 +310,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                       );
                     }),
                   ),
+                  _buildReviewImages(review),
                 ],
               ),
             ),
@@ -314,13 +319,26 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                 ? MoreOptionsMenu(
                     onEdit: () {
                       _openWriteReviewBottomSheet(
-                          hubID: widget.hub.recId,
-                          stationId: review.chargingStationId!,
-                          stationName: widget.hub.chargingHubName ?? "Station",
-                          rating: review.rating,
-                          description: review.description,
-                          isEdit: true,
-                          recId: review.recId);
+  hubID: widget.hub.recId,
+  stationId: review.chargingStationId!,
+  stationName: widget.hub.chargingHubName ?? "Station",
+  rating: review.rating,
+  description: review.description,
+  isEdit: true,
+  recId: review.recId,
+  img1: review.reviewImage1,
+  img2: review.reviewImage2,
+  img3: review.reviewImage3,
+  img4: review.reviewImage4,
+);
+                      // _openWriteReviewBottomSheet(
+                      //     hubID: widget.hub.recId,
+                      //     stationId: review.chargingStationId!,
+                      //     stationName: widget.hub.chargingHubName ?? "Station",
+                      //     rating: review.rating,
+                      //     description: review.description,
+                      //     isEdit: true,
+                      //     recId: review.recId);
                     },
                     onDelete: () async {
                       showModalBottomSheet(
@@ -344,8 +362,10 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                                 .deleteReview(context, review.recId!);
 
                             if (updatedResponse != null) {
+                              FocusScope.of(context).unfocus();
                               showToast(updatedResponse.message);
                             } else {
+                              FocusScope.of(context).unfocus();
                               showToast('Something went wrong');
                             }
 
@@ -368,7 +388,191 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
       ],
     );
   }
+Widget _buildReviewImages(review) {
+  // Collect valid image IDs
+  final imageIds = [
+    review.reviewImage1,
+    review.reviewImage2,
+    review.reviewImage3,
+    review.reviewImage4,
+  ]
+      .where((e) => e != null && e.toString().isNotEmpty && e != "string")
+      .cast<String>()
+      .toList();
 
+  if (imageIds.isEmpty) return const SizedBox();
+
+  return Padding(
+    padding: const EdgeInsets.only(top: 6),
+    child: SizedBox(
+      height: 55,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: imageIds.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 6),
+        itemBuilder: (context, index) {
+          return _reviewImageBox(imageIds[index]);
+        },
+      ),
+    ),
+  );
+}
+void _showFixedImagePopup(BuildContext context, Uint8List bytes) {
+  showDialog(
+    context: context,
+    barrierColor: Colors.black54,
+    builder: (_) {
+      return Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: SizeConfig.blockSizeHorizontal * 80,     // same width for all images
+            height: SizeConfig.blockSizeVertical *70,    // same height for all images
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Stack(
+              children: [
+                /// Image (same size box)
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.memory(
+                      bytes,
+                      fit: BoxFit.contain, // keeps aspect ratio
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
+                  ),
+                ),
+
+                /// Close Button
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const CircleAvatar(
+                      radius: 14,
+                      backgroundColor: Colors.black54,
+                      child: Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+  );
+}
+void _showImagePopup(BuildContext context, Uint8List bytes) {
+  showDialog(
+    context: context,
+    barrierColor: Colors.black.withOpacity(0.8),
+    builder: (_) {
+      return Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(10),
+        child: Stack(
+          children: [
+            // Zoomable Image
+            InteractiveViewer(
+              minScale: 1,
+              maxScale: 4,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.memory(
+                  bytes,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+
+            // Close Button
+            Positioned(
+              right: 10,
+              top: 10,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.white,
+                    size: 22,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+Widget _reviewImageBox(String imageId) {
+  return FutureBuilder<Uint8List>(
+    future:  context
+              .read<HubProvider>()   // 👈 your provider class
+              .downloadImage(imageId!),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return _imagePlaceholder();
+      }
+
+      if (snapshot.hasError || !snapshot.hasData) {
+        return _imagePlaceholder();
+      }
+
+      final bytes = snapshot.data!;
+
+      return GestureDetector(
+        onTap: () {
+          _showFixedImagePopup(context, bytes);
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.memory(
+            bytes,
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+Widget _imagePlaceholder() {
+  return Container(
+    width: 50,
+    height: 50,
+    decoration: BoxDecoration(
+      color: Colors.grey.shade200,
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: Colors.grey.shade300),
+    ),
+    child: const Icon(
+      Icons.image,
+      size: 18,
+      color: Colors.grey,
+    ),
+  );
+}
   String formatReviewTime(String dateTimeString) {
     final dateTime = DateTime.parse(dateTimeString);
 
@@ -664,35 +868,71 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
       ],
     );
   }
-
-  void _openWriteReviewBottomSheet(
-      {required String stationId,
-      required String stationName,
-      required String hubID,
-      int? rating,
-      String? description,
-      bool? isEdit,
-      String? recId}) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: CommonColors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) {
-        return _WriteReviewSheet(
-          hubId: hubID,
-          stationId: stationId,
-          stationName: stationName,
-          initialRating: rating,
-          initialDescription: description,
-          isEdit: isEdit!,
-          recId: recId,
-        );
-      },
-    );
-  }
+void _openWriteReviewBottomSheet({
+  required String stationId,
+  required String stationName,
+  required String hubID,
+  int? rating,
+  String? description,
+  bool? isEdit,
+  String? recId,
+  String? img1,
+  String? img2,
+  String? img3,
+  String? img4,
+}) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: CommonColors.white,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (_) {
+      return _WriteReviewSheet(
+        hubId: hubID,
+        stationId: stationId,
+        stationName: stationName,
+        initialRating: rating,
+        initialDescription: description,
+        isEdit: isEdit!,
+        recId: recId,
+        reviewImage1: img1,
+        reviewImage2: img2,
+        reviewImage3: img3,
+        reviewImage4: img4,
+      );
+    },
+  );
+}
+  // void _openWriteReviewBottomSheet(
+  //     {required String stationId,
+  //     required String stationName,
+  //     required String hubID,
+  //     int? rating,
+  //     String? description,
+  //     bool? isEdit,
+  //     String? recId}) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     backgroundColor: CommonColors.white,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //     ),
+  //     builder: (_) {
+  //       return _WriteReviewSheet(
+  //         hubId: hubID,
+  //         stationId: stationId,
+  //         stationName: stationName,
+  //         initialRating: rating,
+  //         initialDescription: description,
+  //         isEdit: isEdit!,
+  //         recId: recId,
+  //       );
+  //     },
+  //   );
+  // }
 
   // void _openWriteReviewBottomSheet({
   //   required String stationId,
@@ -1024,9 +1264,11 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                             try{
 _selectedCharger = charger;
                             selectedStationID = station.recId;
+                            FocusScope.of(context).unfocus();
                              showToast(_selectedCharger!.connectorName!);
                             }catch(e)
                             {
+                              FocusScope.of(context).unfocus();
                               showToast(e.toString());
                             }
                             
@@ -1087,7 +1329,7 @@ _selectedCharger = charger;
       ),
     );
   } else {
-   
+   FocusScope.of(context).unfocus();
     showToast("Charging gun status is not available. Please try again.");
   }
               //  context.read<ChargingGunStatusProvider>().fetchGunStatusValue(context: context, charger: _selectedCharger!);
@@ -1203,41 +1445,36 @@ _selectedCharger = charger;
     );
   }
 }
-
-// class _WriteReviewSheet extends StatefulWidget {
-//   final String hubId;
-//   final String stationId;
-//   final String stationName;
-
-//   const _WriteReviewSheet({
-//     required this.stationId,
-//     required this.stationName, required this.hubId,
-//   });
-
-//   @override
-//   State<_WriteReviewSheet> createState() => _WriteReviewSheetState();
-// }
 class _WriteReviewSheet extends StatefulWidget {
   final String hubId;
   final String stationId;
   final String stationName;
   final bool isEdit;
 
-  /// 👇 optional for edit
   final int? initialRating;
   final String? initialDescription;
   final String? recId;
 
-  const _WriteReviewSheet(
-      {Key? key,
-      required this.hubId,
-      required this.stationId,
-      required this.stationName,
-      this.initialRating,
-      this.initialDescription,
-      required this.isEdit,
-      this.recId})
-      : super(key: key);
+  /// Existing images (for edit)
+  final String? reviewImage1;
+  final String? reviewImage2;
+  final String? reviewImage3;
+  final String? reviewImage4;
+
+  const _WriteReviewSheet({
+    Key? key,
+    required this.hubId,
+    required this.stationId,
+    required this.stationName,
+    required this.isEdit,
+    this.initialRating,
+    this.initialDescription,
+    this.recId,
+    this.reviewImage1,
+    this.reviewImage2,
+    this.reviewImage3,
+    this.reviewImage4,
+  }) : super(key: key);
 
   @override
   State<_WriteReviewSheet> createState() => _WriteReviewSheetState();
@@ -1246,24 +1483,161 @@ class _WriteReviewSheet extends StatefulWidget {
 class _WriteReviewSheetState extends State<_WriteReviewSheet> {
   int rating = 0;
   TextEditingController reviewCtrl = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+
+  List<File> selectedImages = [];
+  List<String> uploadedImageIds = [];
+
+  /// Existing image IDs
+  List<String> existingImageIds = [];
+
   @override
   void initState() {
     super.initState();
 
     rating = widget.initialRating ?? 0;
-    reviewCtrl = TextEditingController(
-      text: widget.initialDescription ?? '',
+    reviewCtrl.text = widget.initialDescription ?? '';
+
+    existingImageIds = [
+      widget.reviewImage1,
+      widget.reviewImage2,
+      widget.reviewImage3,
+      widget.reviewImage4,
+    ]
+        .where((e) => e != null && e.toString().isNotEmpty)
+        .cast<String>()
+        .toList();
+  }
+
+  Future<void> _pickImages() async {
+    int total = existingImageIds.length + selectedImages.length;
+
+    if (total >= 4) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Maximum 4 images allowed")));
+      return;
+    }
+
+    final images = await _picker.pickMultiImage();
+    if (images == null) return;
+
+    int remaining = 4 - total;
+
+    setState(() {
+      selectedImages.addAll(
+        images.take(remaining).map((e) => File(e.path)),
+      );
+    });
+  }
+
+  Future<void> _uploadSelectedImages() async {
+    uploadedImageIds.clear();
+    final uploadProvider = context.read<UploadProvider>();
+
+    for (File file in selectedImages) {
+      final res = await uploadProvider.upload(file: file);
+      if (res != null && res.success) {
+        uploadedImageIds.add(res.fileId ?? "");
+      }
+    }
+  }
+
+  Widget _networkImageBox(String imageId) {
+    return FutureBuilder<Uint8List>(
+      future: context.read<HubProvider>().downloadImage(imageId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return _placeholder();
+        }
+
+        return Stack(
+          children: [
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              width: 70,
+              height: 70,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: MemoryImage(snapshot.data!),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            Positioned(
+              right: 4,
+              top: 4,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    existingImageIds.remove(imageId);
+                  });
+                },
+                child: const CircleAvatar(
+                  radius: 10,
+                  backgroundColor: Colors.black54,
+                  child: Icon(Icons.close, size: 12, color: Colors.white),
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _localImageBox(File file) {
+    return Stack(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(right: 8),
+          width: 70,
+          height: 70,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            image: DecorationImage(
+              image: FileImage(file),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          right: 4,
+          top: 4,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedImages.remove(file);
+              });
+            },
+            child: const CircleAvatar(
+              radius: 10,
+              backgroundColor: Colors.black54,
+              child: Icon(Icons.close, size: 12, color: Colors.white),
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: 70,
+      height: 70,
+      margin: const EdgeInsets.only(right: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(8),
+      ),
     );
   }
 
   @override
-  void dispose() {
-    reviewCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    int totalImages = existingImageIds.length + selectedImages.length;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -1275,94 +1649,128 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
-          Text(
-            widget.stationName,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+          Text(widget.stationName,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
 
           const SizedBox(height: 8),
 
-          // ⭐ Rating
+          /// Rating
           Row(
-            children: List.generate(5, (index) {
-              final starIndex = index + 1;
-
+            children: List.generate(5, (i) {
               return IconButton(
-                padding: EdgeInsets.zero,
-                onPressed: () {
-                  setState(() {
-                    if (rating == starIndex) {
-                      rating = starIndex - 1; // 👈 remove only this star
-                    } else {
-                      rating = starIndex;
-                    }
-                  });
-                },
+                onPressed: () => setState(() => rating = i + 1),
                 icon: Icon(
-                  index < rating ? Icons.star : Icons.star_border,
+                  i < rating ? Icons.star : Icons.star_border,
                   color: Colors.amber,
-                  size: 28,
                 ),
               );
             }),
           ),
 
-          // ✍️ Review Text
           CustomTextFieldWidget(
-            isMandatory: false,
-            title: "",
+            title: "Write your review",
             hintText: "Share your experience",
-            onChange: (val) {},
             textFieldLines: 4,
             textEditingController: reviewCtrl,
-            autovalidateMode: AutovalidateMode.disabled,
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
 
-          // Submit Button
+          /// Add Button
+           Row(
+             children: [
+              Icon(Icons.add,color:CommonColors.blue ,),
+               GestureDetector(
+                onTap:_pickImages,
+                child: Text("Add Images",style: TextStyle(color: CommonColors.blue),)),
+                const SizedBox(width: 10),
+              Text("$totalImages / 4"),
+             ],
+           ),
+          // Row(
+          //   children: [
+          //     ElevatedButton.icon(
+                
+          //       onPressed: _pickImages,
+          //       icon: const Icon(Icons.image, size: 18),
+          //       label:  Text("Add Images",style: TextStyle(color: CommonColors.blue),),
+          //     ),
+          //     const SizedBox(width: 10),
+          //     Text("$totalImages / 4"),
+          //   ],
+          // ),
+
+          const SizedBox(height: 10),
+
+          /// Preview (existing + new)
+          if (totalImages > 0)
+            SizedBox(
+              height: 80,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  ...existingImageIds.map(_networkImageBox),
+                  ...selectedImages.map(_localImageBox),
+                ],
+              ),
+            ),
+
+          const SizedBox(height: 16),
+
+          /// Submit
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                if (rating == 0 || reviewCtrl.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Please add rating & review"),
-                    ),
-                  );
-                  return;
-                }
+              onPressed: () async {
+                await _uploadSelectedImages();
 
-                if (widget.isEdit) {
-                  context.read<ChargingHubReviewProvider>().updateReview(
-                      context: context,
-                      chargingHubId: widget.hubId,
-                      chargingStationId: widget.stationId,
-                      rating: rating,
-                      description: reviewCtrl.text,
-                      recId: widget.recId!);
-                } else {
-                  context.read<ChargingHubReviewProvider>().addReview(
-                        context: context,
-                        chargingHubId: widget.hubId,
-                        chargingStationId: widget.stationId,
-                        rating: rating,
-                        description: reviewCtrl.text,
-                      );
-                }
+                final allImages = [
+                  ...existingImageIds,
+                  ...uploadedImageIds,
+                ];
+if (widget.isEdit) {
+    context.read<ChargingHubReviewProvider>().updateReview(
+      context: context,
+      chargingHubId: widget.hubId,
+      chargingStationId: widget.stationId,
+      rating: rating,
+      description: reviewCtrl.text,
+      recId: widget.recId!,
+            reviewImage1: allImages.length > 0 ? allImages[0] : null,
+                      reviewImage2: allImages.length > 1 ? allImages[1] : null,
+                      reviewImage3: allImages.length > 2 ? allImages[2] : null,
+                      reviewImage4: allImages.length > 3 ? allImages[3] : null,
+    );
+  } else {
+      if (rating == 0) {
+        FocusScope.of(context).unfocus();
+    showToast("Please select rating");
+    return;
+  }
 
-                // 🔥 CALL API HERE
-                // context.read<ChargingHubReviewProvider>()
-                //   .submitReview(widget.stationId, rating, reviewCtrl.text);
+  // 🔹 Review validation (for Add only)
+  if (!ValidationHelper.isNotEmpty(reviewCtrl.text)) {
+    FocusScope.of(context).unfocus();
+    showToast("Please enter your review");
+    return;
+  }
+    context.read<ChargingHubReviewProvider>().addReview(
+      context: context,
+      chargingHubId: widget.hubId,
+      chargingStationId: widget.stationId,
+      rating: rating,
+      description: reviewCtrl.text,
+            reviewImage1: allImages.length > 0 ? allImages[0] : null,
+                      reviewImage2: allImages.length > 1 ? allImages[1] : null,
+                      reviewImage3: allImages.length > 2 ? allImages[2] : null,
+                      reviewImage4: allImages.length > 3 ? allImages[3] : null,
+    );
+  }
+             
 
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(
+             style: ElevatedButton.styleFrom(
                 backgroundColor: CommonColors.blue,
                 foregroundColor: CommonColors.blue,
                 shape: RoundedRectangleBorder(
@@ -1387,6 +1795,336 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
     );
   }
 }
+// class _WriteReviewSheet extends StatefulWidget {
+//   final String hubId;
+//   final String stationId;
+//   final String stationName;
+
+//   const _WriteReviewSheet({
+//     required this.stationId,
+//     required this.stationName, required this.hubId,
+//   });
+
+//   @override
+//   State<_WriteReviewSheet> createState() => _WriteReviewSheetState();
+// }
+// class _WriteReviewSheet extends StatefulWidget {
+//   final String hubId;
+//   final String stationId;
+//   final String stationName;
+//   final bool isEdit;
+
+//   /// 👇 optional for edit
+//   final int? initialRating;
+//   final String? initialDescription;
+//   final String? recId;
+
+//   const _WriteReviewSheet(
+//       {Key? key,
+//       required this.hubId,
+//       required this.stationId,
+//       required this.stationName,
+//       this.initialRating,
+//       this.initialDescription,
+//       required this.isEdit,
+//       this.recId})
+//       : super(key: key);
+
+//   @override
+//   State<_WriteReviewSheet> createState() => _WriteReviewSheetState();
+// }
+
+// class _WriteReviewSheetState extends State<_WriteReviewSheet> {
+//   int rating = 0;
+//   TextEditingController reviewCtrl = TextEditingController();
+//   final ImagePicker _picker = ImagePicker();
+// Future<void> _pickImages() async {
+//   if (selectedImages.length >= 4) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(content: Text("Maximum 4 images allowed")),
+//     );
+//     return;
+//   }
+
+//   final List<XFile>? images = await _picker.pickMultiImage();
+
+//   if (images == null) return;
+
+//   final remainingSlots = 4 - selectedImages.length;
+
+//   final filesToAdd = images.take(remainingSlots).map((e) => File(e.path));
+
+//   setState(() {
+//     selectedImages.addAll(filesToAdd);
+//   });
+// }
+// Future<void> _uploadSelectedImages() async {
+//   uploadedImageIds.clear();
+
+//   final uploadProvider = context.read<UploadProvider>();
+
+//   for (File file in selectedImages) {
+//     final res = await uploadProvider.upload(file: file);
+
+//     if (res != null && res.success) {
+//       uploadedImageIds.add(res.fileId ?? "");
+//     }
+//   }
+// }
+// List<File> selectedImages = [];
+// List<String> uploadedImageIds = [];
+//   @override
+//   void initState() {
+//     super.initState();
+
+//     rating = widget.initialRating ?? 0;
+//     reviewCtrl = TextEditingController(
+//       text: widget.initialDescription ?? '',
+//     );
+//   }
+
+//   @override
+//   void dispose() {
+//     reviewCtrl.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: EdgeInsets.only(
+//         left: 16,
+//         right: 16,
+//         top: 16,
+//         bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+//       ),
+//       child: Column(
+//         mainAxisSize: MainAxisSize.min,
+//         crossAxisAlignment: CrossAxisAlignment.start,
+//         children: [
+//           // Title
+//           Text(
+//             widget.stationName,
+//             style: const TextStyle(
+//               fontSize: 18,
+//               fontWeight: FontWeight.w600,
+//             ),
+//           ),
+
+//           const SizedBox(height: 8),
+
+//           // ⭐ Rating
+//           Row(
+//             children: List.generate(5, (index) {
+//               final starIndex = index + 1;
+
+//               return IconButton(
+//                 padding: EdgeInsets.zero,
+//                 onPressed: () {
+//                   setState(() {
+//                     if (rating == starIndex) {
+//                       rating = starIndex - 1; // 👈 remove only this star
+//                     } else {
+//                       rating = starIndex;
+//                     }
+//                   });
+//                 },
+//                 icon: Icon(
+//                   index < rating ? Icons.star : Icons.star_border,
+//                   color: Colors.amber,
+//                   size: 28,
+//                 ),
+//               );
+//             }),
+//           ),
+
+//           // ✍️ Review Text
+//           CustomTextFieldWidget(
+//             isMandatory: false,
+//             title: "",
+//             hintText: "Share your experience",
+//             onChange: (val) {},
+//             textFieldLines: 4,
+//             textEditingController: reviewCtrl,
+//             autovalidateMode: AutovalidateMode.disabled,
+//           ),
+
+//           const SizedBox(height: 8),
+// const SizedBox(height: 12),
+
+// /// Add Image Button
+// Row(
+//   children: [
+//     ElevatedButton.icon(
+//       onPressed: _pickImages,
+//       icon: const Icon(Icons.image, size: 18),
+//       label: const Text("Add Images"),
+//       style: ElevatedButton.styleFrom(
+//         backgroundColor: Colors.grey.shade200,
+//         foregroundColor: Colors.black,
+//         elevation: 0,
+//       ),
+//     ),
+//     const SizedBox(width: 8),
+//     Text("${selectedImages.length}/4"),
+//   ],
+// ),
+
+// const SizedBox(height: 10),
+
+// /// Image Preview
+// if (selectedImages.isNotEmpty)
+//   SizedBox(
+//     height: 70,
+//     child: ListView.builder(
+//       scrollDirection: Axis.horizontal,
+//       itemCount: selectedImages.length,
+//       itemBuilder: (context, index) {
+//         return Stack(
+//           children: [
+//             Container(
+//               margin: const EdgeInsets.only(right: 8),
+//               width: 70,
+//               height: 70,
+//               decoration: BoxDecoration(
+//                 borderRadius: BorderRadius.circular(8),
+//                 image: DecorationImage(
+//                   image: FileImage(selectedImages[index]),
+//                   fit: BoxFit.cover,
+//                 ),
+//               ),
+//             ),
+
+//             /// Remove button
+//             Positioned(
+//               right: 4,
+//               top: 4,
+//               child: GestureDetector(
+//                 onTap: () {
+//                   setState(() {
+//                     selectedImages.removeAt(index);
+//                   });
+//                 },
+//                 child: const CircleAvatar(
+//                   radius: 10,
+//                   backgroundColor: Colors.black54,
+//                   child: Icon(Icons.close, size: 12, color: Colors.white),
+//                 ),
+//               ),
+//             ),
+//           ],
+//         );
+//       },
+//     ),
+//   ),
+//           // Submit Button
+//           SizedBox(
+//             width: double.infinity,
+//             child: ElevatedButton(
+//               onPressed: () async {
+//   if (rating == 0 || reviewCtrl.text.trim().isEmpty) {
+//     ScaffoldMessenger.of(context).showSnackBar(
+//       const SnackBar(content: Text("Please add rating & review")),
+//     );
+//     return;
+//   }
+
+//   /// Upload images first
+//   await _uploadSelectedImages();
+
+//   String? img1 = uploadedImageIds.length > 0 ? uploadedImageIds[0] : null;
+//   String? img2 = uploadedImageIds.length > 1 ? uploadedImageIds[1] : null;
+//   String? img3 = uploadedImageIds.length > 2 ? uploadedImageIds[2] : null;
+//   String? img4 = uploadedImageIds.length > 3 ? uploadedImageIds[3] : null;
+
+//   if (widget.isEdit) {
+//     context.read<ChargingHubReviewProvider>().updateReview(
+//       context: context,
+//       chargingHubId: widget.hubId,
+//       chargingStationId: widget.stationId,
+//       rating: rating,
+//       description: reviewCtrl.text,
+//       recId: widget.recId!,
+//       reviewImage1: img1,
+//       reviewImage2: img2,
+//       reviewImage3: img3,
+//       reviewImage4: img4,
+//     );
+//   } else {
+//     context.read<ChargingHubReviewProvider>().addReview(
+//       context: context,
+//       chargingHubId: widget.hubId,
+//       chargingStationId: widget.stationId,
+//       rating: rating,
+//       description: reviewCtrl.text,
+//       reviewImage1: img1,
+//       reviewImage2: img2,
+//       reviewImage3: img3,
+//       reviewImage4: img4,
+//     );
+//   }
+
+//   Navigator.pop(context);
+// },
+//               // onPressed: () {
+//               //   if (rating == 0 || reviewCtrl.text.trim().isEmpty) {
+//               //     ScaffoldMessenger.of(context).showSnackBar(
+//               //       const SnackBar(
+//               //         content: Text("Please add rating & review"),
+//               //       ),
+//               //     );
+//               //     return;
+//               //   }
+
+//               //   if (widget.isEdit) {
+//               //     context.read<ChargingHubReviewProvider>().updateReview(
+//               //         context: context,
+//               //         chargingHubId: widget.hubId,
+//               //         chargingStationId: widget.stationId,
+//               //         rating: rating,
+//               //         description: reviewCtrl.text,
+//               //         recId: widget.recId!);
+//               //   } else {
+//               //     context.read<ChargingHubReviewProvider>().addReview(
+//               //           context: context,
+//               //           chargingHubId: widget.hubId,
+//               //           chargingStationId: widget.stationId,
+//               //           rating: rating,
+//               //           description: reviewCtrl.text,
+//               //         );
+//               //   }
+
+//               //   // 🔥 CALL API HERE
+//               //   // context.read<ChargingHubReviewProvider>()
+//               //   //   .submitReview(widget.stationId, rating, reviewCtrl.text);
+
+//               //   Navigator.pop(context);
+//               // },
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: CommonColors.blue,
+//                 foregroundColor: CommonColors.blue,
+//                 shape: RoundedRectangleBorder(
+//                   borderRadius: BorderRadius.circular(12),
+//                   side: BorderSide(
+//                     color: CommonColors.blue.withOpacity(0.4),
+//                     width: 0.8,
+//                   ),
+//                 ),
+//               ),
+//               child: const Text(
+//                 "Submit",
+//                 style: TextStyle(
+//                     fontSize: 12,
+//                     color: CommonColors.white,
+//                     fontWeight: FontWeight.w600),
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 class MoreOptionsMenu extends StatelessWidget {
   final VoidCallback onEdit;

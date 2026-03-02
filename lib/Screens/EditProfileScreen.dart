@@ -107,6 +107,7 @@ if(widget.user!=null)
                         if (resultResponse?.success == true) {
                           print("✅ Uploaded: ${resultResponse!.fileId}");
                           final provider = context.read<ProfileProvider>();
+                          FocusScope.of(context).unfocus();
  showToast("${resultResponse?.message}");
                          
                              context.read<UploadProvider>().setImage(file);
@@ -264,6 +265,7 @@ if(widget.user!=null)
           );
 
           if (success) {
+            FocusScope.of(context).unfocus();
             showToast("${provider.message}");
             // ScaffoldMessenger.of(context).showSnackBar(
             //   const SnackBar(content: Text("Profile updated successfully")),

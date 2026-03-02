@@ -214,7 +214,15 @@ if (_scrollController.position.pixels >=
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(
         title: "Transactions",
-        onBack: () => Navigator.pop(context),
+        onBack: () {
+           Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
+            ),
+            (_) => false,
+          );
+        },
       ),
       body: Consumer<WalletProvider>(
         builder: (context, provider, _) {

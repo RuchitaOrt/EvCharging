@@ -14,7 +14,10 @@ class ValidationHelper {
     return value != null && value.trim().isNotEmpty;
   }
 
-
+static bool isNameValid(String value) {
+  final RegExp nameRegex = RegExp(r'^[a-zA-Z]+$');
+  return nameRegex.hasMatch(value.trim());
+}
   // static bool isPasswordValid(String password) {
   //   return password.trim().isNotEmpty;
   // }

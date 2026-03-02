@@ -23,11 +23,13 @@ class ChargingHubReviewProvider extends ChangeNotifier {
       response = res;
 
       if (!res.success) {
+        FocusScope.of(context).unfocus();
         showToast(res.message);
       }
 
       return res;
     } catch (e) {
+      FocusScope.of(context).unfocus();
       showToast(e.toString());
       return null;
     } finally {
@@ -64,6 +66,7 @@ class ChargingHubReviewProvider extends ChangeNotifier {
       );
 
       if (res.success) {
+        FocusScope.of(context).unfocus();
         showToast(res.message);
 
         /// 🔁 refresh list after add
@@ -72,11 +75,13 @@ class ChargingHubReviewProvider extends ChangeNotifier {
           hubId: chargingHubId,
         );
       } else {
+        FocusScope.of(context).unfocus();
         showToast(res.message);
       }
 
       return res;
     } catch (e) {
+      FocusScope.of(context).unfocus();
       showToast("Failed to add review");
       return null;
     } finally {
@@ -115,6 +120,7 @@ class ChargingHubReviewProvider extends ChangeNotifier {
       );
 
       if (res.success) {
+        FocusScope.of(context).unfocus();
         showToast(res.message);
 
         /// 🔁 refresh list after add
@@ -123,11 +129,13 @@ class ChargingHubReviewProvider extends ChangeNotifier {
           hubId: chargingHubId,
         );
       } else {
+        FocusScope.of(context).unfocus();
         showToast(res.message);
       }
 
       return res;
     } catch (e) {
+      FocusScope.of(context).unfocus();
       showToast("Failed to add review");
       return null;
     } finally {

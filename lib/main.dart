@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/AuthProvider.dart';
 import 'package:HyCharge/Provider/ChargingEstimateProvider.dart';
@@ -18,6 +20,7 @@ import 'package:HyCharge/Provider/charging_hub_provider.dart';
 import 'package:HyCharge/Provider/hardware_master_provider.dart';
 import 'package:HyCharge/Provider/user_vehicle_provider.dart';
 import 'package:HyCharge/Routers/routers.dart';
+import 'package:HyCharge/Screens/OnboardingScreen.dart';
 
 import 'package:HyCharge/Screens/SplashScreen.dart';
 import 'package:HyCharge/Services/ChargingHistorySessionProvider.dart';
@@ -47,7 +50,7 @@ Future<void> main() async {
 // ✅ NEW OFFICIAL API (replaces useAndroidViewSurface)
   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
 
-  await Firebase.initializeApp();
+  //  await Firebase.initializeApp();
 //   await Firebase.initializeApp(
 //   options: const FirebaseOptions(
 //     apiKey: "YOUR_API_KEY",
@@ -58,13 +61,14 @@ Future<void> main() async {
 //   ),
 // );
 
-  await Utility().loadAPIConfig();
+ 
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
   runApp(MyApp());
+   await Utility().loadAPIConfig();
 }
 
 class MyApp extends StatefulWidget {
@@ -137,7 +141,7 @@ class _MyAppState extends State<MyApp> {
               cursorColor: CommonColors.blue, // fallback cursor
             ),
           ),
-          initialRoute: SplashScreen.route,
+          initialRoute:SplashScreen.route,
           onGenerateRoute: Routers.generateRoute,
         ),
       ),

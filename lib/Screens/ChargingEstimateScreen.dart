@@ -16,6 +16,7 @@ import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class ChargingEstimateScreen extends StatefulWidget {
@@ -62,41 +63,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min, // ⭐ VERY IMPORTANT
               children: [
-                // Container(
-                //   padding: const EdgeInsets.all(14),
-                //   decoration: BoxDecoration(
-                //     color: CommonColors.neutral50,
-                //     borderRadius: BorderRadius.circular(10),
-                //   ),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Row(
-                //         children: const [
-                //           Icon(Icons.local_offer,
-                //               color: Colors.orange, size: 18),
-                //           SizedBox(width: 8),
-                //           Text(
-                //             "Apply Coupon",
-                //             style: TextStyle(fontSize: 12),
-                //           ),
-                //         ],
-                //       ),
-                //       InkWell(
-                //         onTap: () {},
-                //         child: DottedUnderlineText(
-                //           text: "View Coupons",
-                //           dotColor: CommonColors.blue,
-                //           style: const TextStyle(
-                //             fontSize: 10,
-                //             color: CommonColors.blue,
-                //           ),
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
-                // const SizedBox(height: 16),
+               
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -130,6 +97,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
               print("RRenteredAmount");
 print(enteredAmount);
               if (enteredAmount == 0) {
+                FocusScope.of(context).unfocus();
                 showToast("Please enter amount");
               } else if (currentWalletPrice >= enteredAmount) {
                 // ✅ start session
@@ -150,6 +118,7 @@ print(enteredAmount);
                 );
 
                 if (response != null && response.success) {
+                  FocusScope.of(context).unfocus();
                   showToast("Charging session started successfully!");
                   print("BEFORE STSRT");
                   print(response.data!.session!.recId);
@@ -172,9 +141,11 @@ print(enteredAmount);
                     ),
                   );
                 } else {
+                  FocusScope.of(context).unfocus();
                   showToast("Failed to start session");
                 }
               } else {
+                FocusScope.of(context).unfocus();
                 showToast("Wallet does not have sufficient amount");
                 Navigator.push(
                   context,
@@ -231,20 +202,36 @@ print(enteredAmount);
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: TabBar(
-                indicatorSize: TabBarIndicatorSize.label,
-                indicator: BoxDecoration(
-                  // color: CommonColors.blue,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+              child: Theme(
+                  data: Theme.of(context).copyWith(
+    tabBarTheme:  TabBarThemeData(
+      labelColor: CommonColors.blue,
+      unselectedLabelColor: Colors.black54,
+    ),
+  ),
+                child: TabBar(
+
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicator: BoxDecoration(
+                    // color: CommonColors.blue,
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
+                  labelColor: CommonColors.blue,
+                  unselectedLabelColor: Colors.black54,
+                  labelStyle: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                
+                  tabs: [
+                    Tab(text: "Amount"),
+                    Tab(text: "Units"),
+                    // Tab(text: "Time"),
+                    Tab(text: "Time"),
+                  ],
                 ),
-                labelColor: CommonColors.blue,
-                unselectedLabelColor: Colors.black54,
-                tabs: [
-                  Tab(text: "Amount"),
-                  Tab(text: "Units"),
-                  // Tab(text: "Time"),
-                  Tab(text: "Time"),
-                ],
               ),
             ),
 
@@ -321,65 +308,6 @@ class _EstimateCard extends StatelessWidget {
   }
 }
 
-// class _EstimateCard extends StatelessWidget {
-//   final String label1;
-//   final String label2;
-//   final String label3;
-//   final String labelvalue1;
-//   final String labelvalue2;
-//   final String labelvalue3;
-
-//   const _EstimateCard(this.label1, this.label2, this.label3, this.labelvalue1,
-//       this.labelvalue2, this.labelvalue3);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Consumer<ChargingEstimateProvider>(
-//       builder: (_, p, __) {
-//         return AnimatedContainer(
-//           duration: const Duration(milliseconds: 300),
-//           curve: Curves.easeOut,
-//           margin: const EdgeInsets.all(16),
-//           padding: const EdgeInsets.all(16),
-//           decoration: BoxDecoration(
-//             color: Colors.white,
-//             borderRadius: BorderRadius.circular(16),
-//             boxShadow: const [
-//               BoxShadow(color: Colors.black12, blurRadius: 8),
-//             ],
-//           ),
-//           child: IntrinsicHeight(
-//             child: Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 _infoColumn("${label1}", "${labelvalue1}"),
-//                 const VerticalDivider(thickness: 1),
-//                 _infoColumn("${label2}", "${labelvalue2}"),
-//                 const VerticalDivider(thickness: 1),
-//                 _infoColumn("${label3}", "${labelvalue3}"),
-//               ],
-//             ),
-//           ),
-//         );
-//       },
-//     );
-//   }
-
-//   Widget _infoColumn(String title, String value) {
-//     return Column(
-//       children: [
-//         Text(
-//           title,
-//           style: TextStyle(
-//             color: CommonColors.blue,
-//             fontSize: 13,
-//           ),
-//         ),
-//         Text(value),
-//       ],
-//     );
-//   }
-// }
 
 class _TabViews extends StatelessWidget {
    final Charger? selectedCharger;
@@ -404,7 +332,8 @@ class _TabViews extends StatelessWidget {
       "Time",
       "Unit",
       "Percentage",
-      "${p.time} min",
+      "${(p.time ?? 0).round()} min",
+      // "${p.time.toStringAsFixed(2)} min",
       "${p.units.toStringAsFixed(2)}",
       "${p.percentage} %",
     );
@@ -416,57 +345,12 @@ class _TabViews extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-  //           _sliderTab(
-  //             label: "Select Units (kWh)",
-  //             min: 1,
-  //             max: 40,
-  //             onChange: (v) 
-  //             {
-  //                            final value = v ?? 0;
-
-  // final provider = context.read<ChargingEstimateProvider>();
-
-
-
-  // if (_debounce?.isActive ?? false) _debounce!.cancel();
-
-  // _debounce = Timer(const Duration(milliseconds: 600), () {
-  //   provider.estimateCharging(
-  //     context: context,
-  //     chargingGunId: selectedCharger!.recId.toString(),
-  //     chargingStationId: selectedStationID!,
-  //     connectorId: selectedCharger!.connectorId.toString(),
-  //     desiredEnergy: v,
-  //   );
-  // });
-  //             },
-  //             valueSelector: (p) => p.units,
-  //           ),
+ 
   _sliderTab(
   label: "Select Units (kWh)",
   min: 1,
   max: 40,
   
-
-  // 👇 While dragging → only update value
-//   onChanged: (v) {
-//     // context.read<ChargingEstimateProvider>().units = v;
-//       context.read<ChargingEstimateProvider>().activeMode = "units";
-//    context.read<ChargingEstimateProvider>().setUnits(v);
-//   },
-
-//   // 👇 When user releases → call API
-//   onChangeEnd: (v) {
-//     final provider = context.read<ChargingEstimateProvider>();
-// provider.activeMode = "units";
-//     provider.estimateCharging(
-//       context: context,
-//       chargingGunId: selectedCharger!.recId.toString(),
-//       chargingStationId: selectedStationID!,
-//       connectorId: selectedCharger!.connectorId.toString(),
-//       desiredEnergy: v,
-//     );
-//   },
 onChanged: (v) {
   final provider = context.read<ChargingEstimateProvider>();
   provider.isDragging = true;
@@ -501,9 +385,10 @@ onChangeEnd: (v) {
       "Time",
       "Percentage",
       "Amount",
-      "${p.time} min",
+      "${(p.time ?? 0).round()} min",
+      // "${p.time.toStringAsFixed(2)} min",
       "${p.percentage} %",
-      "₹ ${p.amount}",
+      "₹ ${p.amount.round()}",
     );
   },
 ),
@@ -569,90 +454,6 @@ onChangeEnd: (v) {
   },
 )
 
-//                    Consumer<ChargingEstimateProvider>(
-//                         builder: (_, p, __) {
-//                        return SliderTheme(
-//                         data: SliderTheme.of(_).copyWith(
-//                         trackHeight: 3,
-//                         thumbShape:
-//                             const RoundSliderThumbShape(enabledThumbRadius: 8),
-//                         overlayShape:
-//                             const RoundSliderOverlayShape(overlayRadius: 14),
-//                                        ),
-//                          child:
-//                          Selector<ChargingEstimateProvider, double>(
-//   selector: (_, p) => p.time,
-//   builder: (_, timeValue, __) {
-//     return SliderTheme(
-//       data: SliderTheme.of(context).copyWith(
-//         trackHeight: 3,
-//         thumbShape:
-//             const RoundSliderThumbShape(enabledThumbRadius: 8),
-//         overlayShape:
-//             const RoundSliderOverlayShape(overlayRadius: 14),
-//       ),
-//       child: Slider(
-//         value: timeValue.clamp(0, 80),
-//         min: 0,
-//         max: 80,
-//         activeColor: CommonColors.blue,
-//         onChanged: (v) {
-//           final provider = context.read<ChargingEstimateProvider>();
-//           provider.isDragging = true;
-//           provider.activeMode = "time";
-//           provider.setTime(v);
-//         },
-//         onChangeEnd: (v) {
-//           final provider = context.read<ChargingEstimateProvider>();
-//           provider.isDragging = false;
-//           provider.activeMode = "time";
-
-//           provider.estimateCharging(
-//             context: context,
-//             chargingGunId: selectedCharger!.recId.toString(),
-//             chargingStationId: selectedStationID!,
-//             connectorId: selectedCharger!.connectorId.toString(),
-//             desiredDuration: v.round(),
-//           );
-//         },
-//       ),
-//     );
-//   },
-// )
-
-// //                           Slider(
-// //                            value: p.time,
-// //                            min: 0,
-// //                             activeColor: CommonColors.blue,
-// //                            max: 80,
-// //                            onChanged: (v) {
-// //   final provider = context.read<ChargingEstimateProvider>();
-// //   provider.isDragging = true;
-// //   provider.activeMode = "time";
-// //   provider.setTime(v);
-// // },
-
-// // onChangeEnd: (v) {
-// //   final provider = context.read<ChargingEstimateProvider>();
-// //   provider.isDragging = false;
-// //   provider.activeMode = "time";
-
-// //   provider.estimateCharging(
-// //     context: context,
-// //     chargingGunId: selectedCharger!.recId.toString(),
-// //     chargingStationId: selectedStationID!,
-// //     connectorId: selectedCharger!.connectorId.toString(),
-// //     desiredDuration: v.round(),
-// //   );
-// // },
-
-
-
-  
-// //                          ),
-//                        );
-//                      }
-//                    ),
                 ),
               
                    Padding(
@@ -699,7 +500,7 @@ onChangeEnd: (v) {
       "Amount",
       "${p.units.toStringAsFixed(2)}",
       "${p.percentage} %",
-      "₹ ${p.amount}",
+      "₹ ${p.amount.round()}",
     );
   },
 ),
@@ -707,24 +508,7 @@ onChangeEnd: (v) {
                   //    _EstimateCard("Unit","Percentage","Amount","20","20 %","₹ 2000"),
                 ],
               ),
-        // Column(
-        //   mainAxisAlignment: MainAxisAlignment.start,
-        //   crossAxisAlignment: CrossAxisAlignment.start,
-        //   children: [
-        //     _sliderTab(
-        //       label: "Battery %",
-        //       min: 1,
-        //       max: 100,
-        //       onChange: (v) => context
-        //           .read<ChargingEstimateProvider>()
-        //           .updateByPercentage(v),
-        //       valueSelector: (p) => p.percentage,
-        //     ),
-        //     textInfo(),
-        //     const SizedBox(height: 8),
-        //     _EstimateCard("Time", "Unit", "Amount", "-", "-", "₹ 0"),
-        //   ],
-        // ),
+
       ],
     );
   }
@@ -748,7 +532,8 @@ String _formatMinutes(double minutes) {
           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
     );
   }
-  Widget _sliderTab({
+
+Widget _sliderTab({
   required String label,
   required double min,
   required double max,
@@ -758,26 +543,69 @@ String _formatMinutes(double minutes) {
 }) {
   return Selector<ChargingEstimateProvider, double>(
     selector: (_, p) => valueSelector(p),
-    builder: (_, value, __) {
-
+    builder: (context, value, __) {
       final clampedValue = value.clamp(min, max);
 
       return Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// Title
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            /// Slider
             SliderTheme(
-               data: SliderTheme.of(routeGlobalKey.currentContext!).copyWith(
-        trackHeight: 3,
-        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-        overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
-      ),
-              child: Slider( activeColor: CommonColors.blue,
+              data: SliderTheme.of(context).copyWith(
+                trackHeight: 3,
+                thumbShape:
+                    const RoundSliderThumbShape(enabledThumbRadius: 8),
+                overlayShape:
+                    const RoundSliderOverlayShape(overlayRadius: 14),
+              ),
+              child: Slider(
+                activeColor: CommonColors.blue,
                 min: min,
                 max: max,
                 value: clampedValue,
                 onChanged: onChanged,
                 onChangeEnd: onChangeEnd,
+              ),
+            ),
+
+            /// Min - Max values
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "${min.toInt()}",
+                  style: const TextStyle(fontSize: 12),
+                ),
+                Text(
+                  "${max.toInt()}",
+                  style: const TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            /// Selected value
+            Center(
+              child: Text(
+                "${clampedValue.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -786,151 +614,7 @@ String _formatMinutes(double minutes) {
     },
   );
 }
-
-// Widget _sliderTab({
-//   required String label,
-//   required double min,
-//   required double max,
-//   required Function(double) onChanged,
-//   required Function(double) onChangeEnd,
-//   required double Function(ChargingEstimateProvider) valueSelector,
-// }) {
-//   return Consumer<ChargingEstimateProvider>(
-//     builder: (_, p, __) {
-//       final value = valueSelector(p).clamp(min, max);
-
-//       return Padding(
-//         padding: const EdgeInsets.all(24),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             Text(label,
-//                 style: const TextStyle(
-//                     fontSize: 12, fontWeight: FontWeight.w400)),
-//             const SizedBox(height: 20),
-
-//             Slider(
-//               activeColor: CommonColors.blue,
-//               min: min,
-//               max: max,
-//               value: value,
-//               onChanged: onChanged,       // 👈 only UI update
-//               onChangeEnd: onChangeEnd,   // 👈 API call here
-//             ),
-
-//             Padding(
-//               padding: const EdgeInsets.symmetric(horizontal: 4),
-//               child: Row(
-//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                 children: [
-//                   Text(min.toStringAsFixed(1),
-//                       style: const TextStyle(
-//                           fontSize: 10, color: Colors.black54)),
-//                   Text(max.toStringAsFixed(1),
-//                       style: const TextStyle(
-//                           fontSize: 10, color: Colors.black54)),
-//                 ],
-//               ),
-//             ),
-
-//             Center(
-//               child: Text(
-//                 value.toStringAsFixed(1),
-//                 style: const TextStyle(
-//                     fontSize: 20, fontWeight: FontWeight.bold),
-//               ),
-//             )
-//           ],
-//         ),
-//       );
-//     },
-//   );
-// }
 }
-//   Widget _sliderTab({
-//     required String label,
-//     required double min,
-//     required double max,
-//     required Function(double) onChange,
-//     required double Function(ChargingEstimateProvider) valueSelector,
-//   }) {
-//     return Consumer<ChargingEstimateProvider>(
-//       builder: (_, p, __) {
-//         final value = valueSelector(p).clamp(min, max);
-
-//         return Padding(
-//           padding: const EdgeInsets.all(24),
-//           child: Column(
-//             crossAxisAlignment: CrossAxisAlignment.start,
-//             children: [
-//               Text(label,
-//                   style: const TextStyle(
-//                       fontSize: 12, fontWeight: FontWeight.w400)),
-//               const SizedBox(height: 20),
-//               SliderTheme(
-//                 data: SliderTheme.of(_).copyWith(
-//                   trackHeight: 3,
-//                   thumbShape:
-//                       const RoundSliderThumbShape(enabledThumbRadius: 8),
-//                   overlayShape:
-//                       const RoundSliderOverlayShape(overlayRadius: 14),
-//                 ),
-//                 child: Column(
-//                   children: [
-//                     Slider(
-//                       activeColor: CommonColors.blue,
-//                       min: min,
-//                       max: max,
-//                       value: value,
-//                       onChanged: onChange,
-//                     ),
-
-//                     // 👇 Min & Max labels
-//                     Padding(
-//                       padding: const EdgeInsets.symmetric(horizontal: 4),
-//                       child: Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           Text(
-//                             label.contains("%")
-//                                 ? "${min.toStringAsFixed(1)} %"
-//                                 : min.toStringAsFixed(1),
-//                             style: const TextStyle(
-//                               fontSize: 10,
-//                               color: Colors.black54,
-//                             ),
-//                           ),
-//                           Text(
-//                             label.contains("%")
-//                                 ? "${max.toStringAsFixed(1)} %"
-//                                 : max.toStringAsFixed(1),
-//                             style: const TextStyle(
-//                               fontSize: 10,
-//                               color: Colors.black54,
-//                             ),
-//                           ),
-//                         ],
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               ),
-//               Center(
-//                 child: Text(
-//                   label.contains("%")
-//                       ? "${value.toStringAsFixed(1)} %"
-//                       : value.toStringAsFixed(1),
-//                   style: const TextStyle(
-//                       fontSize: 20, fontWeight: FontWeight.bold),
-//                 ),
-//               )
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }
 
 class _AmountTab extends StatefulWidget {
   final Charger? selectedCharger;
@@ -970,16 +654,18 @@ class _AmountTabState extends State<_AmountTab> {
             title: "",
             isMandatory: false,
             hintText: CommonStrings.strAmountHint,
+            textInputType: TextInputType.text,
+
+inputFormatters: [
+  FilteringTextInputFormatter.digitsOnly,
+],
             textEditingController: provider.controller,
-            textInputType: TextInputType.number,
+            // textInputType:const TextInputType.numberWithOptions(decimal: false),
             leadingIcon: Text("₹",
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             onChange: (val) {
-              // final value = double.tryParse(val) ?? 0;
-              // print("val of textfield");
-              // print(val);
-              // provider.calculateFromAmount(value);
+      
               provider.activeMode = "amount";
 provider.setAmount(val);
 

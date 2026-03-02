@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Ev Charging App</string>
+		<string>HyCharge</string>
 		<key>NSLocationWhenInUseUsageDescription</key>
         <string>We need your location to show nearby charging stations.</string>
 
@@ -67,7 +67,17 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
-		<key>NSLocationWhenInUseUsageDescription</key>
-        <string>We need your location to show nearby charging stations</string>
+		
+		<!-- Camera Permission -->
+		<key>NSCameraUsageDescription</key>
+		<string>We need camera access to capture images for profile and charging related features.</string>
+
+		<!-- Photo Library Access (Read) -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>We need access to your photo library to upload images.</string>
+
+		<!-- Photo Library Add (Save images) -->
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>We need permission to save images to your gallery.</string>
 	</dict>
 </plist>

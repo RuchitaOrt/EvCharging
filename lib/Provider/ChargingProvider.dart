@@ -48,6 +48,7 @@ class ChargingProvider extends ChangeNotifier {
       sessionResponse = res;
 
       if (!res.success) {
+        FocusScope.of(context).unfocus();
         showToast(res.message!);
       }
  loading = false;
@@ -57,6 +58,7 @@ class ChargingProvider extends ChangeNotifier {
       print(e.toString());
        loading = false;
       notifyListeners();
+      FocusScope.of(context).unfocus();
       showToast("Failed to start session");
       return null; // ❌ failure
     } finally {
@@ -85,13 +87,16 @@ class ChargingProvider extends ChangeNotifier {
       endSessionResponse = res;
 
       if (res.success == true) {
+        FocusScope.of(context).unfocus();
         showToast(res.message ?? "Session ended successfully");
       } else {
+        FocusScope.of(context).unfocus();
         showToast(res.message ?? "Failed to end session");
       }
 
       return res; // ✅ RETURN FULL RESPONSE
     } catch (e) {
+      FocusScope.of(context).unfocus();
       showToast("Failed to end session");
       return null; // ✅ SAFE FALLBACK
     } finally {
@@ -99,41 +104,6 @@ class ChargingProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  // UnlockResponse? unlockResponse;
-
-  // Future<bool> unlockConnector({
-  //   required BuildContext context,
-  //   required String chargingStationId,
-  //   required int connectorId,
-  // }) async {
-  //   loading = true;
-  //   notifyListeners();
-
-  //   final payload = {
-  //     "chargingStationId": chargingStationId,
-  //     "connectorId": connectorId,
-  //   };
-
-  //   try {
-  //     final res = await _service.unlockConnector(context, payload);
-  //     unlockResponse = res;
-
-  //     if (res.success == true) {
-  //       showToast(res.message!);
-  //       return true;
-  //     } else {
-  //       showToast(res.message!);
-  //     }
-  //   } catch (e) {
-  //     showToast("Failed to unlock connector: $e");
-  //   } finally {
-  //     loading = false;
-  //     notifyListeners();
-  //   }
-
-  //   return false;
-  // }
 
   UnlockResponse? unlockResponse;
 
@@ -155,13 +125,16 @@ class ChargingProvider extends ChangeNotifier {
       unlockResponse = res;
 
       if (res.success == true) {
+        FocusScope.of(context).unfocus();
         showToast(res.message ?? "Connector unlocked");
       } else {
+        FocusScope.of(context).unfocus();
         showToast(res.message ?? "Failed to unlock connector");
       }
 
       return res; // ✅ RETURN FULL RESPONSE
     } catch (e) {
+      FocusScope.of(context).unfocus();
       showToast("Failed to unlock connector");
       return null; // ✅ SAFE NULL
     } finally {
@@ -187,6 +160,7 @@ class ChargingProvider extends ChangeNotifier {
       sessionDetails = res;
       return res; // ✅ return response
     } catch (e) {
+      FocusScope.of(context).unfocus();
       showToast(e.toString());
       return null;
     } finally {

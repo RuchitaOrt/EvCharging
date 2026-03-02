@@ -53,21 +53,17 @@ class StationCardWidget extends StatelessWidget {
 
   final isSelected = value.currentVisibleIndex == index;
 
-  return _StationCard(
-    chargingHub: value.recordsStation[index],
-    isSelected: isSelected,
-    cardWidth: screenWidth * 0.88,
+  return Padding(
+    padding: const EdgeInsets.only(left: 18),
+    child: _StationCard(
+      chargingHub: value.recordsStation[index],
+      isSelected: isSelected,
+      cardWidth: screenWidth * 0.88,
+    ),
   );
 },
 
-            // itemBuilder: (context, index) {
-            //   final isSelected = value.currentVisibleIndex == index;
-            //   return _StationCard(
-            //     chargingHub: value.recordsStation[index],
-            //     isSelected: isSelected,
-            //     cardWidth: screenWidth * 0.88,
-            //   );
-            // },
+          
           );
         },
       ),
@@ -105,16 +101,6 @@ class _StationCardState extends State<_StationCard> {
   }
 }
 
-  //   void _fetchCurrentLocation() async {
-  //   Position? position = await MapController().getCurrentPosition();
-  //   if (position != null) {
-  //     setState(() {
-  //       _currentPosition = position;
-  //     });
-  //     print(
-  //         "Current Location: ${_currentPosition!.latitude}, ${_currentPosition!.longitude}");
-  //   }
-  // }
   @override
   void initState() {
     // TODO: implement initState
@@ -140,6 +126,8 @@ class _StationCardState extends State<_StationCard> {
               location!.longitude) /
           1000;
     }
+    print("DISTANCE");
+    print(distance);
     final typeAPrice = widget.chargingHub.typeATariff?.isNotEmpty == true
         ? '₹${widget.chargingHub.typeATariff} / kWh'
         : '₹ 0 / kWh';
@@ -278,19 +266,7 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                             latitude: location.latitude,
                             longitude: location.longitude,
                           );
-                          // final Position position =
-                          //     await MapController().getCurrentPosition();
-
-                          // if (position.longitude != null) {
-                          //   Navigator.push(
-                          //     routeGlobalKey.currentContext!,
-                          //     MaterialPageRoute(
-                          //         builder: (_) => MapOverviewScreen(
-                          //               hub: chargingHub,
-                          //               location: position,
-                          //             )),
-                          //   );
-                          // }
+                         
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor:

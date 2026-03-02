@@ -18,21 +18,25 @@ class _MobileOtpSheetWidgetState extends State<MobileOtpSheetWidget> {
 
   void _sendOtp() async {
     if (_mobileController.text.length != 10) {
+      FocusScope.of(context).unfocus();
       showToast("Enter valid mobile number");
       return;
     }
 
     setState(() => otpSent = true);
+    FocusScope.of(context).unfocus();
     showToast("OTP sent");
   }
 
   void _verifyOtp() async {
     if (_otpController.text.length != 6) {
+      FocusScope.of(context).unfocus();
       showToast("Enter valid OTP");
       return;
     }
 
     // TODO: API integration later
+    FocusScope.of(context).unfocus();
     showToast("OTP verified");
 
     Navigator.pop(context); // close OTP sheet

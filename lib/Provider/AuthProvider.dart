@@ -26,32 +26,49 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> register(BuildContext context, RegisterRequest request) async {
     // 🔹 Validation
     if (!ValidationHelper.isNotEmpty(request.firstName)) {
+      FocusScope.of(context).unfocus();
       showToast("Please enter firstname");
       return false;
     }
+    if (!ValidationHelper.isNameValid(request.firstName)) {
+      FocusScope.of(context).unfocus();
+  showToast("First name should contain only letters");
+  return false;
+}
     if (!ValidationHelper.isNotEmpty(request.lastName)) {
+      FocusScope.of(context).unfocus();
       showToast("Please enter lastname");
       return false;
     }
+    if (!ValidationHelper.isNameValid(request.lastName)) {
+      FocusScope.of(context).unfocus();
+  showToast("Last name should contain only letters");
+  return false;
+}
     if (!ValidationHelper.isNotEmpty(request.eMailID)) {
+      FocusScope.of(context).unfocus();
       showToast("Please enter email");
       return false;
     }
     if (!ValidationHelper.isEmailValid(request.eMailID)) {
+      FocusScope.of(context).unfocus();
       showToast("Please enter a valid email address");
       return false;
     }
     if (!ValidationHelper.isValidPhone(request.phoneNumber)) {
+      FocusScope.of(context).unfocus();
       showToast("Please enter a valid mobile number");
       return false;
     }
     if (!ValidationHelper.isPasswordValid(request.password)) {
+      FocusScope.of(context).unfocus();
       showToast("Password must be at least 6 characters");
       return false;
     }
 
     if (!ValidationHelper.isPasswordValid(request.confirmPassword)) {
       if (request.password != request.confirmPassword) {
+        FocusScope.of(context).unfocus();
         showToast("Password and Confirm Password do not match");
         return false;
       }
@@ -69,11 +86,13 @@ class AuthProvider extends ChangeNotifier {
         return true; // ✅ Registration success
       } else {
         message = registrationResponse!.message;
+        FocusScope.of(context).unfocus();
         showToast(registrationResponse?.message ?? "Registration failed");
         return false;
       }
     } catch (e) {
       error = AppError(e);
+      FocusScope.of(context).unfocus();
       showToast("Something went wrong");
       return false;
     } finally {
@@ -131,16 +150,19 @@ class AuthProvider extends ChangeNotifier {
     required String confirmPassword,
   }) async {
     if (!ValidationHelper.isPasswordValid(newPassword)) {
+      FocusScope.of(context).unfocus();
       showToast("Password must be at least 6 characters");
       return null;
     }
 
     if (!ValidationHelper.isPasswordValid(confirmPassword)) {
+      FocusScope.of(context).unfocus();
       showToast("Confirm Password must be at least 6 characters");
       return null;
     }
 
     if (newPassword != confirmPassword) {
+      FocusScope.of(context).unfocus();
       showToast("Password and Confirm Password do not match");
       return null;
     }

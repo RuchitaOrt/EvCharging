@@ -117,6 +117,7 @@ class _MyVehicleScreenState extends State<MyVehicleScreen> {
       
                         if (ok) {
                           Navigator.pop(context);
+                          FocusScope.of(context).unfocus();
                         showToast("${provider.message}");
       
                           // 🔥 REFRESH LIST

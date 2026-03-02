@@ -124,16 +124,21 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                         isMandatory: false,
                         hintText: CommonStrings.strPhoneNumberHint,
                         textEditingController: mobileController,
-                        textInputType: const TextInputType.numberWithOptions(
-                          signed: false,
-                          decimal: false,
-                        ),
+                          textInputType: TextInputType.text,
+
+inputFormatters: [
+  FilteringTextInputFormatter.digitsOnly,
+],
+                        // textInputType: const TextInputType.numberWithOptions(
+                        //   signed: false,
+                        //   decimal: false,
+                        // ),
                         isFieldDisabled: true,
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(10),
-                          FilteringTextInputFormatter.allow(
-                              RegExp(RegexHelper().numberOnlyRegex)),
-                        ],
+                        // inputFormatters: [
+                        //   LengthLimitingTextInputFormatter(10),
+                        //   FilteringTextInputFormatter.allow(
+                        //       RegExp(RegexHelper().numberOnlyRegex)),
+                        // ],
                       ),
                       CustomTextFieldWidget(
                         isMandatory: false,
@@ -307,10 +312,11 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
                           newPassword: newpasswordController.text,
                           confirmPassword: confirmpasswordController.text,
                         );
-
-                        if (response!.success!) {
+print(response);
+                        if (response!.success) {
                           // Clear cookies + force login
                           await APIManager.clearCookies();
+                          FocusScope.of(context).unfocus();
                           showToast(provider.response!.message!);
  await AuthStorage.clearAuthData();
 
@@ -329,6 +335,7 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
         }
                         
                         } else {
+                          FocusScope.of(context).unfocus();
                           showToast(provider.response!.message!);
                         }
                       },

@@ -1,3 +1,6 @@
+
+import 'dart:io';
+
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/OnboardingScreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
@@ -23,7 +26,8 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> loadData() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed( Duration(seconds:
+   Platform.isIOS? 1:3));
 
     if (!mounted) return;
 
@@ -51,7 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void navigateToNextScreen() {
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed( Duration(seconds: Platform.isIOS? 1:3), () {
       FocusScope.of(context).unfocus();
       Navigator.pushReplacement(
         context,

@@ -168,6 +168,7 @@ class APIManager {
             //   routeGlobalKey.currentContext!,
             //   message: "No internet connection. Please check your network.",
             // );
+            FocusScope.of(routeGlobalKey.currentContext!).unfocus();
             showToast("No internet connection. Please check your network.");
             return;
           }
@@ -783,6 +784,7 @@ class APIManager {
 
       throw FetchDataError(_serverMessage(response.data));
     } on DioException catch (e) {
+      print(e.error.toString());
       throw FetchDataError(
         e.response != null
             ? _serverMessage(e.response?.data)

@@ -83,6 +83,7 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                                 phoneNumber: widget.mobileNo,
                                 countryCode: "+91",
                               );
+                              FocusScope.of(context).unfocus();
  showToast(
                                     loginProvider.resendOtpResponse!.message);
                               if (loginProvider.resendOtpResponse?.success ==

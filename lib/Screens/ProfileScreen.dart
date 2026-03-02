@@ -93,6 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         if (resultResponse?.success == true) {
                           print("✅ Uploaded: ${resultResponse!.fileId}");
                           final provider = context.read<ProfileProvider>();
+                          FocusScope.of(context).unfocus();
  showToast("${resultResponse?.message}");
                          
                              context.read<UploadProvider>().setImage(file);
@@ -194,6 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     user: provider.profile!.user!)),
                           );
                         } else {
+                          FocusScope.of(context).unfocus();
                           showToast("No internet connection. Please check your network.");
                           // infoNormalDialog(
                           //   routeGlobalKey.currentContext!,

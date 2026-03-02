@@ -1,6 +1,7 @@
 
 
 
+import 'package:HyCharge/Screens/IOSDoneKeyboard.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/extentions.dart';
@@ -160,6 +161,9 @@ class _CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
 
 Widget _textFieldWidget() {
   return TextFormField(
+    onFieldSubmitted:  (_) {
+    FocusScope.of(context).unfocus(); // closes keyboard
+  },
      cursorColor: CommonColors.blue, 
     textCapitalization: widget.textCapitalization,
     autovalidateMode: widget.autovalidateMode,
@@ -167,7 +171,7 @@ Widget _textFieldWidget() {
     readOnly: widget.isFieldReadOnly || widget.onTapField != null,
     focusNode: _focusNode,
     obscureText: widget.obscureText,
-
+  
     enabled: !widget.isFieldDisabled,
     keyboardType: widget.textInputType,
     textInputAction: TextInputAction.done,

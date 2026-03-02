@@ -68,7 +68,10 @@ class _ScanScreenState extends State<ScanScreen> {
         backgroundColor: CommonColors.black,leading:  IconButton(
                 icon: const Icon(Icons.arrow_back_ios, color: CommonColors.white),
                 onPressed:  () {
-                  Navigator.pop(context);
+                   Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) =>  MainTab(isLoggedIn: GlobalLists.islLogin)),
+      );
                 }
                 
               ),),
@@ -120,7 +123,9 @@ class _ScanScreenState extends State<ScanScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/select'),
+                  onPressed: () {
+
+                  },
                   style: TextButton.styleFrom(
                     backgroundColor: CommonColors.primary,
                     padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
