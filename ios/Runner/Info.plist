@@ -71,7 +71,13 @@
 		<!-- Camera Permission -->
 		<key>NSCameraUsageDescription</key>
 		<string>We need camera access to capture images for profile and charging related features.</string>
-
+        <key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>upi</string>
+			<string>gpay</string>
+			<string>phonepe</string>
+			<string>paytm</string>
+		</array>
 		<!-- Photo Library Access (Read) -->
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>We need access to your photo library to upload images.</string>

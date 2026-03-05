@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "653006420512",
+    "project_id": "ev-charging-5bda9",
+    "storage_bucket": "ev-charging-5bda9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653006420512:android:66ce487a4e64afe3e15a45",
+        "android_client_info": {
+          "package_name": "com.ev.charging_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "653006420512-mlls18o52gqjj6p4233n0mjjm1fdiag6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ev.charging_app",
+            "certificate_hash": "8f3ac6e72c60c2a4ba5adcf22a7f14b059905a09"
+          }
+        },
+        {
+          "client_id": "653006420512-f0riolggkqrqf7532nrtn41go8g9p54o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcMFHF2zBq6jVIYNxCbUDBsPlKuvsS3nk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "653006420512-f0riolggkqrqf7532nrtn41go8g9p54o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

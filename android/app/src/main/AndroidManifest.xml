@@ -1,14 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.ev.charging_app">
-
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-      <uses-permission android:name="android.permission.INTERNET" />
-
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
         android:label="HyCharge"
-         android:usesCleartextTraffic="true"
         android:name="${applicationName}"
-        android:launchMode="singleTop"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
@@ -37,13 +30,12 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-            <meta-data
+              <meta-data
     android:name="com.google.android.geo.API_KEY"
     android:value="AIzaSyDdTSK2ZYsXBQMa-PnFx4BHRfE5RIM0uNs"/>
 <meta-data
     android:name="com.google.android.gms.maps.renderer"
     android:value="legacy" />
-
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
@@ -57,4 +49,3 @@
         </intent>
     </queries>
 </manifest>
-

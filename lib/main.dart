@@ -26,7 +26,7 @@ import 'package:HyCharge/Screens/SplashScreen.dart';
 import 'package:HyCharge/Services/ChargingHistorySessionProvider.dart';
 import 'package:HyCharge/Utils/UtilityFile.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
-import 'package:firebase_core/firebase_core.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
