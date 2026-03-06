@@ -21,7 +21,6 @@ import 'package:HyCharge/Routers/routers.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 
 import 'package:HyCharge/Screens/SplashScreen.dart';
-import 'package:HyCharge/Services/ChargingHistorySessionProvider.dart';
 import 'package:HyCharge/Utils/UtilityFile.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -29,7 +28,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'Provider/MapOverViewProvider.dart';

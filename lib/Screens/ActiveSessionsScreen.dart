@@ -8,6 +8,7 @@ import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 
 class ActiveSessionsScreen extends StatefulWidget {
   const ActiveSessionsScreen({super.key});
@@ -46,6 +47,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
   }
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
       backgroundColor: CommonColors.neutral50,
       appBar: CommonAppBar(
@@ -84,238 +86,255 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
   }
 
   Widget _activeSessionCard(ChargingSession session) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: GestureDetector(
-        onTap: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (_) => SessionChargingScreen(
-          //       args: SessionChargingArgs(
-          //         sessionId: session.recId!,
-          //         status: session!.status ?? "",
-          //         cost: session!.chargingTotalFee.toString() ?? "0",
-          //         unitConsumed: session!.energyTransmitted.toString() ?? "0",
-          //         outputPower: session!.chargingGun!.powerOutput!.toString() ?? "0",
-          //         batteryPercentage: session!.soCStart.toString() ?? "0",
-          //         endMeterReading: session.endMeterReading.toString() ?? "0",
-          //         duration: session.duration.toString() ?? "0"
-          //       ),
-          //     ),
-          //   ),
-          // );
- Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => SessionChargingScreen(
-                args: SessionChargingArgs(
-          sessionId: session?.recId ?? "",
-          status: session?.status ?? "",
-          cost: session?.chargingTotalFee?.toString() ?? "0",
-          unitConsumed: session?.energyTransmitted?.toString() ?? "0",
-          outputPower: (session?.chargingGun?.powerOutput == null ||
-                  session?.chargingGun?.powerOutput == "null")
-              ? "0"
-              : session!.chargingGun!.powerOutput.toString(),
-          batteryPercentage: session?.soCStart?.toString() ?? "0",
-          endMeterReading: session?.endMeterReading?.toString() ?? "0",
-          duration: session?.duration?.toString() ?? "0",
-                ),
+    
+    return LayoutBuilder(
+       
+      builder: (context,constraints) {
+        final isWeb = kIsWeb;
+      final isDesktop = constraints.maxWidth > 900;
+        return Center(
+          child: ConstrainedBox(
+             constraints: BoxConstraints(
+                maxWidth: isWeb && isDesktop ? 1200 : double.infinity,
               ),
-            ),
-          );
-          
-          // Navigator.push(
-          //                   routeGlobalKey.currentContext!,
-          //                   MaterialPageRoute(
-          //                     builder: (_) => SessionChargingScreen(
-          //                       intitalResponse: response,
-          //                     ),
-          //                   ),
-          //                 );
-        },
-        child: Card(
-          color: CommonColors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                /// 🔹 Header
-                Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(8),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.green.shade400,
-                              Colors.green.shade600,
-                            ],
-                          ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.ev_station,
-                          color: Colors.white,
-                          size: 22,
+                ],
+              ),
+              child: GestureDetector(
+                onTap: () {
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => SessionChargingScreen(
+                  //       args: SessionChargingArgs(
+                  //         sessionId: session.recId!,
+                  //         status: session!.status ?? "",
+                  //         cost: session!.chargingTotalFee.toString() ?? "0",
+                  //         unitConsumed: session!.energyTransmitted.toString() ?? "0",
+                  //         outputPower: session!.chargingGun!.powerOutput!.toString() ?? "0",
+                  //         batteryPercentage: session!.soCStart.toString() ?? "0",
+                  //         endMeterReading: session.endMeterReading.toString() ?? "0",
+                  //         duration: session.duration.toString() ?? "0"
+                  //       ),
+                  //     ),
+                  //   ),
+                  // );
+             Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => SessionChargingScreen(
+                        args: SessionChargingArgs(
+                  sessionId: session?.recId ?? "",
+                  status: session?.status ?? "",
+                  cost: session?.chargingTotalFee?.toString() ?? "0",
+                  unitConsumed: session?.energyTransmitted?.toString() ?? "0",
+                  outputPower: (session?.chargingGun?.powerOutput == null ||
+                          session?.chargingGun?.powerOutput == "null")
+                      ? "0"
+                      : session!.chargingGun!.powerOutput.toString(),
+                  batteryPercentage: session?.soCStart?.toString() ?? "0",
+                  endMeterReading: session?.endMeterReading?.toString() ?? "0",
+                  duration: session?.duration?.toString() ?? "0",
                         ),
                       ),
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: Column(
+                    ),
+                  );
+                  
+                  // Navigator.push(
+                  //                   routeGlobalKey.currentContext!,
+                  //                   MaterialPageRoute(
+                  //                     builder: (_) => SessionChargingScreen(
+                  //                       intitalResponse: response,
+                  //                     ),
+                  //                   ),
+                  //                 );
+                },
+                child: Card(
+                  color: CommonColors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        /// 🔹 Header
+                        Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.green.shade400,
+                                      Colors.green.shade600,
+                                    ],
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.ev_station,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+            
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      session.chargingStationName!,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      session.chargingHubName!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+            
+                              /// Status pill
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  session.status!,
+                                  style: const TextStyle(
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+            
+                        const SizedBox(height: 14),
+            
+                        /// 🔹 Info row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              session.chargingStationName!,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
+                            Expanded(
+                              child: _infoChip(
+                                Icons.power,
+                                "Connector",
+                                "${session.connectorName}",
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              session.chargingHubName!,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
+                            Expanded(
+                              child: _infoChip(
+                                Icons.timer,
+                                "Duration",
+                                "${session.duration}",
+                              ),
+                            ),
+                            Expanded(
+                              child: _infoChip(
+                                Icons.power,
+                                "Energy",
+                                "${session.energyTransmitted}",
                               ),
                             ),
                           ],
                         ),
-                      ),
-
-                      /// Status pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.green.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          session.status!,
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
+            
+                         SizedBox(height:isWeb && isDesktop?25: 16),
+                        //   Row(
+                        //     mainAxisAlignment: MainAxisAlignment.start,
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //   children: [
+                        //     _infoChip(
+                        //       Icons.power,
+                        //       "Charging Speed",
+                        //       "${session.chargingSpeed}",
+                        //     ),
+                        //     const SizedBox(width: 10),
+                        //     _infoChip(
+                        //       Icons.power,
+                        //       "Energy",
+                        //       "${session.energyTransmitted}",
+                        //     ),
+                        //   ],
+                        // ),
+            
+                        /// 🔹 Stop button
+                        Center(
+                          child: SizedBox(
+                            width:isWeb && isDesktop ?800: double.infinity,
+                            height: 40,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                final providerEndSession =
+                                    context.read<ChargingProvider>();
+                                //                   // print("Charging session ID ${data!.session!.recId!}");
+                                final response = await providerEndSession.endSession(
+                                    context: context,
+                                    sessionId: session.recId!, // 🔑 station id
+                                    endMeterReading: session.endMeterReading!.toString());
+                                      
+                                if (response!.success!) {
+                                  final provider = context.read<ActiveSessionProvider>();
+                                      
+                                  await provider.fetchActiveSessions(context, "Active");
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: CommonColors.blue,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                              ),
+                              child: Text(
+                                "Stop Charging",
+                                style: const TextStyle(color: CommonColors.white),
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 14),
-
-                /// 🔹 Info row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: _infoChip(
-                        Icons.power,
-                        "Connector",
-                        "${session.connectorName}",
-                      ),
-                    ),
-                    Expanded(
-                      child: _infoChip(
-                        Icons.timer,
-                        "Duration",
-                        "${session.duration}",
-                      ),
-                    ),
-                    Expanded(
-                      child: _infoChip(
-                        Icons.power,
-                        "Energy",
-                        "${session.energyTransmitted}",
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-                //   Row(
-                //     mainAxisAlignment: MainAxisAlignment.start,
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //   children: [
-                //     _infoChip(
-                //       Icons.power,
-                //       "Charging Speed",
-                //       "${session.chargingSpeed}",
-                //     ),
-                //     const SizedBox(width: 10),
-                //     _infoChip(
-                //       Icons.power,
-                //       "Energy",
-                //       "${session.energyTransmitted}",
-                //     ),
-                //   ],
-                // ),
-
-                /// 🔹 Stop button
-                SizedBox(
-                  width: double.infinity,
-                  height: 40,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      final providerEndSession =
-                          context.read<ChargingProvider>();
-                      //                   // print("Charging session ID ${data!.session!.recId!}");
-                      final response = await providerEndSession.endSession(
-                          context: context,
-                          sessionId: session.recId!, // 🔑 station id
-                          endMeterReading: session.endMeterReading!.toString());
-
-                      if (response!.success!) {
-                        final provider = context.read<ActiveSessionProvider>();
-
-                        await provider.fetchActiveSessions(context, "Active");
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CommonColors.blue,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 6),
-                    ),
-                    child: Text(
-                      "Stop Charging",
-                      style: const TextStyle(color: CommonColors.white),
+                      ],
                     ),
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 

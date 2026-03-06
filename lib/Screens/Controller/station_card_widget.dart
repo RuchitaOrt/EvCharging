@@ -102,7 +102,7 @@ class _StationCardState extends State<_StationCard> {
    Position? _currentPosition;
    void _fetchCurrentLocation() async {
   final position = await MapController().getCurrentPosition();
-  if (!mounted) return; // ✅ IMPORTANT
+  if (!mounted) return;
 
   if (position != null) {
     setState(() {
@@ -190,20 +190,21 @@ class _StationCardState extends State<_StationCard> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-              // widget.chargingHub.chargingHubImage!=null?Text("data"):    Image.asset(
-              //       CommonImagePath.frame,
-              //       height: SizeConfig.blockSizeVertical * 6,
-              //     ),
+                
+            
+                
               widget.chargingHub.chargingHubImage != null
     ? HubImage(
         imageId: widget.chargingHub.chargingHubImage!,
-        height: SizeConfig.blockSizeVertical * 5,
-        width: SizeConfig.blockSizeVertical * 5,
+         height: 50,
+        // width: SizeConfig.blockSizeVertical * 5,
       )
     : 
     Image.asset(
         CommonImagePath.frame,
-        height: SizeConfig.blockSizeVertical * 6,
+        // height: SizeConfig.blockSizeVertical * 6,
+        height: 50,
+        // color: Colors.amber,
       ),
 
    

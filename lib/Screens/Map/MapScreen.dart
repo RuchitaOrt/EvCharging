@@ -145,6 +145,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
 
               /// Active Session Card
+               /// Active Session Card
               Consumer<ActiveSessionProvider>(
                 builder: (_, sessionProvider, __) {
                   if (sessionProvider.loading ||
