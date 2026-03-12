@@ -41,6 +41,9 @@ class CommonImagePath {
 
   static String delete = "assets/images/delete.png";
   static String profileImage = "assets/images/profile.png";
+  static String profileIcon = "assets/images/user.png";
+  // logoios.jpg";
+  
   static String edit = "assets/images/edit.png";
   static String greencharge = "assets/images/greencharge.png";
 
@@ -69,7 +72,7 @@ class CommonImagePath {
   static String share = "assets/images/share.png";
   static String setting = "assets/images/setting.png";
   static String logout = "assets/images/logout.png";
-  static String profileIcon = "assets/images/profileIcon.png";
+  // static String profileIcon = "assets/images/profileIcon.png";
   static String upload = "assets/images/upload.png";
   static String download = "assets/images/download.png";
   static String charger = "assets/images/charger.png";

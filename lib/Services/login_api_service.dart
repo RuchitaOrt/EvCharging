@@ -42,7 +42,7 @@ Future<LoginResponse> loginUser(
       API.sendOtp,
       jsonval: body,
     );
-
+print(response);
     return response as SendOtpResponse;
   }
   Future<VerifyOtpResponse> verifyOtp({

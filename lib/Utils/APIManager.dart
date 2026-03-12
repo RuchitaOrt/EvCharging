@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:HyCharge/model/ForgetPasswordResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
@@ -13,10 +12,8 @@ import 'package:HyCharge/Utils/InternetConnection.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:HyCharge/model/AddReviewResponse.dart';
-import 'package:HyCharge/model/ChargingGunStatusRefreshResponse.dart';
 import 'package:HyCharge/model/ChargingGunStatusResponse.dart';
 import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
-import 'package:HyCharge/model/ChargingHistorySessionResponse.dart';
 import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:HyCharge/model/CreateOrderResponse.dart';
 import 'package:HyCharge/model/DeleteAccountResponse.dart';
@@ -94,7 +91,8 @@ enum API {
   verifyOtp,
   resendOtp,
   estimateCharging,
-  forgetPassword
+  forgetPassword,
+  chargerDetails
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -619,6 +617,8 @@ class APIManager {
         return "/ChargingSession/estimate-charging";
       case API.forgetPassword:
         return "/User/forgot-password";
+        case API.chargerDetails:
+  return "/ChargingHub/charger-details";
     }
   }
 
@@ -641,6 +641,7 @@ class APIManager {
       case API.chargingsessions:
       case API.charginggunstatus:
       case API.razorpayKey:
+      case API.chargerDetails:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:

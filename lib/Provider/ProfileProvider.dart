@@ -50,11 +50,11 @@ String? message;
     return false;
   }
 
-  if (!ValidationHelper.isNotEmpty(body['addressLine1'])) {
-    FocusScope.of(context).unfocus();
-    showToast("Please enter address");
-    return false;
-  }
+  // if (!ValidationHelper.isNotEmpty(body['addressLine1'])) {
+  //   FocusScope.of(context).unfocus();
+  //   showToast("Please enter address");
+  //   return false;
+  // }
 
   if (!ValidationHelper.isNotEmpty(body['phoneNumber'])) {
     FocusScope.of(context).unfocus();

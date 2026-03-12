@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'dev.flutter.flutter-gradle-plugin'
 
 android {
+    ndkVersion "27.0.12077973"
     namespace 'com.ev.charging_app'
     compileSdkVersion 36
 
@@ -10,14 +11,18 @@ android {
         applicationId "com.ev.charging_app"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 36
-        versionCode = 5
-        versionName = "1.0.6"
+        versionCode = 30
+        versionName = "1.1.2"
 
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            abiFilters 'arm64-v8a', 'x86_64' 
         }
     }
-
+   packagingOptions {
+    jniLibs {
+        useLegacyPackaging = false
+    }
+}
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17

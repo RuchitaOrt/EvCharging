@@ -114,6 +114,19 @@ class WalletProvider extends ChangeNotifier {
             tx.createdOn!.year == now.year;
       }).toList();
     }
+ // ✅ CREDIT FILTER
+  if (selectedFilter == WalletFilterType.Credit) {
+    return list.where((tx) {
+      return (tx.transactionType ?? "").toLowerCase() == "credit";
+    }).toList();
+  }
+
+  // ✅ DEBIT FILTER
+  if (selectedFilter == WalletFilterType.Debit) {
+    return list.where((tx) {
+      return (tx.transactionType ?? "").toLowerCase() == "debit";
+    }).toList();
+  }
 
     return list;
   }
@@ -129,7 +142,12 @@ class WalletProvider extends ChangeNotifier {
         return "This Month";
       case WalletFilterType.last7Days:
         return "Last 7 Days";
-      case WalletFilterType.all:
+    
+      case WalletFilterType.Credit:
+      return "Credit";
+    case WalletFilterType.Debit:
+      return "Debit";
+        case WalletFilterType.all:
       default:
         return "All";
     }
@@ -158,205 +176,3 @@ class WalletProvider extends ChangeNotifier {
   }
 }
 
-// class WalletProvider extends ChangeNotifier {
-//   final WalletApiService _service = WalletApiService();
-// int _pageNumber = 1;
-// final int _pageSize = 10;
-
-// bool hasMore = true;
-// bool isInitialLoading = false;
-// bool isMoreLoading = false;
-
-// final List<WalletTransaction> _transactions = [];
-// List<WalletTransaction> get transactions => _transactions;
-
-//   bool isLoading = false;
-//   wallet.WalletResponse? walletResponse;
-//   AppError? error;
-  
-//   final RazorpayHelper razorpayHelper = RazorpayHelper();
-
-//   // Call this to clean up Razorpay when provider is disposed
-//   @override
-//   void dispose() {
-  
-//     super.dispose();
-//   }
-//   Future<void> addCredits(
-//     BuildContext context,
-//     AddWalletRequest request,
-//   ) async {
-//     isLoading = true;
-//     notifyListeners();
-//     try {
-//       final response = await _service.addWalletCredits(context, request);
-//       walletResponse = response;
-//       print("walletResponse add ${response.message}");
-//       error = null;
-//     } catch (e) {
-//       error = FetchDataError(e.toString());
-//     }
-//     fetchWallet(context);
-//     isLoading = false;
-//     notifyListeners();
-//   }
-
-//   bool isWalletLoading = false;
-
-//   WalletListResponse? walletListResponse;
-
-//   double get currentBalance =>
-//       walletListResponse?.wallet?.currentBalance?.toDouble() ?? 0.0;
-
-//   WalletFilterType selectedFilter = WalletFilterType.all;
-
-//   void changeFilter(WalletFilterType filter) {
-//     selectedFilter = filter;
-//     notifyListeners();
-//   }
-//   Future<void> fetchWallet(BuildContext context) async {
-//   try {
-//     isInitialLoading = true;
-//     notifyListeners();
-
-//     _pageNumber = 1;
-//     hasMore = true;
-//     _transactions.clear();
-
-//     final response = await _service.getWalletDetails(
-//       context,
-//       pageNumber: _pageNumber,
-//       pageSize: _pageSize,
-//     );
-
-//     walletListResponse = response;
-
-//     final newList = response.wallet?.recentTransactions ?? [];
-//     _transactions.addAll(newList);
-
-//     if (newList.length < _pageSize) {
-//       hasMore = false;
-//     }
-//   } catch (e) {
-//     debugPrint("Wallet fetch error: $e");
-//   } finally {
-//     isInitialLoading = false;
-//     notifyListeners();
-//   }
-// }
-
-// bool hasMoreData = true;
-// int _page = 1;
-
-// Future<void> loadMore(BuildContext context) async {
-//   if (isMoreLoading || !hasMoreData) return;
-
-//   isMoreLoading = true;
-//   notifyListeners();
-
-//   _page++;
-
-//   final response = await _service.getWalletDetails(
-//     context,
-//     pageNumber: _page,
-//     pageSize: 10,
-//   );
-
-//   final newList = response.wallet?.recentTransactions ?? [];
-
-//   if (newList.isEmpty) {
-//     hasMoreData = false;
-//   } else {
-//     newList.addAll(newList);
-//   }
-
-//   isMoreLoading = false;
-//   notifyListeners();
-// }
-
-
-// // Future<void> fetchWallet(BuildContext context) async {
-// //   try {
-// //     isLoading = true;
-// //     notifyListeners();
-
-// //     walletListResponse = await _service.getWalletDetails(
-// //       context,
-// //       pageNumber: 1,
-// //       pageSize: 100,
-// //     );
-
-// //     debugPrint(
-// //       "Wallet current Balance ${walletListResponse!.wallet!.currentBalance}");
-// //   } catch (e) {
-// //     debugPrint("Wallet fetch error: $e");
-// //   } finally {
-// //     isLoading = false;
-// //     notifyListeners();
-// //   }
-// // }
-
-
-// List<WalletTransaction> get filteredTransactions {
-//   final list = _transactions;
-
-//   if (selectedFilter == WalletFilterType.all) return list;
-
-//   final now = DateTime.now();
-
-//   if (selectedFilter == WalletFilterType.last7Days) {
-//     return list.where((tx) {
-//       if (tx.createdOn == null) return false;
-//       return now.difference(tx.createdOn!).inDays <= 7;
-//     }).toList();
-//   }
-
-//   if (selectedFilter == WalletFilterType.thisMonth) {
-//     return list.where((tx) {
-//       if (tx.createdOn == null) return false;
-//       return tx.createdOn!.month == now.month &&
-//           tx.createdOn!.year == now.year;
-//     }).toList();
-//   }
-
-//   return list;
-// }
-
-//   // List<WalletTransaction> get filteredTransactions {
-//   //   final transactions = walletListResponse?.wallet?.recentTransactions ?? [];
-
-//   //   if (selectedFilter == WalletFilterType.all) return transactions;
-
-//   //   final now = DateTime.now();
-
-//   //   if (selectedFilter == WalletFilterType.last7Days) {
-//   //     return transactions.where((tx) {
-//   //       if (tx.createdOn == null) return false;
-//   //       final date = tx.createdOn!;
-//   //       return now.difference(date).inDays <= 7;
-//   //     }).toList();
-//   //   }
-
-//   //   if (selectedFilter == WalletFilterType.thisMonth) {
-//   //     return transactions.where((tx) {
-//   //       if (tx.createdOn == null) return false;
-//   //       final date = tx.createdOn!;
-//   //       return date.month == now.month && date.year == now.year;
-//   //     }).toList();
-//   //   }
-
-//   //   return transactions;
-//   // }
-
-//   String get filterLabel {
-//     switch (selectedFilter) {
-//       case WalletFilterType.thisMonth:
-//         return "This Month";
-//       case WalletFilterType.last7Days:
-//         return "Last 7 Days";
-//       case WalletFilterType.all:
-//       default:
-//         return "All";
-//     }
-//   }
-// }

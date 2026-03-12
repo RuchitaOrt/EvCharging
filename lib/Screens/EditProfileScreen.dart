@@ -73,17 +73,17 @@ if(widget.user!=null)
             _profileImage(),
             const SizedBox(height: 10),
 
-            _inputField("First Name", firstNameController),
+            _inputField("First Name *", firstNameController),
             
 
-            _inputField("Last Name", lastNameController),
+            _inputField("Last Name *", lastNameController),
            
-            _inputField("Email", emailController),
+            _inputField("Email *", emailController),
           
 
-            _inputField("Address *", addressController, maxLines: 3),
+            _inputField("Address", addressController, maxLines: 3),
             
-            _inputField("Phone Number", phoneController),
+            _inputField("Phone Number *", phoneController),
            
  const SizedBox(height: 10),
 
@@ -142,7 +142,7 @@ if(widget.user!=null)
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error, stackTrace) {
                 return Image.asset(
-                  CommonImagePath.profileImage,
+                  CommonImagePath.profileIcon,
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
@@ -150,7 +150,7 @@ if(widget.user!=null)
               },
                                               )
                                             : Image.asset(
-                                                CommonImagePath.profileImage,
+                                                CommonImagePath.profileIcon,
                                                 width: 120,
                                                 height: 120,
                                                 fit: BoxFit.cover,

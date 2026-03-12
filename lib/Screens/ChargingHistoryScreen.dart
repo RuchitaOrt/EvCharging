@@ -3,6 +3,7 @@ import 'package:HyCharge/Provider/PaymentProvider.dart';
 import 'package:HyCharge/Screens/BookingDetailsScreen.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
@@ -246,12 +247,44 @@ Widget _summaryRow() {
   //     ),
   //   );
   // }
+String formatDuration(String duration) {
+  List<String> parts = duration.split(':');
 
-  String formatTime(String dateTimeString) {
-    final dateTime = DateTime.parse(dateTimeString);
+  int h = 0, m = 0, s = 0;
 
-    return DateFormat('EEE ddMMM yyyy').format(dateTime);
+  if (parts.isNotEmpty) {
+    h = int.tryParse(parts[0]) ?? 0;
   }
+
+  if (parts.length > 1) {
+    m = int.tryParse(parts[1]) ?? 0;
+  }
+
+  if (parts.length > 2) {
+    // keep only first 2 digits if too long
+    String secPart = parts[2].replaceAll(RegExp(r'[^0-9]'), '');
+    if (secPart.length > 2) {
+      secPart = secPart.substring(0, 2);
+    }
+    s = int.tryParse(secPart) ?? 0;
+  }
+
+  // fix overflow
+  m += s ~/ 60;
+  s = s % 60;
+
+  h += m ~/ 60;
+  m = m % 60;
+
+  return "${h.toString().padLeft(2, '0')}:"
+      "${m.toString().padLeft(2, '0')}:"
+      "${s.toString().padLeft(2, '0')}";
+}
+String formatTime(String dateTimeString) {
+  final dateTime = DateTime.parse(dateTimeString);
+
+  return DateFormat('EEE dd MMM yyyy').format(dateTime);
+}
 
   Widget _historyCard(ChargingSession data) {
     return Column(
@@ -305,7 +338,7 @@ Widget _summaryRow() {
                   
                   children: [
                     Text(
-                      "Station: ${data.chargingStationName}",
+                      "Station: ${ capitalizeWords(data.chargingStationName?? "Station")}",
                       style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
                     ),
                      Text(
@@ -394,7 +427,7 @@ Widget _summaryRow() {
                                       fontWeight: FontWeight.w400,
                                       color: CommonColors.neutral500,
                                       fontSize: 12)),
-                              Text("${data.duration}",
+                              Text(formatDuration("${data.duration}"),
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600, fontSize: 12)),
                             ],
@@ -430,6 +463,7 @@ Widget _summaryRow() {
                         // ),
                       ],
                     ),
+                 
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -528,6 +562,8 @@ Widget _summaryRow() {
           batteryPercentage: data?.soCStart?.toString() ?? "0",
           endMeterReading: data?.endMeterReading?.toString() ?? "0",
           duration: data?.duration?.toString() ?? "0",
+          stationName: data.chargingStationName ?? "",
+          ConnectorGunID: data.chargingGun!.connectorId ?? ""
                 ),
               ),
             ),
@@ -557,7 +593,17 @@ Widget _summaryRow() {
                   :   Container(
                       width: SizeConfig.blockSizeHorizontal * 90,
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                           data.status == "Active"?null:
+             Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BookingDetailsScreen(recID: data.recId!,
+            
+            ),
+          ),
+        );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: CommonColors.white,
                           foregroundColor: CommonColors.blue,
@@ -570,7 +616,8 @@ Widget _summaryRow() {
                           ),
                         ),
                         child: const Text(
-                          "Download Receipt",
+                          //Download
+                          "View Receipt",
                           style: TextStyle(
                               fontSize: 12,
                               color: CommonColors.blue,
@@ -673,6 +720,7 @@ class _FilterTabsWidgetState extends State<FilterTabsWidget> {
         } else if (index == 2) {
           provider.setFilter(SessionFilter.all); // NEW
         }
+      
 
         // Debug: print length after filtering
         Future.microtask(() {

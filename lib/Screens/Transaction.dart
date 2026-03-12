@@ -1,6 +1,7 @@
 import 'package:HyCharge/Bottomsheet/showAddMoneyBottomSheet.dart';
 import 'package:HyCharge/Provider/PaymentProvider.dart';
 import 'package:HyCharge/Provider/WalletProvider.dart';
+import 'package:HyCharge/Screens/BookingDetailsScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
@@ -202,6 +203,7 @@ if (_scrollController.position.pixels >=
                     _formatDate(tx.createdOn?.toString()),
                     isCredit,
                     tx.additionalInfo1 ?? "",
+                    tx.chargingSessionId ?? ""
                   ),
                 ),
               );
@@ -322,6 +324,7 @@ class _TransactionSectionState extends State<_TransactionSection> {
                         _formatDate(tx.createdOn?.toString()),
                         isCredit,
                         tx.additionalInfo1 ?? "",
+                        tx.chargingSessionId ?? ""
                       ),
                     ),
                   );
@@ -410,9 +413,10 @@ class _Tx {
   final String orderId;
   final String amount;
   final String time;
+  final String sessionID;
   final bool isCredit;
 
-  _Tx(this.title, this.amount, this.time, this.isCredit, this.orderId);
+  _Tx(this.title, this.amount, this.time, this.isCredit, this.orderId,  this.sessionID);
 }
 
 class _TransactionTile extends StatelessWidget {
@@ -421,66 +425,80 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        // border: Border.all(color: Colors.black12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              item.isCredit ? Icons.call_made : Icons.call_received,
-              color: item.isCredit ? Colors.green : Colors.orange,
-              size: 14,
+    return GestureDetector(
+      onTap: ()
+      {
+         item.isCredit?null:
+         Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BookingDetailsScreen(recID: item.sessionID
+            
             ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.title,
-                    style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w800)),
-                const SizedBox(height: 2),
-                Text("${item.orderId}",
-                    style:
-                        const TextStyle(fontSize: 10, color: Colors.black54)),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(item.time,
-                        style: const TextStyle(
-                            fontSize: 10, color: Colors.black54)),
-                    Text(
-                        item.isCredit ? "+ ${item.amount}" : "- ${item.amount}",
-                        style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w900,
-                            color:
-                                item.isCredit ? Colors.green : Colors.orange)),
-                    // Icon(
-                    //   item.isCredit ? Icons.call_received : Icons.call_made,
-                    //   color: item.isCredit ? Colors.green : Colors.orange,
-                    //   size: 14,
-                    // )
-                  ],
-                ),
-              ],
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          // border: Border.all(color: Colors.black12),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                item.isCredit ? Icons.call_made : Icons.call_received,
+                color: item.isCredit ? Colors.green : Colors.orange,
+                size: 14,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.title,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 2),
+                  Text("${item.orderId}",
+                      style:
+                          const TextStyle(fontSize: 10, color: Colors.black54)),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(item.time,
+                          style: const TextStyle(
+                              fontSize: 10, color: Colors.black54)),
+                      Text(
+                          item.isCredit ? "+ ${item.amount}" : "- ${item.amount}",
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                              color:
+                                  item.isCredit ? Colors.green : Colors.orange)),
+                      // Icon(
+                      //   item.isCredit ? Icons.call_received : Icons.call_made,
+                      //   color: item.isCredit ? Colors.green : Colors.orange,
+                      //   size: 14,
+                      // )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

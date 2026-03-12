@@ -42,12 +42,13 @@ class StationDetailsScreen extends StatefulWidget {
   final ChargingHub hub;
   final Marker marker;
   final LatLng location;
+  final List<dynamic> nearbyHubs;
 
   StationDetailsScreen({
     super.key,
     required this.hub,
     required this.marker,
-    required this.location,
+    required this.location, required this.nearbyHubs,
   });
 
   @override
@@ -64,26 +65,51 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   Position? _currentPosition;
   Timer? _statusTimer;
   double currentWalletPrice = 0.0;
+void _startPolling() {
+  final chargers =
+      (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ?? [])
+          .cast<Charger>();
 
-  void _startPolling() {
-    _statusTimer = Timer.periodic(
-      const Duration(seconds: 10), // 👈 every 10 sec
-      (_) {
-        // final chargers = widget.hub.stations
-        //     ?.expand((s) => s.chargers ?? [])
-        //     .toList() ?? [];
-        final chargers =
-            (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ??
-                    [])
-                .cast<Charger>();
+  context.read<ChargingGunStatusProvider>().refreshAll(
+        context: context,
+        chargers: chargers,
+      );
 
-        context.read<ChargingGunStatusProvider>().refreshAll(
-              context: context,
-              chargers: chargers,
-            );
-      },
-    );
-  }
+  _statusTimer = Timer.periodic(
+    const Duration(seconds: 10),
+    (_) {
+      if (!mounted) return;
+
+      print("CHAGRERs");
+print(chargers.length);
+
+
+      context.read<ChargingGunStatusProvider>().refreshAll(
+            context: context,
+            chargers: chargers,
+          );
+    },
+  );
+}
+  // void _startPolling() {
+  //   _statusTimer = Timer.periodic(
+  //     const Duration(seconds: 10), // 👈 every 10 sec
+  //     (_) {
+  //       // final chargers = widget.hub.stations
+  //       //     ?.expand((s) => s.chargers ?? [])
+  //       //     .toList() ?? [];
+  //       final chargers =
+  //           (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ??
+  //                   [])
+  //               .cast<Charger>();
+
+  //       context.read<ChargingGunStatusProvider>().refreshAll(
+  //             context: context,
+  //             chargers: chargers,
+  //           );
+  //     },
+  //   );
+  // }
 
   String userId = "";
   getUserInfo() async {
@@ -100,6 +126,20 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   void initState() {
     super.initState();
     print("Current BALNCE");
+     // Force status bar visible
+  // ✅ Force status bar visible
+// Force status bar visible
+  // SystemChrome.setEnabledSystemUIMode(
+  //   SystemUiMode.edgeToEdge, // ensures system overlays are visible
+  // );
+
+  // // Set status bar color & icon brightness
+  // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+  //   statusBarColor: Colors.white,           // white background
+  //   statusBarIconBrightness: Brightness.dark, // dark icons for Android
+  //   statusBarBrightness: Brightness.light,    // dark icons for iOS
+  // ));
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getUserInfo();
       context.read<WalletProvider>().fetchWallet(context);
@@ -605,6 +645,8 @@ Widget _imagePlaceholder() {
   }
 
   double distanceInKm = 0;
+
+
   @override
   Widget build(BuildContext context) {
     final reviewProvider = context.watch<ChargingHubReviewProvider>();
@@ -629,204 +671,182 @@ Widget _imagePlaceholder() {
     currentWalletPrice = walletProvider.currentBalance;
 
     print("Current BALANCE ${walletProvider.currentBalance}");
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.white,
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.dark));
+//    SystemChrome.setEnabledSystemUIMode(
+//   SystemUiMode.manual,
+//   overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
+// );
+
+// SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+//   statusBarColor: Colors.white,
+//   statusBarBrightness: Brightness.dark,
+//   statusBarIconBrightness: Brightness.dark,
+// ));
     final w = MediaQuery.of(context).size.width;
     markers.add(widget.marker);
-    return Scaffold(
-      backgroundColor: CommonColors.white,
-      appBar: CommonAppBar(
-        title: "Station Details",
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: _navigateButton(),
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // map placeholder
-            _currentPosition == null
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: CommonColors.blue,
-                    ),
-                  )
-                : Container(
-                    height: MediaQuery.of(context).size.height *
-                        0.35, // 35% of screen height
-                    decoration: BoxDecoration(
-                      color: CommonColors.mapDark,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: MiniMapWidget(
-                      hub: widget.hub,
-                      currentLocation: LatLng(_currentPosition!.latitude,
-                          _currentPosition!.longitude),
-                      hubLocation: LatLng(
-                        location!.latitude ?? 0,
-                        location!.longitude ?? 0,
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: CommonColors.white,
+        appBar: CommonAppBar(
+          title: "Station Details",
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: _navigateButton(),
+        ),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // map placeholder
+              _currentPosition == null
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: CommonColors.blue,
+                      ),
+                    )
+                  : Container(
+                      height: MediaQuery.of(context).size.height *
+                          0.35, // 35% of screen height
+                      decoration: BoxDecoration(
+                        color: CommonColors.mapDark,
+                       //  borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: MiniMapWidget(
+                        nearbyHubs: widget.nearbyHubs,
+                        hub: widget.hub,
+                        currentLocation: LatLng(_currentPosition!.latitude,
+                            _currentPosition!.longitude),
+                        hubLocation: LatLng(
+                          location!.latitude ?? 0,
+                          location!.longitude ?? 0,
+                        ),
                       ),
                     ),
-                  ),
-
-            // Container(
-            //   height: w * 0.5,
-            //   decoration: BoxDecoration(
-            //     color: CommonColors.mapDark,
-            //     borderRadius: BorderRadius.circular(12),
-            //   ),
-            //   child: GoogleMap(
-            //     initialCameraPosition: CameraPosition(
-            //       target: widget.location,
-            //       zoom: 16,
-            //       tilt: 45,
-            //       bearing: 0,
-            //     ),
-            //     myLocationEnabled: false,
-            //     myLocationButtonEnabled: false,
-            //     onMapCreated: (controller) async {
-            //       mapController = controller;
-            //       String style = await DefaultAssetBundle.of(context)
-            //           .loadString('assets/map_styles/dark_map.json');
-            //       mapController!.setMapStyle(style);
-            //     },
-            //     markers: markers,
-            //     zoomControlsEnabled: false,
-            //     zoomGesturesEnabled: false,
-            //     compassEnabled: false,
-            //     mapToolbarEnabled: false,
-            //     buildingsEnabled: false,
-            //     trafficEnabled: false,
-            //     tiltGesturesEnabled: false,
-            //   ),
-            // ),
-
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: CommonColors.white,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: CommonColors.neutral50,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Image.asset(
-                              //   CommonImagePath.frame,
-                              //   fit: BoxFit.cover,
-                              //   height: SizeConfig.blockSizeVertical * 8,
-                              // ),
-                              widget.hub.chargingHubImage != null
-                                  ? HubImage(
-                                      imageId: widget.hub.chargingHubImage!,
-                                      height: SizeConfig.blockSizeVertical * 5,
-                                      width: SizeConfig.blockSizeVertical * 5,
-                                    )
-                                  : Image.asset(
-                                      CommonImagePath.frame,
-                                      height: SizeConfig.blockSizeVertical * 6,
-                                    ),
-                              SizedBox(
-                                  width: SizeConfig.blockSizeHorizontal * 2),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            widget.hub.chargingHubName ??
-                                                "Charging Station",
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                color: CommonColors.primary,
-                                                fontWeight: FontWeight.w500),
+      
+              
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: CommonColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: CommonColors.neutral50,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                // Image.asset(
+                                //   CommonImagePath.frame,
+                                //   fit: BoxFit.cover,
+                                //   height: SizeConfig.blockSizeVertical * 8,
+                                // ),
+                                widget.hub.chargingHubImage != null
+                                    ? HubImage(
+                                        imageId: widget.hub.chargingHubImage!,
+                                        height: SizeConfig.blockSizeVertical * 5,
+                                        width: SizeConfig.blockSizeVertical * 5,
+                                      )
+                                    : Image.asset(
+                                        CommonImagePath.frame,
+                                        height: SizeConfig.blockSizeVertical * 6,
+                                      ),
+                                SizedBox(
+                                    width: SizeConfig.blockSizeHorizontal * 2),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              widget.hub.chargingHubName ??
+                                                  "Charging Station",
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: CommonColors.primary,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    Text(
-                                      widget.hub.addressLine1 ??
-                                          "Address not available",
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: CommonColors.primary,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ],
+                                        ],
+                                      ),
+                                      Text(
+                                        widget.hub.addressLine1 ??
+                                            "Address not available",
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: CommonColors.primary,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            print("open bottom ${widget.hub.recId!}");
-                            _openReviewsBottomSheet(
-                              context: context,
-                              stationId: widget.hub.recId!, // fallback
-                            );
-                          },
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                "${totalReviews} Reviews",
-                                style: TextStyle(
-                                  fontSize: 12,
+                          GestureDetector(
+                            onTap: () {
+                              print("open bottom ${widget.hub.recId!}");
+                              _openReviewsBottomSheet(
+                                context: context,
+                                stationId: widget.hub.recId!, // fallback
+                              );
+                            },
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "${totalReviews} Reviews",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: CommonColors.blue,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                const SizedBox(
+                                    height: 2), // 👈 SPACE between text & line
+                                Container(
+                                  width: 40,
+                                  height: 1.5,
                                   color: CommonColors.blue,
-                                  fontWeight: FontWeight.w400,
                                 ),
-                              ),
-                              const SizedBox(
-                                  height: 2), // 👈 SPACE between text & line
-                              Container(
-                                width: 40,
-                                height: 1.5,
-                                color: CommonColors.blue,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  _filterButtons(
-                      opening: widget.hub.openingTime,
-                      closing: widget.hub.closingTime,
-                      availablePorts: widget.hub.availableChargers,
-                      totalPorts: widget.hub.totalChargers),
-                  const SizedBox(height: 12),
-                  // Divider(
-                  //   color: CommonColors.neutral200,
-                  //   thickness: 2,
-                  // ),
-                  _stationsList(widget.hub.stations),
-                  // chargerDetail()
-                  // _navigateButton(),
-                ],
+                    const SizedBox(height: 6),
+                    _filterButtons(
+                        opening: widget.hub.openingTime,
+                        closing: widget.hub.closingTime,
+                        availablePorts: widget.hub.availableChargers,
+                        totalPorts: widget.hub.totalChargers),
+                    const SizedBox(height: 12),
+                    // Divider(
+                    //   color: CommonColors.neutral200,
+                    //   thickness: 2,
+                    // ),
+                    _stationsList(widget.hub.stations),
+                    // chargerDetail()
+                    // _navigateButton(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1124,8 +1144,11 @@ void _openWriteReviewBottomSheet({
                       ),
                       Consumer<ChargingGunStatusProvider>(
                         builder: (context, provider, _) {
-                          final updatedCharger = provider
-                                  .chargers[int.parse(charger.connectorId!)] ??
+                          // final updatedCharger = provider
+                          //         .chargers[int.parse(charger.connectorId!)] ??
+                          //     charger;
+  final updatedCharger = provider
+                                  .chargers[charger.recId] ??
                               charger;
 
                           final isAvailable =
@@ -1156,8 +1179,10 @@ void _openWriteReviewBottomSheet({
                   ),
                 ),
                 const SizedBox(height: 6),
+                  // Text("${charger.recId}"),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                //spaceBetween
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1170,28 +1195,29 @@ void _openWriteReviewBottomSheet({
                                 fontWeight: FontWeight.w600, fontSize: 13)),
                       ],
                     ),
+                    SizedBox(width: 20,),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Power Output',
                             style: TextStyle(
                                 fontWeight: FontWeight.w200, fontSize: 12)),
-                        Text('${charger.powerOutput} KW',
+                        Text('${charger.powerOutput}',
                             style: TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 13)),
                       ],
                     ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Plug Type',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w200, fontSize: 12)),
-                        Text('Type ${charger.chargerTariff}',
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600, fontSize: 13)),
-                      ],
-                    ),
+                    // Column(
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text('Plug Type',
+                    //         style: TextStyle(
+                    //             fontWeight: FontWeight.w200, fontSize: 12)),
+                    //     Text('Type ${charger.chargerTariff}',
+                    //         style: TextStyle(
+                    //             fontWeight: FontWeight.w600, fontSize: 13)),
+                    //   ],
+                    // ),
                   ],
                 ),
               ],
@@ -1201,7 +1227,13 @@ void _openWriteReviewBottomSheet({
       ),
     );
   }
-
+// String capitalizeWords(String text) {
+//   return text
+//       .split(' ')
+//       .map((word) =>
+//           word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
+//       .join(' ');
+// }
   Widget _stationsList(List<ChargingStation> stations) {
     return Column(
       children: stations.map((station) {
@@ -1227,7 +1259,7 @@ void _openWriteReviewBottomSheet({
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  station.chargePointName ?? "Station",
+                  capitalizeWords(station.chargePointName ?? "Station"),
                   style: const TextStyle(
                       fontSize: 15, fontWeight: FontWeight.w600),
                 ),
@@ -1388,11 +1420,12 @@ _selectedCharger = charger;
                   : "Distance N/A")
               : Container(),
           const SizedBox(width: 10),
-          _filterChip(
-            opening != null && closing != null
-                ? "$opening - $closing"
-                : "Timing N/A",
-          ),
+          // _filterChip(
+          //   opening != null && closing != null
+          //       ? "$opening - $closing"
+          //       : "Timing N/A",
+          // ),
+          _filter24hourChip(),
           const SizedBox(width: 10),
           _filterChip(
             availablePorts != null && totalPorts != null
@@ -1439,6 +1472,29 @@ _selectedCharger = charger;
           Text(
             label,
             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+          ),
+        ],
+      ),
+    );
+  }
+   Widget _filter24hourChip() {
+    return Container(
+      
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+         color: CommonColors.darkgreen.withOpacity(0.15),
+        border: Border.all(
+          color: CommonColors.darkgreen.withOpacity(0.15), // choose your color here
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "24 hrs Available",
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400,color: CommonColors.darkgreen),
           ),
         ],
       ),

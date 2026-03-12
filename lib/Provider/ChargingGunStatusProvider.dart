@@ -22,10 +22,13 @@ class ChargingGunStatusProvider extends ChangeNotifier {
   String getStatus(int chargingGunId) =>
       _chargerMap[chargingGunId]?.lastStatus ?? "Unknown";
 
-final Map<int, Charger> _chargerMap = {};
+// final Map<int, Charger> _chargerMap = {};
 
-  Map<int, Charger> get chargers => _chargerMap;
-
+//   Map<int, Charger> get chargers => _chargerMap;
+// final Map<int, Charger> _chargerMap = {};
+// Map<int, Charger> get chargers => _chargerMap;
+final Map<String, Charger> _chargerMap = {};
+Map<String, Charger> get chargers => _chargerMap;
 Future<void> fetchGunStatus({
   required BuildContext context,
   required Charger charger,
@@ -38,8 +41,8 @@ Future<void> fetchGunStatus({
 
     if (res.success == true && res.data != null) {
       final gunData = res.data!;
-      final key = int.parse(charger.connectorId!);
-
+      // final key = int.parse(charger.connectorId!);
+final key = charger.recId!;
       _chargerMap[key] = Charger(
         connectorId: charger.connectorId,
         chargePointId: charger.chargePointId,
@@ -69,7 +72,7 @@ Future<ChargingGunStatusResponse?> fetchGunStatusValue({
 
     if (res.success == true && res.data != null) {
       final gunData = res.data!;
-      final key = int.parse(charger.connectorId!);
+     final key = charger.recId!;
 
       _chargerMap[key] = Charger(
         connectorId: charger.connectorId,
@@ -102,6 +105,10 @@ Future<void> refreshAll({
   required List<Charger> chargers,
 }) async {
   for (final charger in chargers) {
+    print("NAME");
+    print(charger.chargePointName);
+    print(charger.chargingHubName);
+   
     await fetchGunStatus(context: context, charger: charger);
   }
   notifyListeners(); // 🔥 triggers UI rebuild

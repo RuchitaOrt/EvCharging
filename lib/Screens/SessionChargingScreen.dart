@@ -1,9 +1,12 @@
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/main.dart';
 
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
@@ -11,8 +14,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:math' as math;
 import 'dart:async';
-  import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:vibration/vibration.dart';
 
 class SessionChargingScreen extends StatefulWidget {
   // final StartChargingSessionResponse intitalResponse;
@@ -44,12 +48,24 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
   String? cost;
   String? unitConsumed;
   String? outputPower;
-  String? batteryPercentage="0";
+  String? batteryPercentage = "0";
   String? endMeterReading;
-Timer? _durationTimer;
-DateTime? _sessionStartTime;
-String duration = "00:00";
-final String recId ="";
+  String? stationName;
+  String? ConnectorGunID;
+  Timer? _durationTimer;
+  DateTime? _sessionStartTime;
+  String duration = "00:00";
+  final String recId = "";
+  session()
+  async {
+      final res = await context
+        .read<ChargingProvider>()
+        .fetchChargingSessionDetails(
+          context: context,
+          sessionId: widget.args.sessionId!,
+        );
+         duration = formatBackendDuration(res!.data!.session!.duration);
+  }
   @override
   void initState() {
     super.initState();
@@ -57,14 +73,15 @@ final String recId ="";
 // _sessionStartTime = DateTime.parse(widget.args.startTime);
 
 // If not available, start from now
- // 1️⃣ Get backend duration
-  duration = formatBackendDuration(widget.args.duration);
+    // 1️⃣ Get backend duration
+    
+     duration = formatBackendDuration(widget.args.duration);
+// session();
+    // 2️⃣ Convert to seconds
+    _elapsedSeconds = durationToSeconds(duration);
 
-  // 2️⃣ Convert to seconds
-  _elapsedSeconds = durationToSeconds(duration);
-
-  // 3️⃣ Start timer from backend value
-  _startDurationTimer();
+    // 3️⃣ Start timer from backend value
+    _startDurationTimer();
 // _sessionStartTime = DateTime.now();
 
 // _startDurationTimer();
@@ -76,13 +93,15 @@ final String recId ="";
     // batteryPercentage ==
     //      widget.intitalResponse.data!.batteryStateOfCharge!.currentSoC;
     // endMeterReading = widget.intitalResponse.data!.session!.endMeterReading;
-    
+
     status = widget.args.status!;
     cost = widget.args.cost;
     unitConsumed = widget.args.unitConsumed;
     outputPower = widget.args.outputPower;
-    batteryPercentage =widget.args.batteryPercentage;
-      print("BATTERY");
+    batteryPercentage = widget.args.batteryPercentage;
+    stationName=widget.args.stationName;
+    ConnectorGunID=widget.args.ConnectorGunID;
+    print("BATTERY");
     print(outputPower);
     print("BATTERY");
     print(batteryPercentage);
@@ -101,51 +120,53 @@ final String recId ="";
     _controller.repeat();
     _startPolling();
   }
+
   int _elapsedSeconds = 0;
   String formatBackendDuration(String? raw) {
-  if (raw == null || raw.isEmpty) return "00:00:00";
+    if (raw == null || raw.isEmpty) return "00:00:00";
 
-  // Case 1: 01:19:22:07372260.0  → take first 3 parts
-  final parts = raw.split(':');
+    // Case 1: 01:19:22:07372260.0  → take first 3 parts
+    final parts = raw.split(':');
 
-  if (parts.length >= 3) {
-    final hours = parts[0].padLeft(2, '0');
-    final minutes = parts[1].padLeft(2, '0');
+    if (parts.length >= 3) {
+      final hours = parts[0].padLeft(2, '0');
+      final minutes = parts[1].padLeft(2, '0');
 
-    // seconds may contain decimals
-    final secondsPart = parts[2].split('.').first.padLeft(2, '0');
+      // seconds may contain decimals
+      final secondsPart = parts[2].split('.').first.padLeft(2, '0');
 
-    return "$hours:$minutes:$secondsPart";
+      return "$hours:$minutes:$secondsPart";
+    }
+
+    return "00:00:00";
   }
 
-  return "00:00:00";
-}
-int durationToSeconds(String duration) {
-  final parts = duration.split(':');
-  if (parts.length != 3) return 0;
+  int durationToSeconds(String duration) {
+    final parts = duration.split(':');
+    if (parts.length != 3) return 0;
 
-  final hours = int.tryParse(parts[0]) ?? 0;
-  final minutes = int.tryParse(parts[1]) ?? 0;
-  final seconds = int.tryParse(parts[2]) ?? 0;
+    final hours = int.tryParse(parts[0]) ?? 0;
+    final minutes = int.tryParse(parts[1]) ?? 0;
+    final seconds = int.tryParse(parts[2]) ?? 0;
 
-  return hours * 3600 + minutes * 60 + seconds;
-}
-void _startDurationTimer() {
-  _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-    _elapsedSeconds++;
+    return hours * 3600 + minutes * 60 + seconds;
+  }
 
-    final hours = _elapsedSeconds ~/ 3600;
-    final minutes = (_elapsedSeconds % 3600) ~/ 60;
-    final seconds = _elapsedSeconds % 60;
+  void _startDurationTimer() {
+    _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _elapsedSeconds++;
 
-    setState(() {
-      duration =
-          "${hours.toString().padLeft(2, '0')}:"
-          "${minutes.toString().padLeft(2, '0')}:"
-          "${seconds.toString().padLeft(2, '0')}";
+      final hours = _elapsedSeconds ~/ 3600;
+      final minutes = (_elapsedSeconds % 3600) ~/ 60;
+      final seconds = _elapsedSeconds % 60;
+
+      setState(() {
+        duration = "${hours.toString().padLeft(2, '0')}:"
+            "${minutes.toString().padLeft(2, '0')}:"
+            "${seconds.toString().padLeft(2, '0')}";
+      });
     });
-  });
-}
+  }
 
 // void _startDurationTimer() {
 //   _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -168,43 +189,104 @@ void _startDurationTimer() {
 
   void _startPolling() {
     _refreshTimer = Timer.periodic(
-      const Duration(seconds: 10),
-      (_) async {
-        final res =
-            await context.read<ChargingProvider>().fetchChargingSessionDetails(
-                  context: context,
-                  sessionId: widget.args.sessionId!,
-                );
-        setState(() {
-          status = res!.data!.session!.status == null
-              ? ""
-              : res!.data!.session!.status;
-          cost = "${res.data!.costDetails!.totalCost!.toString()!}";
-          unitConsumed =
-              "${res.data!.session!.energyTransmitted!.toString()} ${res.data!.session!.energyTransmitted!.toString()}";
-          outputPower =
-              "${res.data!.chargerDetails!.powerOutput} KW";
-         print("outputPower ${res.data!.chargerDetails!.powerOutput} KW");
-         
-          // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
-          final isActive = res?.data?.session?.active == 1;
+  const Duration(seconds: 10),
+  (_) async {
+    final res = await context
+        .read<ChargingProvider>()
+        .fetchChargingSessionDetails(
+          context: context,
+          sessionId: widget.args.sessionId!,
+        );
 
-          batteryPercentage = isActive
-              ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
-              : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
-          print("AFTER 15 sec batteryStateOfCharge");
-          print(res.data!.batteryStateOfCharge!.currentSoC.toString());
+    // Extract all values first (outside setState)
+    final newStatus = res!.data!.session!.status ?? "";
+    final newCost = "${res.data!.costDetails!.totalCost}";
+    final newUnitConsumed = "${res.data!.energyConsumption!.totalEnergy}";
+    final newOutputPower = "${res.data!.chargerDetails!.powerOutput} KW";
+    final isActive = res.data!.session!.active == 1;
+    final newBatteryPercentage = isActive
+        ? res.data!.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+        : res.data!.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+    final newEndMeterReading = res.data!.session!.endMeterReading.toString();
+    final newStationName = res.data!.session!.chargingStationName;
+    // final newConnectorGunID = res.data!.session!.connectorName;
 
-          endMeterReading = res.data!.session!.endMeterReading.toString();
-          print("AFTER 15 sec ${outputPower}");
-          // 🔴 Stop polling if session completed
-          if (res!.data!.isActive == false) {
-            _refreshTimer?.cancel();
-              _durationTimer?.cancel(); 
-          }
-        });
-      },
-    );
+    // Stop timers and vibrate if session completed
+    if (res.data!.isActive == false) {
+      _refreshTimer?.cancel();
+      _durationTimer?.cancel();
+
+      if (await Vibration.hasVibrator() ?? false) {
+        Vibration.vibrate(duration: 800);
+      }
+showToast("Charging session completed");
+     
+    }
+
+    // Update UI synchronously
+    setState(() {
+      status = newStatus;
+      cost = newCost;
+      unitConsumed = newUnitConsumed;
+      outputPower = newOutputPower;
+      batteryPercentage = newBatteryPercentage;
+      endMeterReading = newEndMeterReading;
+      stationName = newStationName;
+      // ConnectorGunID = newConnectorGunID;
+    });
+  },
+);
+    // _refreshTimer = Timer.periodic(
+    //   const Duration(seconds: 10),
+    //   (_) async {
+    //     final res =
+    //         await context.read<ChargingProvider>().fetchChargingSessionDetails(
+    //               context: context,
+    //               sessionId: widget.args.sessionId!,
+    //             );
+    //     setState(() async {
+    //       status = res!.data!.session!.status == null
+    //           ? ""
+    //           : res!.data!.session!.status;
+    //       cost = "${res.data!.costDetails!.totalCost!.toString()!}";
+    //       unitConsumed =
+    //           "${res.data!.energyConsumption!.totalEnergy!.toString()}";
+    //       outputPower = "${res.data!.chargerDetails!.powerOutput} KW";
+    //       print("outputPower ${res.data!.chargerDetails!.powerOutput} KW");
+
+    //       // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
+    //       final isActive = res?.data?.session?.active == 1;
+
+    //       batteryPercentage = isActive
+    //           ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+    //           : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+    //       print("AFTER 15 sec batteryStateOfCharge");
+    //       print(res.data!.batteryStateOfCharge!.currentSoC.toString());
+
+    //       endMeterReading = res.data!.session!.endMeterReading.toString();
+    //       stationName=res.data!.session!.chargingStationName;
+    //       ConnectorGunID= res.data!.session!.chargingGunId;
+    //       print("AFTER 15 sec ${outputPower}");
+    //       // 🔴 Stop polling if session completed
+    //       if (res!.data!.isActive == false) {
+    //         _refreshTimer?.cancel();
+    //         _durationTimer?.cancel();
+
+    //         if (await Vibration.hasVibrator() ?? false) {
+    //           Vibration.vibrate(duration: 800);
+    //         }
+
+    //         // Optional UI message
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           const SnackBar(
+    //             content: Text("Charging session completed"),
+    //             duration: Duration(seconds: 2),
+    //           ),
+    //         );
+    //       }
+    //     });
+    //   },
+    // );
   }
 
   @override
@@ -221,23 +303,17 @@ void _startDurationTimer() {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MainTab(
-              isLoggedIn: GlobalLists.islLogin,
-              currentIndex: 1,
-            ),
-          ),
-        );
-        return false; // prevent default pop
-      },
-      child: Scaffold(
-        backgroundColor: CommonColors.white,
-        appBar: CommonAppBar(
-          title: "Charging Session",
-          onBack: () {
-            Navigator.push(
+         if(widget.args!.isActive!)
+
+{
+  Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                            builder: (_) => ActiveSessionsScreen(),
+                          ),
+                        );
+}  else{
+ Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (_) => MainTab(
@@ -246,6 +322,44 @@ void _startDurationTimer() {
                 ),
               ),
             );
+}         
+          
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => MainTab(
+        //       isLoggedIn: GlobalLists.islLogin,
+        //       currentIndex: 1,
+        //     ),
+        //   ),
+        // );
+        return false; // prevent default pop
+      },
+      child: Scaffold(
+        backgroundColor: CommonColors.white,
+        appBar: CommonAppBar(
+          title: "Charging Session",
+          onBack: () {
+            if(widget.args!.isActive!)
+
+{
+  Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                            builder: (_) => ActiveSessionsScreen(),
+                          ),
+                        );
+}  else{
+ Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MainTab(
+                  isLoggedIn: GlobalLists.islLogin,
+                  currentIndex: 1,
+                ),
+              ),
+            );
+}         
           },
         ),
         bottomNavigationBar: Padding(
@@ -264,23 +378,34 @@ void _startDurationTimer() {
                                   widget.args.sessionId!, // 🔑 station id
                               endMeterReading: endMeterReading!);
 
-                          setState(() {
+                          setState(() async {
                             _durationTimer?.cancel();
-
+                            if (await Vibration.hasVibrator() ?? false) {
+                              Vibration.vibrate(pattern: [0, 500, 200, 500]);
+                            }
+showToast("harging session stopped");
+                           
                             status = response!.data!.session!.status;
 
                             cost = response.data!.cost!.toString();
                             unitConsumed =
-                                response.data!.session!.energyTransmitted.toString();
-                            outputPower =
-                                response.data!.session!.chargingGun!.powerOutput.toString();
-                            batteryPercentage =response
-                                .data!.batteryStateOfCharge!.endSoC==null?"0" :response
-                                .data!.batteryStateOfCharge!.endSoC
+                                response.data!.energyConsumed.toString();
+                            outputPower = response
+                                .data!.session!.chargingGun!.powerOutput
                                 .toString();
+                            batteryPercentage = response
+                                        .data!.batteryStateOfCharge!.endSoC ==
+                                    null
+                                ? "0"
+                                : response.data!.batteryStateOfCharge!.endSoC
+                                    .toString();
                             endMeterReading =
                                 response.data!.meterStop.toString();
+                                stationName=response.data!.session!.chargingStationName;
+                                // ConnectorGunID=response.data!.session!.connectorName;
                           });
+                          // 📳 Vibrate when user manually stops charging
+
                           // if (success) {
                           //   Navigator.pop(context);
                           // }
@@ -314,13 +439,14 @@ void _startDurationTimer() {
                               context: context,
                               chargingStationId: data!
                                   .session!.chargingStationId!, // 🔑 station id
-                              connectorId:
-                                  int.parse(data.session!.chargingGunId!));
+                              connectorId:data.chargerDetails!.connectorId!
+                                  // int.parse(data.session!.chargingGunId!)
+                                  );
                           status = response!.data!.status;
 
-                          if (response.success) {
-                            Navigator.pop(context);
-                          }
+                          // if (response.success) {
+                          //   Navigator.pop(context);
+                          // }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.white,
@@ -347,64 +473,81 @@ void _startDurationTimer() {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-            
+               status == ""
+                  ? Container()
+                  : Row(
+                    
+                      children: [
+                        Expanded(
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 30),
+                              child: Text(
+                                '${status}',
+                                style: TextStyle(
+                                    color: CommonColors.blue, fontSize: 22),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // SizedBox(
+                        //   width: 60,
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 20),
+                          child: GestureDetector(
+                              onTap: () async {
+                                print("REFRESH CLICKED");
+                                final res = await context
+                                    .read<ChargingProvider>()
+                                    .fetchChargingSessionDetails(
+                                      context: context,
+                                      sessionId: widget.args.sessionId!,
+                                    );
+                                setState(() {
+                                  status = res!.data!.session!.status == null
+                                      ? ""
+                                      : res!.data!.session!.status;
+                                  cost =
+                                      "${res.data!.costDetails!.totalCost!.toString()!}";
+                                  unitConsumed =
+                                      "${res.data!.energyConsumption!.totalEnergy!.toString()} ";
+                                  outputPower =
+                                      "${res.data!.chargerDetails!.powerOutput} KW";
+                                  print(
+                                      "outputPower ${res.data!.chargerDetails!.powerOutput} KW");
+                                           stationName="${res.data!.session!.chargingStationName}";
+                                          //  ConnectorGunID="${res.data!.session!.connectorName}";
+                                  // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
+                                  final isActive =
+                                      res?.data?.session?.active == 1;
+                          
+                                  batteryPercentage = isActive
+                                      ? res?.data?.batteryStateOfCharge
+                                              ?.currentSoC
+                                              ?.toString() ??
+                                          "0"
+                                      : res?.data?.batteryStateOfCharge?.endSoC
+                                              ?.toString() ??
+                                          "0";
+                                  print("AFTER 15 sec batteryStateOfCharge");
+                                  print(res.data!.batteryStateOfCharge!.currentSoC
+                                      .toString());
+                          
+                                  endMeterReading = res
+                                      .data!.session!.endMeterReading
+                                      .toString();
+                                });
+                              },
+                              child: Icon(Icons.refresh)),
+                        ),
+                      ],
+                    ),
               ChargerAnimation(
                 status: status!, // "Active" or "Complete"
               ),
 
-              status == ""
-                  ? Container()
-                  : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Center(
-                          child: Text(
-                            '${status}',
-                            style:
-                                TextStyle(color: CommonColors.blue, fontSize: 22),
-                          ),
-                        ),
-                       SizedBox(width: 60,),
-                         GestureDetector(
-                          onTap: ()
-                          async {
-print("REFRESH CLICKED");
-final res =
-            await context.read<ChargingProvider>().fetchChargingSessionDetails(
-                  context: context,
-                  sessionId: widget.args.sessionId!,
-                );
-        setState(() {
-          status = res!.data!.session!.status == null
-              ? ""
-              : res!.data!.session!.status;
-          cost = "${res.data!.costDetails!.totalCost!.toString()!}";
-          unitConsumed =
-              "${res.data!.session!.energyTransmitted!.toString()} ${res.data!.session!.energyTransmitted!.toString()}";
-          outputPower =
-              "${res.data!.chargerDetails!.powerOutput} KW";
-         print("outputPower ${res.data!.chargerDetails!.powerOutput} KW");
-         
-          // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
-          final isActive = res?.data?.session?.active == 1;
-
-          batteryPercentage = isActive
-              ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
-              : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
-          print("AFTER 15 sec batteryStateOfCharge");
-          print(res.data!.batteryStateOfCharge!.currentSoC.toString());
-
-          endMeterReading = res.data!.session!.endMeterReading.toString();
-        
-       
-        });
-
-                            
-                          },
-                          child: Icon(Icons.refresh)),
-                    ],
-                  ),
-                
+            
 
 // Row(
 //   children: [
@@ -426,10 +569,46 @@ final res =
 //   ],
 // )
 // ,
-               
+
               SizedBox(
                 height: 10,
               ),
+               Padding(
+                padding: const EdgeInsets.only(left: 20,bottom: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                      "Station Name: ",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                        Text(
+                          "${stationName}",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                     Text(
+                       "(Connector ${ConnectorGunID})",
+                       style: TextStyle(
+                         color: Colors.black,
+                         fontSize: 12,
+                       ),
+                     ),
+                  ],
+                ),
+              ),
+             
               _batteryProgress(),
               _infoGrid(),
 
@@ -468,7 +647,8 @@ final res =
                     TweenAnimationBuilder<double>(
                       tween: Tween(
                           begin: 0,
-                          end: (batteryPercentage == null || batteryPercentage == "null")
+                          end: (batteryPercentage == null ||
+                                  batteryPercentage == "null")
                               ? 0.0
                               : double.parse(
                                   batteryPercentage.toString() ?? "0.0")),
@@ -599,10 +779,9 @@ final res =
   // }
 
   Widget _infoGrid() {
-
     print("UI COST $cost");
-print("UI UNIT $unitConsumed");
-print("UI OUTPUT $outputPower");
+    print("UI UNIT $unitConsumed");
+    print("UI OUTPUT $outputPower");
 
     return GridView.count(
       crossAxisCount: 2,
@@ -622,11 +801,10 @@ print("UI OUTPUT $outputPower");
         // ),
         _infoCard(
             "Units ", "${unitConsumed ?? '--'}", CommonImagePath.unitconsumed),
-        _infoCard("Output Power", "${outputPower}",
-            CommonImagePath.poweroutput),
-           
-             _infoCard("Duration", "${duration}",
-            CommonImagePath.poweroutput), 
+        _infoCard(
+            "Output Power", "${outputPower}", CommonImagePath.poweroutput),
+
+        _infoCard("Duration", "${duration}", CommonImagePath.poweroutput),
       ],
     );
   }
@@ -650,8 +828,8 @@ print("UI OUTPUT $outputPower");
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title,
-                  style: TextStyle(color: Colors.white70, fontSize: 14)),
-                 
+                  style: TextStyle(color: Colors.white70, fontSize: 13)),
+
               const Spacer(),
               Text(
                 value,
@@ -837,7 +1015,7 @@ class _ChargerAnimationState extends State<ChargerAnimation>
   @override
   void dispose() {
     _controller.dispose();
-   
+
     super.dispose();
   }
 
@@ -860,7 +1038,7 @@ class _ChargerAnimationState extends State<ChargerAnimation>
             }
           },
           width: 200,
-          height: 200,
+          height: 180,
           fit: BoxFit.contain,
         ),
       ),
@@ -877,6 +1055,9 @@ class SessionChargingArgs {
   final String batteryPercentage;
   final String endMeterReading;
   final String duration;
+  final String? stationName;
+  final String? ConnectorGunID;
+  final bool? isActive; //1 for Active otherwise 0
 
   SessionChargingArgs({
     required this.sessionId,
@@ -885,6 +1066,10 @@ class SessionChargingArgs {
     required this.unitConsumed,
     required this.outputPower,
     required this.batteryPercentage,
-    required this.endMeterReading, required this.duration,
+    required this.endMeterReading,
+    required this.duration,
+    required this.stationName,
+    required this.ConnectorGunID, 
+    this.isActive =false
   });
 }

@@ -128,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                                 fit: BoxFit.cover,
                                                 errorBuilder: (context, error, stackTrace) {
                 return Image.asset(
-                  CommonImagePath.profileImage,
+                  CommonImagePath.profileIcon,
                   width: 120,
                   height: 120,
                   fit: BoxFit.cover,
@@ -136,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
                                               )
                                             : Image.asset(
-                                                CommonImagePath.profileImage,
+                                                CommonImagePath.profileIcon,
                                                 width: 120,
                                                 height: 120,
                                                 fit: BoxFit.cover,
@@ -240,28 +240,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     //     // );
                     //   },
                     // ),
-                    _profileTile(
-                      CommonImagePath.vehicle,
-                      'Vehicle Information',
-                      () {
-                        Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                              builder: (context) => MyVehicleScreen()),
-                        );
-                      },
-                    ),
-                    _profileTile(
-                      CommonImagePath.notification,
-                      'Notification',
-                      () {
-                        Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                              builder: (context) => NotificationScreen()),
-                        );
-                      },
-                    ),
+                    // _profileTile(
+                    //   CommonImagePath.vehicle,
+                    //   'Vehicle Information',
+                    //   () {
+                    //     Navigator.push(
+                    //       routeGlobalKey.currentContext!,
+                    //       MaterialPageRoute(
+                    //           builder: (context) => MyVehicleScreen()),
+                    //     );
+                    //   },
+                    // ),
+                    // _profileTile(
+                    //   CommonImagePath.notification,
+                    //   'Notification',
+                    //   () {
+                    //     Navigator.push(
+                    //       routeGlobalKey.currentContext!,
+                    //       MaterialPageRoute(
+                    //           builder: (context) => NotificationScreen()),
+                    //     );
+                    //   },
+                    // ),
                     // _profileTile(
                     //   CommonImagePath.share,
                     //   'Share',
@@ -274,7 +274,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     // ),
                     _profileTile(
                       CommonImagePath.setting,
-                      'Settings',
+                      'Support',
                       () {
                         Navigator.push(
                           routeGlobalKey.currentContext!,
@@ -283,38 +283,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       },
                     ),
-                    _profileTile(
-                      CommonImagePath.delete,
-                      'Delete Account',
-                      () {
-                        showModalBottomSheet(
-                          backgroundColor: CommonColors.white,
-                          context: context,
-                          shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.vertical(top: Radius.circular(20)),
-                          ),
-                          isScrollControlled: true,
-                          builder: (_) => ConfirmationSheet(
-                            title: "Are you sure you want to Delete Account?",
-                            singleButton: "",
-                            imagePath: CommonImagePath.delete, // Your SVG/PNG
-                            isSingleButton: false,
-                            onBackToHome: () {},
-                            onCancel: () => Navigator.pop(context),
-                            onLogout: () async {
-                              print("LOGOUT CLICKED");
-                              context
-                                  .read<DeleteAccountProvider>()
-                                  .deleteAccount(context);
-                            },
-                            firstbutton: 'Cancel',
-                            secondButton: 'Delete',
-                            subHeading: '',
-                          ),
-                        );
-                      },
-                    ),
+                    // _profileTile(
+                    //   CommonImagePath.delete,
+                    //   'Delete Account',
+                    //   () {
+                    //     showModalBottomSheet(
+                    //       backgroundColor: CommonColors.white,
+                    //       context: context,
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius:
+                    //             BorderRadius.vertical(top: Radius.circular(20)),
+                    //       ),
+                    //       isScrollControlled: true,
+                    //       builder: (_) => ConfirmationSheet(
+                    //         title: "Are you sure you want to Delete Account?",
+                    //         singleButton: "",
+                    //         imagePath: CommonImagePath.delete, // Your SVG/PNG
+                    //         isSingleButton: false,
+                    //         onBackToHome: () {},
+                    //         onCancel: () => Navigator.pop(context),
+                    //         onLogout: () async {
+                    //           print("LOGOUT CLICKED");
+                    //           context
+                    //               .read<DeleteAccountProvider>()
+                    //               .deleteAccount(context);
+                    //         },
+                    //         firstbutton: 'Cancel',
+                    //         secondButton: 'Delete',
+                    //         subHeading: '',
+                    //       ),
+                    //     );
+                    //   },
+                    // ),
                     _profileTile(
                       CommonImagePath.logout,
                       'Log out',

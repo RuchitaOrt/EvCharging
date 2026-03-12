@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:HyCharge/Screens/MainTab.dart';
@@ -7,46 +6,54 @@ import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
 
-
 class SplashScreen extends StatefulWidget {
   static const String route = "/splashScreen";
-  const SplashScreen({super.key});
 
+  const SplashScreen({super.key});
+static bool deepLinkHandled = false;
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  
+
   @override
   void initState() {
     super.initState();
-
     loadData();
   }
 
   Future<void> loadData() async {
-    await Future.delayed( Duration(seconds:
-   Platform.isIOS? 1:3));
 
-    if (!mounted) return;
-
+    /// Splash Delay
+    await Future.delayed(
+      Duration(seconds: Platform.isIOS ? 1 : 3),
+    );
+print("returned");
+    // if (!mounted) return;
+ if (!mounted || SplashScreen.deepLinkHandled) return; // ✅ Skip if deep link handled
+ print("returning");
+    /// Check First Time User
     final isFirstTime = await AuthStorage.isFirstTime();
-
     print("SPLASH -> isFirstTime: $isFirstTime");
 
     if (isFirstTime) {
-     
-      Navigator.of(context).pushReplacement(
+
+      Navigator.pushReplacement(
+        context,
         MaterialPageRoute(
           builder: (_) => const OnboardingScreen(),
         ),
       );
+
     } else {
-     
+
+      /// Check Login Status
       final loggedIn = await AuthStorage.isLoggedIn();
       print("SPLASH -> loggedIn: $loggedIn");
-      Navigator.of(context).pushReplacement(
+
+      Navigator.pushReplacement(
+        context,
         MaterialPageRoute(
           builder: (_) => MainTab(isLoggedIn: loggedIn),
         ),
@@ -54,24 +61,16 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  void navigateToNextScreen() {
-    Future.delayed( Duration(seconds: Platform.isIOS? 1:3), () {
-      FocusScope.of(context).unfocus();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-     SizeConfig().init(context);
+
+    SizeConfig().init(context);
+
     return Scaffold(
       body: SizedBox.expand(
         child: Image.asset(
           'assets/images/firstscreen.png',
-          fit: BoxFit.cover, // makes the image full screen
+          fit: BoxFit.cover,
         ),
       ),
     );

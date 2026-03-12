@@ -67,6 +67,8 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>FlutterDeepLinkingEnabled</key>
+        <true/>
 		
 		<!-- Camera Permission -->
 		<key>NSCameraUsageDescription</key>

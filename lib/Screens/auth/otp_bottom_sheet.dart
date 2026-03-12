@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:HyCharge/Provider/LoginProvider.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/auth/ResetPassword_bottom_sheet.dart';
@@ -25,7 +27,48 @@ class VerifyOtpBottomSheet extends StatefulWidget {
 
 class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
   TextEditingController otpfielfController = TextEditingController();
+int _start = 0;
+bool _canResend = true;
+late Timer _timer;
+@override
+void initState() {
+  super.initState();
+  startTimer(); // <-- start countdown immediately
+}
+void cancelTimer() {
+  if (_timer.isActive) {
+    _timer.cancel();
+  }
+  setState(() {
+    _canResend = true;
+    _start = 0;
+  });
+}
+@override
+void dispose() {
+  otpfielfController.dispose();
+  if (_timer.isActive) _timer.cancel();
+  super.dispose();
+}
+void startTimer() {
+  setState(() {
+    _start = 60;
+    _canResend = false;
+  });
 
+  _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    if (_start == 0) {
+      setState(() {
+        _canResend = true;
+      });
+      _timer.cancel();
+    } else {
+      setState(() {
+        _start--;
+      });
+    }
+  });
+}
   @override
   Widget build(BuildContext context) {
     return AnimatedPadding(
@@ -76,42 +119,56 @@ class _VerifyOtpBottomSheetState extends State<VerifyOtpBottomSheet> {
                             controller: otpfielfController,
                           ),
                           const SizedBox(height: 15),
-                          GestureDetector(
-                            onTap: () async {
-                              await loginProvider.resendOtp(
-                                context: context,
-                                phoneNumber: widget.mobileNo,
-                                countryCode: "+91",
-                              );
-                              FocusScope.of(context).unfocus();
- showToast(
-                                    loginProvider.resendOtpResponse!.message);
-                              if (loginProvider.resendOtpResponse?.success ==
-                                  true) {
-                               
-                                FocusManager.instance.primaryFocus?.unfocus();
-                                Navigator.pop(context);
-                                showVerifyOTPLoginSheet(
-                                    context,
-                                    widget.mobileNo,
-                                    loginProvider.sendOtpResponse!.authId!,widget.isForgetPassword);
-                              }
-                            },
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text("Resend Otp",
-                                      style: CommonStyles.tsbllueHeading,),
-                                  SizedBox(
-                                    width: 5,
-                                  ),
-                                  Icon(
-                                    Icons.refresh,
-                                    color: CommonColors.greyText,
-                                  ),
-                                ],
-                              ),
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _canResend
+                                    ? GestureDetector(
+                                        onTap: () async {
+                                          // same resend logic as above
+                                           if (!_canResend) return;
+                            await loginProvider.resendOtp(
+                              context: context,
+                              phoneNumber: widget.mobileNo,
+                              countryCode: "+91",
+                            );
+                            FocusScope.of(context).unfocus();
+                           showToast(
+                                  loginProvider.resendOtpResponse!.message);
+                            if (loginProvider.resendOtpResponse?.success ==
+                                true) {
+                              startTimer(); 
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              Navigator.pop(context);
+                              showVerifyOTPLoginSheet(
+                                  context,
+                                  widget.mobileNo,
+                                  loginProvider.sendOtpResponse!.authId!,widget.isForgetPassword);
+                            }else{
+                               cancelTimer();
+ 
+                            }
+                                        },
+                                        child: Text(
+                                          "Resend Otp",
+                                          style: CommonStyles.tsbllueHeading,
+                                        ),
+                                      )
+                                    : Text(
+                                        "Resend in $_start s",
+                                        style: CommonStyles.textFieldHint,
+                                      ),
+                                if (_canResend)
+                                  const SizedBox(width: 5)
+                                else
+                                  const SizedBox(width: 0),
+                                   if (_canResend)
+                                Icon(
+                                  Icons.refresh,
+                                  color: _canResend ? CommonColors.greyText : Colors.grey.shade400,
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 15),

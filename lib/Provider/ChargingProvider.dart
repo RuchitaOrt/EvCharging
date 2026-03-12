@@ -1,6 +1,6 @@
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/model/EndChargingSessionResponse.dart';
-import 'package:HyCharge/model/SessionDetailResponse.dart';
+import 'package:HyCharge/model/SessionDetailResponse.dart' as session;
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:HyCharge/model/UnlockConnectorResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
@@ -110,7 +110,7 @@ class ChargingProvider extends ChangeNotifier {
   Future<UnlockResponse?> unlockConnector({
     required BuildContext context,
     required String chargingStationId,
-    required int connectorId,
+    required String connectorId,
   }) async {
     loading = true;
     notifyListeners();
@@ -123,7 +123,8 @@ class ChargingProvider extends ChangeNotifier {
     try {
       final res = await _service.unlockConnector(context, payload);
       unlockResponse = res;
-
+     print("UNLOCK");
+     print(unlockResponse);
       if (res.success == true) {
         FocusScope.of(context).unfocus();
         showToast(res.message ?? "Connector unlocked");
@@ -135,6 +136,7 @@ class ChargingProvider extends ChangeNotifier {
       return res; // ✅ RETURN FULL RESPONSE
     } catch (e) {
       FocusScope.of(context).unfocus();
+      print(e.toString());
       showToast("Failed to unlock connector");
       return null; // ✅ SAFE NULL
     } finally {
@@ -143,8 +145,8 @@ class ChargingProvider extends ChangeNotifier {
     }
   }
 
-  SessionDetailResponse? sessionDetails;
-  Future<SessionDetailResponse?> fetchChargingSessionDetails({
+  session.SessionDetailResponse? sessionDetails;
+  Future<session.SessionDetailResponse?> fetchChargingSessionDetails({
     required BuildContext context,
     required String sessionId,
   }) async {

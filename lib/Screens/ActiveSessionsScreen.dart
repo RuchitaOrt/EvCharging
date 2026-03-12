@@ -1,11 +1,13 @@
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -46,39 +48,61 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: CommonColors.neutral50,
-      appBar: CommonAppBar(
-        title: "Active Charging Session",
-      ),
-      body: Consumer<ActiveSessionProvider>(
-        builder: (context, provider, _) {
-          if (provider.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (provider.sessions.isEmpty) {
-            return const Center(child: Text("No active sessions"));
-          }
-
-          return ListView.builder(
-            controller: _scrollController, 
-            padding: const EdgeInsets.all(12),
-            itemCount: provider.sessions.length +
-      (provider.loadingMore && provider.hasMore ? 1 : 0),
-            itemBuilder: (context, index) {
-               if (index == provider.sessions.length) {
-      return const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: CircularProgressIndicator()),
+    return WillPopScope(
+        onWillPop: () async {
+    
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
+        ),
       );
-    }
-
-              final session = provider.sessions[index];
-              return _activeSessionCard(session);
-            },
-          );
-        },
+   
+    return false; // ✅ now it's Future<bool>
+  },
+      child: Scaffold(
+        backgroundColor: CommonColors.neutral50,
+        appBar: CommonAppBar(
+          title: "Active Charging Session",
+          onBack: ()
+          {
+             Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
+                ),
+              );
+          },
+        ),
+        body: Consumer<ActiveSessionProvider>(
+          builder: (context, provider, _) {
+            if (provider.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+      
+            if (provider.sessions.isEmpty) {
+              return const Center(child: Text("No active sessions"));
+            }
+      
+            return ListView.builder(
+              controller: _scrollController, 
+              padding: const EdgeInsets.all(12),
+              itemCount: provider.sessions.length +
+        (provider.loadingMore && provider.hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                 if (index == provider.sessions.length) {
+        return const Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(child: CircularProgressIndicator()),
+        );
+      }
+      
+                final session = provider.sessions[index];
+                return _activeSessionCard(session);
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -131,6 +155,10 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
           batteryPercentage: session?.soCStart?.toString() ?? "0",
           endMeterReading: session?.endMeterReading?.toString() ?? "0",
           duration: session?.duration?.toString() ?? "0",
+          stationName: session.chargingStationName ?? "",
+          ConnectorGunID: session.chargingGun!.connectorId ?? "",
+          isActive: true
+          
                 ),
               ),
             ),
@@ -189,7 +217,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              session.chargingStationName!,
+                              session.chargingStationName!.toUpperCase(),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -246,7 +274,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                       child: _infoChip(
                         Icons.timer,
                         "Duration",
-                        "${session.duration}",
+                      session.duration!.split('.').first,
                       ),
                     ),
                     Expanded(
@@ -258,8 +286,23 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                     ),
                   ],
                 ),
+                  const SizedBox(height: 14),
+// Row(
+//                   mainAxisAlignment: MainAxisAlignment.start,
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Expanded(
+//                       child: _infoChip(
+//                         Icons.power,
+//                         "Connector/GUN ID",
+//                         "${session.chargingGunId}",
+//                       ),
+//                     ),
+                   
+//                   ],
+//                 ),
 
-                const SizedBox(height: 16),
+                // const SizedBox(height: 16),
                 //   Row(
                 //     mainAxisAlignment: MainAxisAlignment.start,
                 //     crossAxisAlignment: CrossAxisAlignment.start,

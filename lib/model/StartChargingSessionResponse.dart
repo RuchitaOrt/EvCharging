@@ -70,26 +70,26 @@ class ChargingSession {
   final ChargingHub? chargingHub;
   final ChargingGun? chargingGun;
 
-  final double? startMeterReading;
-  final double? endMeterReading;
-  final double? energyTransmitted;
-  final double? chargingSpeed;
+  final dynamic? startMeterReading;
+  final dynamic? endMeterReading;
+  final dynamic? energyTransmitted;
+  final dynamic? chargingSpeed;
 
   final DateTime? startTime;
   final DateTime? endTime;
 
-  final double? chargingTariff;
-  final double? chargingTotalFee;
+  final dynamic? chargingTariff;
+  final dynamic? chargingTotalFee;
 
   final String? status;
   final String? duration;
 
-  final int? energyLimit;
-  final int? costLimit;
-  final int? timeLimit;
-  final int? batteryIncreaseLimit;
+  final dynamic? energyLimit;
+  final dynamic? costLimit;
+  final dynamic? timeLimit;
+  final dynamic? batteryIncreaseLimit;
 
-  final int? active;
+  final dynamic? active;
   final DateTime? createdOn;
   final DateTime? updatedOn;
 

@@ -66,21 +66,32 @@ void setAmount(String value) {
 
     if (_estimateResponse != null && _estimateResponse!.success) {
 
-      if (!isDragging) {
-        if (activeMode != "units") {
-          units = _estimateResponse!.estimatedEnergy;
-        }
+      // if (!isDragging) {
+      //   if (activeMode != "units") {
+      //     units = _estimateResponse!.estimatedEnergy;
+      //   }
 
-        if (activeMode != "time") {
-          time = _estimateResponse!.estimatedTimeMinutes;
-        }
+      //   if (activeMode != "time") {
+      //     time = _estimateResponse!.estimatedTimeMinutes;
+      //   }
 
-        if (activeMode != "amount") {
-          amount = _estimateResponse!.estimatedCost;
-          controller.text = amount.toStringAsFixed(0);
-        }
-      }
+      //   if (activeMode != "amount") {
+      //     amount = _estimateResponse!.estimatedCost;
+      //     controller.text = amount.toStringAsFixed(0);
+      //   }
+      // }
+if (activeMode != "units") {
+  units = _estimateResponse!.estimatedEnergy;
+}
 
+if (activeMode != "time") {
+  time = _estimateResponse!.estimatedTimeMinutes;
+}
+
+if (activeMode != "amount") {
+  amount = _estimateResponse!.estimatedCost;
+  controller.text = amount.toStringAsFixed(0);
+}
       percentage = _estimateResponse!.estimatedBatteryIncrease;
     }
 
@@ -92,90 +103,5 @@ void setAmount(String value) {
   }
 }
 
-//  Future<void> estimateCharging({
-//   required BuildContext context,
-//   required String chargingGunId,
-//   required String chargingStationId,
-//   required String connectorId,
-
-//   double? desiredEnergy,
-//   int? desiredDuration,
-//   double? desiredCost,
-//   double? currentBatteryPercentage,
-// }) async {
-//   try {
-//     _loading = true;
-//     notifyListeners();
-
-//     _estimateResponse = await _service.estimateCharging(
-//       context: context,
-//       chargingGunId: chargingGunId,
-//       chargingStationId: chargingStationId,
-//       connectorId: connectorId,
-//       batteryCapacity: batteryCapacity,
-//       desiredEnergy: desiredEnergy,
-//       desiredDuration: desiredDuration,
-//       currentBatteryPercentage: currentBatteryPercentage,
-//       desiredCost: desiredCost,
-//     );
-//  print("coming");
-//  print(_estimateResponse);
-//     if (_estimateResponse != null &&
-//         _estimateResponse!.success) {
-//       print("coming here");
-//       // units = _estimateResponse!.estimatedEnergy;
-//       // time = _estimateResponse!.estimatedTimeMinutes;
-//       // percentage = _estimateResponse!.estimatedBatteryIncrease;
-//       // amount = _estimateResponse!.estimatedCost;
-// // if (activeMode != "units") {
-// //   units = _estimateResponse!.estimatedEnergy;
-// // }
-
-// // if (activeMode != "time") {
-// //   time = _estimateResponse!.estimatedTimeMinutes;
-// // }
-
-// // if (activeMode != "amount") {
-// //   amount = _estimateResponse!.estimatedCost;
-// // }
-// // if (activeMode != "units") {
-// //   units = _estimateResponse!.estimatedEnergy;
-// // }
-
-// // if (activeMode != "time") {
-// //   time = _estimateResponse!.estimatedTimeMinutes;
-// // }
-
-// // if (activeMode != "amount") {
-// //   amount = _estimateResponse!.estimatedCost;
-// // }
-// if (!isDragging) {
-
-//   if (activeMode != "units") {
-//     units = _estimateResponse!.estimatedEnergy;
-//   }
-
-//   if (activeMode != "time") {
-//     time = _estimateResponse!.estimatedTimeMinutes;
-//   }
-
-//   if (activeMode != "amount") {
-//     amount = _estimateResponse!.estimatedCost;
-//   }
-
-// }
-
-// percentage = _estimateResponse!.estimatedBatteryIncrease;
-
-//       notifyListeners();
-//     }
-
-//   } catch (e) {
-//     debugPrint("Estimate Charging Error: $e");
-//   } finally {
-//     _loading = false;
-//     notifyListeners();
-//   }
-// }
 
 }

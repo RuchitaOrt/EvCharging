@@ -188,21 +188,21 @@ Future<void> _onScroll() async {
 
           return Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        width: SizeConfig.blockSizeHorizontal * 78,
-                        child: _searchBar(),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    Image.asset(CommonImagePath.filter, height: 40),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 10),
+              //   child: Row(
+              //     children: [
+              //       Expanded(
+              //         child: SizedBox(
+              //           width: SizeConfig.blockSizeHorizontal * 78,
+              //           child: _searchBar(),
+              //         ),
+              //       ),
+              //       SizedBox(width: 10),
+              //       Image.asset(CommonImagePath.filter, height: 40),
+              //     ],
+              //   ),
+              // ),
             (!provider.loading && provider.filteredHubs.isEmpty) ? Expanded(
     child: Center(
       child: Text(
@@ -226,7 +226,7 @@ itemBuilder: (context, index) {
   }
 
   final hub = list[index];
-  return _stationBottomCard(hub);
+  return _stationBottomCard(hub,list);
 },
                   // itemCount: provider.hubs.length + 1,
                   // itemBuilder: (context, index) {
@@ -265,7 +265,7 @@ itemBuilder: (context, index) {
     }
   }
   double distance=0.0;
-  Widget _stationBottomCard(dynamic hub) {
+  Widget _stationBottomCard(dynamic hub,List<dynamic> nearbyHubs) {
   
     final opening = hub.openingTime ?? 'N/A';
     final closing = hub.closingTime ?? 'N/A';
@@ -290,7 +290,9 @@ itemBuilder: (context, index) {
           );
           Navigator.push(
             routeGlobalKey.currentContext!,
-            MaterialPageRoute(builder: (_) => StationDetailsScreen(hub: hub,
+            MaterialPageRoute(builder: (_) => StationDetailsScreen(
+              nearbyHubs: nearbyHubs,
+              hub: hub,
               marker: Marker(
                 markerId: MarkerId(hub.recId),
                 position: location,
@@ -405,11 +407,11 @@ ExpandableText(
               // Pricing
               Row(
                 children: [
-                  _typeInfo("Type A", "₹${hub.typeATariff ?? '--'} / kWh"),
+                  _typeInfo("Station A", "₹${hub.typeATariff ?? '--'} / kWh"),
                   const SizedBox(width: 20),
                   Expanded(
                       child: _typeInfo(
-                          "Type B", "₹${hub.typeBTariff ?? '--'} / kWh")),
+                          "Station B", "₹${hub.typeBTariff ?? '--'} / kWh")),
                   GestureDetector(
                     onTap: ()
                     {
@@ -417,7 +419,7 @@ ExpandableText(
                               LocationConvert.getLatLngFromHub(hub);
                           print(location!.latitude);
                           print(location!.longitude);
-                          openGoogleMaps(
+                          openMaps(
                             latitude: location.latitude,
                             longitude: location.longitude,
                           );

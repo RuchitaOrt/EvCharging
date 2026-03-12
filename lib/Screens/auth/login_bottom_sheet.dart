@@ -477,25 +477,25 @@ isGmail?Container():GestureDetector(
                                           if (loginProvider
                                                   .sendOtpResponse?.success ==
                                               true) {
-                                            // FIRST close login sheet properly
+                                           
                                             Navigator.of(context,
                                                     rootNavigator: true)
                                                 .pop();
 
-                                            // THEN open OTP sheet using root navigator
-                                            // Future.delayed(const Duration(milliseconds: 300), () {
                                             showVerifyOTPLoginSheet(
                                               context,
                                               _phoneEmailController.text,
                                               loginProvider
                                                   .sendOtpResponse!.authId!,false
                                             );
-                                            // });
-                                            // showVerifyOTPLoginSheet(
-                                            //   context,
-                                            //   _phoneEmailController.text,
-                                            //   loginProvider.sendOtpResponse!.authId!
-                                            // );
+                                          
+                                          }else
+                                          {
+                                               Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => RegistrationScreen()),
+                              );
                                           }
                                         }),
                               child: loginProvider.isLoading

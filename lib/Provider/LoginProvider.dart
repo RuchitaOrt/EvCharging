@@ -64,7 +64,7 @@ class LoginProvider extends ChangeNotifier {
     required String countryCode,
   }) async {
     try {
-      _loading = true;
+      isLoading = true;
       notifyListeners();
 
       _sendOtpResponse = await _loginService.sendOtp(
@@ -76,15 +76,19 @@ class LoginProvider extends ChangeNotifier {
       if (_sendOtpResponse?.success == true) {
         print("OTP Sent Successfully");
       }
-      _loading = false;
+      else{
+        print(_sendOtpResponse!.message);
+      }
+      isLoading = false;
       notifyListeners();
     } catch (e) {
       print("Send OTP Error: $e");
-      _loading = false;
+      showToast("Server is taking too long. Please try again.");
+      isLoading = false;
       notifyListeners();
       rethrow;
     } finally {
-      _loading = false;
+      isLoading = false;
       notifyListeners();
     }
   }
@@ -100,7 +104,7 @@ class LoginProvider extends ChangeNotifier {
     required bool isReset,
   }) async {
     try {
-      _loading = true;
+      isLoading = true;
       notifyListeners();
 
       _verifyOtpResponse = await _loginService.verifyOtp(
@@ -113,13 +117,15 @@ class LoginProvider extends ChangeNotifier {
       if (_verifyOtpResponse?.success == true && isReset == false) {
         await _saveLoginData(_verifyOtpResponse!);
       }
+      isLoading = false;
       FocusScope.of(context).unfocus();
       showToast(_verifyOtpResponse!.message!);
     } catch (e) {
+      isLoading = false;
       print("Verify OTP Error: $e");
       rethrow;
     } finally {
-      _loading = false;
+      isLoading = false;
       notifyListeners();
     }
   }

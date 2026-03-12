@@ -60,7 +60,7 @@ Future<void> loadData() async {
           children: [
             /// Amount Section
              Text(
-              "₹ ${response!.data!.costDetails!.totalCost!}",
+              "₹ ${response!.data!.session!.chargingTotalFee}",
               style: TextStyle(
                 fontSize: 34,
                 fontWeight: FontWeight.bold,
@@ -139,13 +139,13 @@ Future<void> loadData() async {
       child: Column(
         children: [
           _item("Date & time", "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTime("${response!.data!.session!.startTime}")} - ${formatonlyTime("${response!.data!.session!.endTime}")}"),
-          _item("Address details",
-      (response!.data!.session!.chargingHub!.addressLine1==null || response!.data!.session!.chargingHub!.addressLine1=="null")?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
+      //     _item("Address details",
+      // (response!.data!.session!.chargingHub!.addressLine1==null)?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
           _item("Charger type", "${response!.data!.chargerDetails!.chargerType}"),
           _item("Price per unit", "${response!.data!.summary!.costPerKwh}"),
           _item("Connector details", "${response!.data!.session!.chargingHubName}"),
           // _item("Vehicle details", "MH05EV5322"),
-          _item("Total kW used", "₹ ${response!.data!.session!.energyTransmitted}"),
+          _item("Total kW used", "₹ ${response!.data!.energyConsumption!.totalEnergy}"),
           _item("Total charging time", "${response!.data!.timing!.duration!.formattedDuration}"),
           // _item("Service charge", "₹173.48"),
           // // _item("Discount", "₹0.0"),

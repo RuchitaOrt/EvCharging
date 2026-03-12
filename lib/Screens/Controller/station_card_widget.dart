@@ -7,6 +7,7 @@ import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/googleMap.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'
     show LatLng, BitmapDescriptor, Marker, MarkerId;
@@ -59,6 +60,7 @@ class StationCardWidget extends StatelessWidget {
       chargingHub: value.recordsStation[index],
       isSelected: isSelected,
       cardWidth: screenWidth * 0.88,
+      nearbyHubs: value.recordsStation,
     ),
   );
 },
@@ -75,11 +77,12 @@ class _StationCard extends StatefulWidget {
   final ChargingHub chargingHub;
   final bool isSelected;
   final double cardWidth;
+  final List<dynamic> nearbyHubs;
 
   const _StationCard({
     required this.chargingHub,
     required this.isSelected,
-    required this.cardWidth,
+    required this.cardWidth, required this.nearbyHubs,
   });
 
   @override
@@ -107,6 +110,29 @@ class _StationCardState extends State<_StationCard> {
     super.initState();
     _fetchCurrentLocation();
   }
+   Widget _filter24hourChip() {
+    return Container(
+      
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      decoration: BoxDecoration(
+         color: CommonColors.darkgreen.withOpacity(0.15),
+        border: Border.all(
+          color: CommonColors.darkgreen.withOpacity(0.15), // choose your color here
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "24 hrs Available",
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400,color: CommonColors.darkgreen),
+          ),
+        ],
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final openingTime = _formatTime(widget.chargingHub.openingTime);
@@ -128,6 +154,7 @@ class _StationCardState extends State<_StationCard> {
     }
     print("DISTANCE");
     print(distance);
+    // print(widget.chargingHub.stations[0].chargers[0].chargerTariff);
     final typeAPrice = widget.chargingHub.typeATariff?.isNotEmpty == true
         ? '₹${widget.chargingHub.typeATariff} / kWh'
         : '₹ 0 / kWh';
@@ -148,6 +175,7 @@ class _StationCardState extends State<_StationCard> {
             routeGlobalKey.currentContext!,
             MaterialPageRoute(
               builder: (_) => StationDetailsScreen(
+                nearbyHubs: widget.nearbyHubs,
                 hub: widget.chargingHub,
                 marker: Marker(
                   markerId: MarkerId(widget.chargingHub.recId!),
@@ -227,7 +255,8 @@ class _StationCardState extends State<_StationCard> {
                                 icon: CommonImagePath.redpin, text: "${distance.toStringAsFixed(2)} km"),
 _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!.toStringAsFixed(0)}",),
                             //  _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!.toString()}"),
-                             _InfoTag(icon: CommonImagePath.clock, text: hours),
+                            //  _InfoTag(icon: CommonImagePath.clock, text: hours),
+                            _filter24hourChip()
                           ],
                         ),
                       ],
@@ -247,53 +276,67 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                       spacing: 16,
                       runSpacing: 6,
                       children: [
-                        _TypeInfo(type: 'Type 1', price: typeAPrice),
-                        _TypeInfo(type: 'Type 2', price: typeBPrice),
+                        _TypeInfo(type: 'Station 1', price: typeAPrice),
+                        _TypeInfo(type: 'Station 2', price: typeBPrice),
                       ],
                     ),
                   ),
-                  Expanded(
-                    flex: 2,
-                    child: SizedBox(
-                      height: 36,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          LatLng? location =
+                  GestureDetector(
+                    onTap: ()
+                    {
+                       LatLng? location =
                               LocationConvert.getLatLngFromHub(widget.chargingHub);
                           print(location!.latitude);
                           print(location!.longitude);
-                          openGoogleMaps(
+                          openMaps(
                             latitude: location.latitude,
                             longitude: location.longitude,
                           );
+                    },
+                    child: SvgPicture.asset(CommonImagePath.direction))
+                  // Expanded(
+                  //   flex: 2,
+                  //   child: SizedBox(
+                  //     height: 36,
+                  //     child: ElevatedButton(
+                  //       onPressed: () async {
+                  //         LatLng? location =
+                  //             LocationConvert.getLatLngFromHub(widget.chargingHub);
+                  //         print(location!.latitude);
+                  //         print(location!.longitude);
+                  //         openMaps(
+                  //           latitude: location.latitude,
+                  //           longitude: location.longitude,
+                  //         );
                          
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              // widget.isSelected ? Colors.lightGreen :
-                               Colors.white,
-                          foregroundColor: CommonColors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              color:
-                                  CommonColors.blue.withOpacity(0.4),
-                            ),
-                          ),
-                        ),
-                        child: const FittedBox(
-                          child: Text(
-                            'Get Directions',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: CommonColors.blue,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  //       },
+                  //       style: ElevatedButton.styleFrom(
+                  //         backgroundColor:
+                  //             // widget.isSelected ? Colors.lightGreen :
+                  //              Colors.white,
+                  //         foregroundColor: CommonColors.blue,
+                  //         shape: RoundedRectangleBorder(
+                  //           borderRadius: BorderRadius.circular(12),
+                  //           side: BorderSide(
+                  //             color:
+                  //                 CommonColors.blue.withOpacity(0.4),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //       child: const FittedBox(
+                  //         child: 
+                  //         Text(
+                  //           'Get Directions',
+                  //           style: TextStyle(
+                  //             fontSize: 12,
+                  //             color: CommonColors.blue,
+                  //             fontWeight: FontWeight.w600,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ],

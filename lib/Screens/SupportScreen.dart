@@ -3,6 +3,7 @@ import 'package:HyCharge/Screens/ReportScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/googleMap.dart';
 import 'package:HyCharge/main.dart';
 import 'package:flutter/material.dart';
 
@@ -27,7 +28,7 @@ class SupportScreen extends StatelessWidget {
                 children:  [
                  Image.asset(CommonImagePath.help),
                   SizedBox(height: 10),
-                  Text("Need the help ?",
+                  Text("Need help ?",
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -45,23 +46,25 @@ class SupportScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _supportTile(CommonImagePath.mail, "support@evcharge.in", () {}),
-                   _supportTile(CommonImagePath.call, "1800-675-4628", () {}),
-              _supportTile(CommonImagePath.chatting, "Contact Live Chat", () {}),
+                  _supportTile(CommonImagePath.mail, "inquiry@hycharge.in", () {}),
+                   _supportTile(CommonImagePath.call, "8655471696", () {}),
+              // _supportTile(CommonImagePath.chatting, "Contact Live Chat", () {}),
               _supportTile(
 CommonImagePath.alert,
                 "Report an issue",
                 () {
-                  Navigator.push(
-                    routeGlobalKey.currentContext!,
-                    MaterialPageRoute(builder: (context) => ReportIssueScreen()),
-                  );
+                   openContactPage();
+                  // Navigator.push(
+                  //   routeGlobalKey.currentContext!,
+                  //   MaterialPageRoute(builder: (context) => ReportIssueScreen()),
+                  // );
                 },
               ),
               _supportTile(
                CommonImagePath.faq,
                 "FAQs",
                 () {
+                //  https://hycharge.in/contact-us
                   Navigator.push(
                     routeGlobalKey.currentContext!,
                     MaterialPageRoute(builder: (context) => FAQScreen()),

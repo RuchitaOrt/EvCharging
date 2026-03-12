@@ -129,7 +129,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           ),
                         ),
 
-                        SizedBox(height: SizeConfig.safeBlockVertical * 3),
+                        SizedBox(height: SizeConfig.safeBlockVertical * 4),
 
                         /// ----------- IMAGE (RESPONSIVE) -----------
                      SizedBox(
