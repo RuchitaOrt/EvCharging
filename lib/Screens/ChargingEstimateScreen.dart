@@ -93,6 +93,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
     return false; // ✅ now it's Future<bool>
   },
         child: Scaffold(
+          resizeToAvoidBottomInset: true,
           appBar: CommonAppBar(
             title: "Plugin and Charge",
             onBack: ()
@@ -109,6 +110,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
               }
             },
           ),
+
           bottomNavigationBar: SafeArea(
             child: Container(
               padding: const EdgeInsets.all(16),
@@ -161,6 +163,9 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
                                   FocusScope.of(context).unfocus();
                                   showToast("Please enter amount");
                                 } else if (currentWalletPrice >= enteredAmount) {
+                                  final tabIndex = DefaultTabController.of(context).index;
+
+print("Selected Tab Index: $tabIndex");
                                   // ✅ start session
                                   final response = await provider.startSession(
                                       context: context,
@@ -178,9 +183,10 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
                                           chargingEstimate.amount.toString(),
                                       energyLimit:
                                           chargingEstimate.units.toString(),
-                                      timeLimit: chargingEstimate.time.toString(),
+                                      timeLimit: chargingEstimate.time.toStringAsFixed(0),
                                       batteryIncreaseLimit:
-                                          chargingEstimate.percentage.toString());
+                                          chargingEstimate.percentage.toString(),
+                                          tabIndex:tabIndex.toString() );
         
                                   if (response != null && response.success) {
                                     FocusScope.of(context).unfocus();
@@ -321,12 +327,25 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
                   ),
                 ),
               ),
-        
+                  
               // 👇 Content
               Expanded(
                 child: _TabViews(_selectedCharger, _selectedStationID
                     // widget.selectedCharger,
                     // widget.selectedStationID
+                    ),
+              ),
+              if (MediaQuery.of(context).viewInsets.bottom > 0)
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Wallet credits", style: TextStyle(fontSize: 12)),
+                        Text("₹ ${currentWalletPrice}",
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w700)),
+                      ],
                     ),
               ),
             ],
@@ -468,7 +487,7 @@ class _TabViews extends StatelessWidget {
             ),
 
             textInfo(),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             // _EstimateCard(
             //     "Time", "Percentage", "Amount", "-", "0 %", "₹ 0"),
             Consumer<ChargingEstimateProvider>(
@@ -525,12 +544,12 @@ if (provider.activeMode != "time" &&
             children: [
           
               /// Title
-              const Text(
-                "Select Time in min",
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-              ),
+              // const Text(
+              //   "Select Time in min",
+              //   style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+              // ),
           
-              const SizedBox(height: 8),
+              // const SizedBox(height: 8),
           
               /// Slider
               SliderTheme(
@@ -660,8 +679,9 @@ if (provider.activeMode != "time" &&
               ),
           
               const SizedBox(height: 8),
-          
-              textInfo(),
+          Text("Estimates Value",
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
+              //  textInfo(),
             ],
           ),
                 );

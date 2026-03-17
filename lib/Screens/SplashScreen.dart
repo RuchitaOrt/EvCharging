@@ -1,9 +1,12 @@
 import 'dart:io';
 
+import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/OnboardingScreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,9 +23,58 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    loadData();
+   Platform.isAndroid? loadData():loadIOSData();
   }
+Future<void> loadIOSData() async {
+  await Future.delayed(
+    Duration(seconds: Platform.isIOS ? 1 : 3),
+  );
 
+  if (!mounted) return;
+
+  /// ✅ Check Deep Link FIRST
+ if (GlobalLists.globalChargerId != null) {
+  final chargerId = GlobalLists.globalChargerId!;
+
+  /// ✅ CLEAR AFTER USING
+  GlobalLists.globalChargerId = null;
+
+  SplashScreen.deepLinkHandled = true;
+
+  /// ✅ USE CONTEXT (NOT global navigator)
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => ChargingEstimateScreen(
+        chargerID: chargerId,
+        isAPPLINK: "1",
+      ),
+    ),
+  );
+
+  return;
+}
+  /// Normal flow
+  final isFirstTime = await AuthStorage.isFirstTime();
+
+  if (isFirstTime) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const OnboardingScreen(),
+      ),
+    );
+  } else {
+    final loggedIn = await AuthStorage.isLoggedIn();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MainTab(isLoggedIn: loggedIn),
+      ),
+    );
+  }
+}
   Future<void> loadData() async {
 
     /// Splash Delay

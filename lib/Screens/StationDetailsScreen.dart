@@ -48,7 +48,8 @@ class StationDetailsScreen extends StatefulWidget {
     super.key,
     required this.hub,
     required this.marker,
-    required this.location, required this.nearbyHubs,
+    required this.location,
+    required this.nearbyHubs,
   });
 
   @override
@@ -65,32 +66,31 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   Position? _currentPosition;
   Timer? _statusTimer;
   double currentWalletPrice = 0.0;
-void _startPolling() {
-  final chargers =
-      (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ?? [])
-          .cast<Charger>();
+  void _startPolling() {
+    final chargers =
+        (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ?? [])
+            .cast<Charger>();
 
-  context.read<ChargingGunStatusProvider>().refreshAll(
-        context: context,
-        chargers: chargers,
-      );
+    context.read<ChargingGunStatusProvider>().refreshAll(
+          context: context,
+          chargers: chargers,
+        );
 
-  _statusTimer = Timer.periodic(
-    const Duration(seconds: 10),
-    (_) {
-      if (!mounted) return;
+    _statusTimer = Timer.periodic(
+      const Duration(seconds: 10),
+      (_) {
+        if (!mounted) return;
 
-      print("CHAGRERs");
-print(chargers.length);
+        print("CHAGRERs");
+        print(chargers.length);
 
-
-      context.read<ChargingGunStatusProvider>().refreshAll(
-            context: context,
-            chargers: chargers,
-          );
-    },
-  );
-}
+        context.read<ChargingGunStatusProvider>().refreshAll(
+              context: context,
+              chargers: chargers,
+            );
+      },
+    );
+  }
   // void _startPolling() {
   //   _statusTimer = Timer.periodic(
   //     const Duration(seconds: 10), // 👈 every 10 sec
@@ -126,19 +126,19 @@ print(chargers.length);
   void initState() {
     super.initState();
     print("Current BALNCE");
-     // Force status bar visible
-  // ✅ Force status bar visible
+    // Force status bar visible
+    // ✅ Force status bar visible
 // Force status bar visible
-  // SystemChrome.setEnabledSystemUIMode(
-  //   SystemUiMode.edgeToEdge, // ensures system overlays are visible
-  // );
+    // SystemChrome.setEnabledSystemUIMode(
+    //   SystemUiMode.edgeToEdge, // ensures system overlays are visible
+    // );
 
-  // // Set status bar color & icon brightness
-  // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-  //   statusBarColor: Colors.white,           // white background
-  //   statusBarIconBrightness: Brightness.dark, // dark icons for Android
-  //   statusBarBrightness: Brightness.light,    // dark icons for iOS
-  // ));
+    // // Set status bar color & icon brightness
+    // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    //   statusBarColor: Colors.white,           // white background
+    //   statusBarIconBrightness: Brightness.dark, // dark icons for Android
+    //   statusBarBrightness: Brightness.light,    // dark icons for iOS
+    // ));
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getUserInfo();
@@ -260,53 +260,54 @@ print(chargers.length);
             //   ),
             // ),
             CircleAvatar(
-  radius: 18,
-  backgroundColor: CommonColors.blue.withOpacity(0.15),
-  child: review.userProfileImage != null &&
-          review.userProfileImage!.isNotEmpty
-      ? FutureBuilder<Uint8List>(
-          future: context
-              .read<HubProvider>()   // 👈 your provider class
-              .downloadImage(review.userProfileImage!),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                height: 16,
-                width: 16,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              );
-            }
+              radius: 18,
+              backgroundColor: CommonColors.blue.withOpacity(0.15),
+              child: review.userProfileImage != null &&
+                      review.userProfileImage!.isNotEmpty
+                  ? FutureBuilder<Uint8List>(
+                      future: context
+                          .read<HubProvider>() // 👈 your provider class
+                          .downloadImage(review.userProfileImage!),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          );
+                        }
 
-            if (snapshot.hasError || !snapshot.hasData) {
-              return Text(
-                initials,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: CommonColors.blue,
-                ),
-              );
-            }
+                        if (snapshot.hasError || !snapshot.hasData) {
+                          return Text(
+                            initials,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: CommonColors.blue,
+                            ),
+                          );
+                        }
 
-            return ClipOval(
-              child: Image.memory(
-                snapshot.data!,
-                fit: BoxFit.cover,
-                width: 36,
-                height: 36,
-              ),
-            );
-          },
-        )
-      : Text(
-          initials,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: CommonColors.blue,
-          ),
-        ),
-),
+                        return ClipOval(
+                          child: Image.memory(
+                            snapshot.data!,
+                            fit: BoxFit.cover,
+                            width: 36,
+                            height: 36,
+                          ),
+                        );
+                      },
+                    )
+                  : Text(
+                      initials,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: CommonColors.blue,
+                      ),
+                    ),
+            ),
             SizedBox(
               width: 10,
             ),
@@ -315,15 +316,13 @@ print(chargers.length);
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  
-                      Text(
+                  Text(
                     review.userName ?? "UnKnown",
                     style: const TextStyle(
                       fontWeight: FontWeight.w400,
                       fontSize: 13,
                     ),
                   ),
-                     
                   Text(
                     formatReviewTime("${review.reviewTime}") ?? "UnKnown",
                     style: const TextStyle(
@@ -359,18 +358,18 @@ print(chargers.length);
                 ? MoreOptionsMenu(
                     onEdit: () {
                       _openWriteReviewBottomSheet(
-  hubID: widget.hub.recId,
-  stationId: review.chargingStationId!,
-  stationName: widget.hub.chargingHubName ?? "Station",
-  rating: review.rating,
-  description: review.description,
-  isEdit: true,
-  recId: review.recId,
-  img1: review.reviewImage1,
-  img2: review.reviewImage2,
-  img3: review.reviewImage3,
-  img4: review.reviewImage4,
-);
+                        hubID: widget.hub.recId,
+                        stationId: review.chargingStationId!,
+                        stationName: widget.hub.chargingHubName ?? "Station",
+                        rating: review.rating,
+                        description: review.description,
+                        isEdit: true,
+                        recId: review.recId,
+                        img1: review.reviewImage1,
+                        img2: review.reviewImage2,
+                        img3: review.reviewImage3,
+                        img4: review.reviewImage4,
+                      );
                       // _openWriteReviewBottomSheet(
                       //     hubID: widget.hub.recId,
                       //     stationId: review.chargingStationId!,
@@ -428,191 +427,197 @@ print(chargers.length);
       ],
     );
   }
-Widget _buildReviewImages(review) {
-  // Collect valid image IDs
-  final imageIds = [
-    review.reviewImage1,
-    review.reviewImage2,
-    review.reviewImage3,
-    review.reviewImage4,
-  ]
-      .where((e) => e != null && e.toString().isNotEmpty && e != "string")
-      .cast<String>()
-      .toList();
 
-  if (imageIds.isEmpty) return const SizedBox();
+  Widget _buildReviewImages(review) {
+    // Collect valid image IDs
+    final imageIds = [
+      review.reviewImage1,
+      review.reviewImage2,
+      review.reviewImage3,
+      review.reviewImage4,
+    ]
+        .where((e) => e != null && e.toString().isNotEmpty && e != "string")
+        .cast<String>()
+        .toList();
 
-  return Padding(
-    padding: const EdgeInsets.only(top: 6),
-    child: SizedBox(
-      height: 55,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: imageIds.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 6),
-        itemBuilder: (context, index) {
-          return _reviewImageBox(imageIds[index]);
-        },
+    if (imageIds.isEmpty) return const SizedBox();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: SizedBox(
+        height: 55,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: imageIds.length,
+          separatorBuilder: (_, __) => const SizedBox(width: 6),
+          itemBuilder: (context, index) {
+            return _reviewImageBox(imageIds[index]);
+          },
+        ),
       ),
-    ),
-  );
-}
-void _showFixedImagePopup(BuildContext context, Uint8List bytes) {
-  showDialog(
-    context: context,
-    barrierColor: Colors.black54,
-    builder: (_) {
-      return Center(
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            width: SizeConfig.blockSizeHorizontal * 80,     // same width for all images
-            height: SizeConfig.blockSizeVertical *70,    // same height for all images
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Stack(
-              children: [
-                /// Image (same size box)
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.memory(
-                      bytes,
-                      fit: BoxFit.contain, // keeps aspect ratio
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                ),
+    );
+  }
 
-                /// Close Button
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const CircleAvatar(
-                      radius: 14,
-                      backgroundColor: Colors.black54,
-                      child: Icon(
-                        Icons.close,
-                        color: Colors.white,
-                        size: 16,
+  void _showFixedImagePopup(BuildContext context, Uint8List bytes) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black54,
+      builder: (_) {
+        return Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Container(
+              width: SizeConfig.blockSizeHorizontal *
+                  80, // same width for all images
+              height: SizeConfig.blockSizeVertical *
+                  70, // same height for all images
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Stack(
+                children: [
+                  /// Image (same size box)
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.memory(
+                        bytes,
+                        fit: BoxFit.contain, // keeps aspect ratio
+                        width: double.infinity,
+                        height: double.infinity,
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-void _showImagePopup(BuildContext context, Uint8List bytes) {
-  showDialog(
-    context: context,
-    barrierColor: Colors.black.withOpacity(0.8),
-    builder: (_) {
-      return Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(10),
-        child: Stack(
-          children: [
-            // Zoomable Image
-            InteractiveViewer(
-              minScale: 1,
-              maxScale: 4,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.memory(
-                  bytes,
-                  fit: BoxFit.contain,
-                ),
+
+                  /// Close Button
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: const CircleAvatar(
+                        radius: 14,
+                        backgroundColor: Colors.black54,
+                        child: Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
+          ),
+        );
+      },
+    );
+  }
 
-            // Close Button
-            Positioned(
-              right: 10,
-              top: 10,
-              child: GestureDetector(
-                onTap: () => Navigator.pop(context),
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    size: 22,
+  void _showImagePopup(BuildContext context, Uint8List bytes) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.8),
+      builder: (_) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(10),
+          child: Stack(
+            children: [
+              // Zoomable Image
+              InteractiveViewer(
+                minScale: 1,
+                maxScale: 4,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    bytes,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-Widget _reviewImageBox(String imageId) {
-  return FutureBuilder<Uint8List>(
-    future:  context
-              .read<HubProvider>()   // 👈 your provider class
-              .downloadImage(imageId!),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return _imagePlaceholder();
-      }
 
-      if (snapshot.hasError || !snapshot.hasData) {
-        return _imagePlaceholder();
-      }
-
-      final bytes = snapshot.data!;
-
-      return GestureDetector(
-        onTap: () {
-          _showFixedImagePopup(context, bytes);
-        },
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Image.memory(
-            bytes,
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
+              // Close Button
+              Positioned(
+                right: 10,
+                top: 10,
+                child: GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Colors.black54,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
+  Widget _reviewImageBox(String imageId) {
+    return FutureBuilder<Uint8List>(
+      future: context
+          .read<HubProvider>() // 👈 your provider class
+          .downloadImage(imageId!),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _imagePlaceholder();
+        }
 
-Widget _imagePlaceholder() {
-  return Container(
-    width: 50,
-    height: 50,
-    decoration: BoxDecoration(
-      color: Colors.grey.shade200,
-      borderRadius: BorderRadius.circular(6),
-      border: Border.all(color: Colors.grey.shade300),
-    ),
-    child: const Icon(
-      Icons.image,
-      size: 18,
-      color: Colors.grey,
-    ),
-  );
-}
+        if (snapshot.hasError || !snapshot.hasData) {
+          return _imagePlaceholder();
+        }
+
+        final bytes = snapshot.data!;
+
+        return GestureDetector(
+          onTap: () {
+            _showFixedImagePopup(context, bytes);
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: Image.memory(
+              bytes,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _imagePlaceholder() {
+    return Container(
+      width: 50,
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: const Icon(
+        Icons.image,
+        size: 18,
+        color: Colors.grey,
+      ),
+    );
+  }
+
   String formatReviewTime(String dateTimeString) {
     final dateTime = DateTime.parse(dateTimeString);
 
@@ -645,7 +650,6 @@ Widget _imagePlaceholder() {
   }
 
   double distanceInKm = 0;
-
 
   @override
   Widget build(BuildContext context) {
@@ -708,7 +712,7 @@ Widget _imagePlaceholder() {
                           0.35, // 35% of screen height
                       decoration: BoxDecoration(
                         color: CommonColors.mapDark,
-                       //  borderRadius: BorderRadius.circular(12),
+                        //  borderRadius: BorderRadius.circular(12),
                       ),
                       child: MiniMapWidget(
                         nearbyHubs: widget.nearbyHubs,
@@ -721,8 +725,7 @@ Widget _imagePlaceholder() {
                         ),
                       ),
                     ),
-      
-              
+
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -754,18 +757,21 @@ Widget _imagePlaceholder() {
                                 widget.hub.chargingHubImage != null
                                     ? HubImage(
                                         imageId: widget.hub.chargingHubImage!,
-                                        height: SizeConfig.blockSizeVertical * 5,
+                                        height:
+                                            SizeConfig.blockSizeVertical * 5,
                                         width: SizeConfig.blockSizeVertical * 5,
                                       )
                                     : Image.asset(
                                         CommonImagePath.frame,
-                                        height: SizeConfig.blockSizeVertical * 6,
+                                        height:
+                                            SizeConfig.blockSizeVertical * 6,
                                       ),
                                 SizedBox(
                                     width: SizeConfig.blockSizeHorizontal * 2),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
                                       Row(
@@ -888,43 +894,44 @@ Widget _imagePlaceholder() {
       ],
     );
   }
-void _openWriteReviewBottomSheet({
-  required String stationId,
-  required String stationName,
-  required String hubID,
-  int? rating,
-  String? description,
-  bool? isEdit,
-  String? recId,
-  String? img1,
-  String? img2,
-  String? img3,
-  String? img4,
-}) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: CommonColors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (_) {
-      return _WriteReviewSheet(
-        hubId: hubID,
-        stationId: stationId,
-        stationName: stationName,
-        initialRating: rating,
-        initialDescription: description,
-        isEdit: isEdit!,
-        recId: recId,
-        reviewImage1: img1,
-        reviewImage2: img2,
-        reviewImage3: img3,
-        reviewImage4: img4,
-      );
-    },
-  );
-}
+
+  void _openWriteReviewBottomSheet({
+    required String stationId,
+    required String stationName,
+    required String hubID,
+    int? rating,
+    String? description,
+    bool? isEdit,
+    String? recId,
+    String? img1,
+    String? img2,
+    String? img3,
+    String? img4,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: CommonColors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return _WriteReviewSheet(
+          hubId: hubID,
+          stationId: stationId,
+          stationName: stationName,
+          initialRating: rating,
+          initialDescription: description,
+          isEdit: isEdit!,
+          recId: recId,
+          reviewImage1: img1,
+          reviewImage2: img2,
+          reviewImage3: img3,
+          reviewImage4: img4,
+        );
+      },
+    );
+  }
   // void _openWriteReviewBottomSheet(
   //     {required String stationId,
   //     required String stationName,
@@ -1075,7 +1082,9 @@ void _openWriteReviewBottomSheet({
     required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: isAvailable ? onTap : null,
+      onTap:
+       onTap,
+     // isAvailable ? onTap : null,
       child: Padding(
         padding: const EdgeInsets.only(bottom: 10),
         child: Material(
@@ -1130,8 +1139,8 @@ void _openWriteReviewBottomSheet({
                             Text(
                               "Connector - ${charger.connectorName}" ??
                                   "Connector",
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w600,fontSize: 13),
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w600, fontSize: 13),
                             ),
                             const SizedBox(height: 2),
                             Text(
@@ -1147,9 +1156,8 @@ void _openWriteReviewBottomSheet({
                           // final updatedCharger = provider
                           //         .chargers[int.parse(charger.connectorId!)] ??
                           //     charger;
-  final updatedCharger = provider
-                                  .chargers[charger.recId] ??
-                              charger;
+                          final updatedCharger =
+                              provider.chargers[charger.recId] ?? charger;
 
                           final isAvailable =
                               updatedCharger.lastStatus == "Available";
@@ -1166,7 +1174,7 @@ void _openWriteReviewBottomSheet({
                             child: Text(
                               updatedCharger.lastStatus ?? "Unknown",
                               style: TextStyle(
-                                fontSize:  12,
+                                fontSize: 12,
                                 color: isAvailable
                                     ? CommonColors.darkgreen
                                     : Colors.red,
@@ -1179,10 +1187,10 @@ void _openWriteReviewBottomSheet({
                   ),
                 ),
                 const SizedBox(height: 6),
-                  // Text("${charger.recId}"),
+                // Text("${charger.recId}"),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
-                //spaceBetween
+                  //spaceBetween
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1195,14 +1203,16 @@ void _openWriteReviewBottomSheet({
                                 fontWeight: FontWeight.w600, fontSize: 13)),
                       ],
                     ),
-                    SizedBox(width: 20,),
+                    SizedBox(
+                      width: 20,
+                    ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Power Output',
                             style: TextStyle(
                                 fontWeight: FontWeight.w200, fontSize: 12)),
-                        Text('${charger.powerOutput}',
+                        Text('upto ${charger.powerOutput} KW',
                             style: TextStyle(
                                 fontWeight: FontWeight.w600, fontSize: 13)),
                       ],
@@ -1227,6 +1237,7 @@ void _openWriteReviewBottomSheet({
       ),
     );
   }
+
 // String capitalizeWords(String text) {
 //   return text
 //       .split(' ')
@@ -1283,6 +1294,7 @@ void _openWriteReviewBottomSheet({
                   Column(
                     children: chargers.map((charger) {
                       final isAvailable = charger.lastStatus == "Available";
+
                       final isSelected = _selectedCharger?.connectorId ==
                               charger.connectorId &&
                           selectedStationID == station.recId;
@@ -1293,17 +1305,17 @@ void _openWriteReviewBottomSheet({
                         isAvailable: isAvailable,
                         onTap: () {
                           setState(() {
-                            try{
-_selectedCharger = charger;
-                            selectedStationID = station.recId;
-                            FocusScope.of(context).unfocus();
-                             showToast(_selectedCharger!.connectorName!);
-                            }catch(e)
-                            {
+                            print("is Availabe ${isAvailable}");
+                            //  showToast("Last Availabe Status${isAvailable}");
+                            try {
+                              _selectedCharger = charger;
+                              selectedStationID = station.recId;
+                              FocusScope.of(context).unfocus();
+                              showToast(_selectedCharger!.connectorName!);
+                            } catch (e) {
                               FocusScope.of(context).unfocus();
                               showToast(e.toString());
                             }
-                            
                           });
                         },
                       );
@@ -1333,50 +1345,59 @@ _selectedCharger = charger;
         onPressed: (!hasSelection || isLoading)
             ? null
             : () async {
-             
-  if (_selectedCharger == null) return;
+                if (_selectedCharger == null) return;
 
-  // 1️⃣ Fetch the status
-  final statusAvailable = await context
-      .read<ChargingGunStatusProvider>()
-      .fetchGunStatusValue(
-        context: context,
-        charger: _selectedCharger!,
-      );
+                // 1️⃣ Fetch the status
+                final statusAvailable = await context
+                    .read<ChargingGunStatusProvider>()
+                    .fetchGunStatusValue(
+                      context: context,
+                      charger: _selectedCharger!,
+                    );
 
-  // 2️⃣ Check the status
-  if (statusAvailable!.data!.isAvailable == true) {
-    // ✅ Status is available, navigate
-        _statusTimer?.cancel();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider(
-          create: (_) => ChargingEstimateProvider(),
-          child: ChargingEstimateScreen(
-            selectedCharger: _selectedCharger,
-            selectedStationID: selectedStationID,
-          ),
-        ),
-      ),
-    );
-  } else {
-   FocusScope.of(context).unfocus();
-    showToast("Charging gun status is not available. Please try again.");
-  }
-              //  context.read<ChargingGunStatusProvider>().fetchGunStatusValue(context: context, charger: _selectedCharger!);
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(
-              //       builder: (_) => ChangeNotifierProvider(
-              //         create: (_) => ChargingEstimateProvider(),
-              //         child: ChargingEstimateScreen(
-              //           selectedCharger: _selectedCharger,
-              //           selectedStationID: selectedStationID,
-              //         ),
-              //       ),
-              //     ),
-              //   );
+                // 2️⃣ Check the status
+                if (statusAvailable!.data!.isAvailable == true) {
+                  // ✅ Status is available, navigate
+                  bool? confirmed = await gunConnectorDialog(
+  context,
+  message: "Please connect gun to the vehicle",
+);
+
+if (confirmed == true) {
+ _statusTimer?.cancel();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChangeNotifierProvider(
+                        create: (_) => ChargingEstimateProvider(),
+                        child: ChargingEstimateScreen(
+                          selectedCharger: _selectedCharger,
+                          selectedStationID: selectedStationID,
+                        ),
+                      ),
+                    ),
+                  );
+}
+                  // gunConnectorDialog(context,message: "Please connect gun to the vehicle");
+                  // _statusTimer?.cancel();
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (_) => ChangeNotifierProvider(
+                  //       create: (_) => ChargingEstimateProvider(),
+                  //       child: ChargingEstimateScreen(
+                  //         selectedCharger: _selectedCharger,
+                  //         selectedStationID: selectedStationID,
+                  //       ),
+                  //     ),
+                  //   ),
+                  // );
+                } else {
+                  FocusScope.of(context).unfocus();
+                  showToast(
+                      "Charging gun status is not available. Please try again.");
+                }
+               
               },
         style: ElevatedButton.styleFrom(
           backgroundColor:
@@ -1477,14 +1498,15 @@ _selectedCharger = charger;
       ),
     );
   }
-   Widget _filter24hourChip() {
+
+  Widget _filter24hourChip() {
     return Container(
-      
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-         color: CommonColors.darkgreen.withOpacity(0.15),
+        color: CommonColors.darkgreen.withOpacity(0.15),
         border: Border.all(
-          color: CommonColors.darkgreen.withOpacity(0.15), // choose your color here
+          color: CommonColors.darkgreen
+              .withOpacity(0.15), // choose your color here
           width: 1.5,
         ),
         borderRadius: BorderRadius.circular(24),
@@ -1494,13 +1516,17 @@ _selectedCharger = charger;
         children: [
           Text(
             "24 hrs Available",
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400,color: CommonColors.darkgreen),
+            style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: CommonColors.darkgreen),
           ),
         ],
       ),
     );
   }
 }
+
 class _WriteReviewSheet extends StatefulWidget {
   final String hubId;
   final String stationId;
@@ -1570,8 +1596,8 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
     int total = existingImageIds.length + selectedImages.length;
 
     if (total >= 4) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text("Maximum 4 images allowed")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Maximum 4 images allowed")));
       return;
     }
 
@@ -1706,7 +1732,8 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(widget.stationName,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
 
           const SizedBox(height: 8),
 
@@ -1733,20 +1760,26 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
           const SizedBox(height: 10),
 
           /// Add Button
-           Row(
-             children: [
-              Icon(Icons.add,color:CommonColors.blue ,),
-               GestureDetector(
-                onTap:_pickImages,
-                child: Text("Add Images",style: TextStyle(color: CommonColors.blue),)),
-                const SizedBox(width: 10),
+          Row(
+            children: [
+              Icon(
+                Icons.add,
+                color: CommonColors.blue,
+              ),
+              GestureDetector(
+                  onTap: _pickImages,
+                  child: Text(
+                    "Add Images",
+                    style: TextStyle(color: CommonColors.blue),
+                  )),
+              const SizedBox(width: 10),
               Text("$totalImages / 4"),
-             ],
-           ),
+            ],
+          ),
           // Row(
           //   children: [
           //     ElevatedButton.icon(
-                
+
           //       onPressed: _pickImages,
           //       icon: const Icon(Icons.image, size: 18),
           //       label:  Text("Add Images",style: TextStyle(color: CommonColors.blue),),
@@ -1784,49 +1817,56 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                   ...existingImageIds,
                   ...uploadedImageIds,
                 ];
-if (widget.isEdit) {
-    context.read<ChargingHubReviewProvider>().updateReview(
-      context: context,
-      chargingHubId: widget.hubId,
-      chargingStationId: widget.stationId,
-      rating: rating,
-      description: reviewCtrl.text,
-      recId: widget.recId!,
-            reviewImage1: allImages.length > 0 ? allImages[0] : null,
-                      reviewImage2: allImages.length > 1 ? allImages[1] : null,
-                      reviewImage3: allImages.length > 2 ? allImages[2] : null,
-                      reviewImage4: allImages.length > 3 ? allImages[3] : null,
-    );
-  } else {
-      if (rating == 0) {
-        FocusScope.of(context).unfocus();
-    showToast("Please select rating");
-    return;
-  }
+                if (widget.isEdit) {
+                  context.read<ChargingHubReviewProvider>().updateReview(
+                        context: context,
+                        chargingHubId: widget.hubId,
+                        chargingStationId: widget.stationId,
+                        rating: rating,
+                        description: reviewCtrl.text,
+                        recId: widget.recId!,
+                        reviewImage1:
+                            allImages.length > 0 ? allImages[0] : null,
+                        reviewImage2:
+                            allImages.length > 1 ? allImages[1] : null,
+                        reviewImage3:
+                            allImages.length > 2 ? allImages[2] : null,
+                        reviewImage4:
+                            allImages.length > 3 ? allImages[3] : null,
+                      );
+                } else {
+                  if (rating == 0) {
+                    FocusScope.of(context).unfocus();
+                    showToast("Please select rating");
+                    return;
+                  }
 
-  // 🔹 Review validation (for Add only)
-  if (!ValidationHelper.isNotEmpty(reviewCtrl.text)) {
-    FocusScope.of(context).unfocus();
-    showToast("Please enter your review");
-    return;
-  }
-    context.read<ChargingHubReviewProvider>().addReview(
-      context: context,
-      chargingHubId: widget.hubId,
-      chargingStationId: widget.stationId,
-      rating: rating,
-      description: reviewCtrl.text,
-            reviewImage1: allImages.length > 0 ? allImages[0] : null,
-                      reviewImage2: allImages.length > 1 ? allImages[1] : null,
-                      reviewImage3: allImages.length > 2 ? allImages[2] : null,
-                      reviewImage4: allImages.length > 3 ? allImages[3] : null,
-    );
-  }
-             
+                  // 🔹 Review validation (for Add only)
+                  if (!ValidationHelper.isNotEmpty(reviewCtrl.text)) {
+                    FocusScope.of(context).unfocus();
+                    showToast("Please enter your review");
+                    return;
+                  }
+                  context.read<ChargingHubReviewProvider>().addReview(
+                        context: context,
+                        chargingHubId: widget.hubId,
+                        chargingStationId: widget.stationId,
+                        rating: rating,
+                        description: reviewCtrl.text,
+                        reviewImage1:
+                            allImages.length > 0 ? allImages[0] : null,
+                        reviewImage2:
+                            allImages.length > 1 ? allImages[1] : null,
+                        reviewImage3:
+                            allImages.length > 2 ? allImages[2] : null,
+                        reviewImage4:
+                            allImages.length > 3 ? allImages[3] : null,
+                      );
+                }
 
                 Navigator.pop(context);
               },
-             style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 backgroundColor: CommonColors.blue,
                 foregroundColor: CommonColors.blue,
                 shape: RoundedRectangleBorder(

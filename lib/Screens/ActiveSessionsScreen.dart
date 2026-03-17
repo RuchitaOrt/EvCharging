@@ -3,6 +3,7 @@ import 'package:HyCharge/Provider/ChargingProvider.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
@@ -327,7 +328,9 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                   height: 40,
                   child: ElevatedButton(
                     onPressed: () async {
-                      final providerEndSession =
+                        bool? result = await stopSessionDialog(context);
+                        if (result == true) {
+ final providerEndSession =
                           context.read<ChargingProvider>();
                       //                   // print("Charging session ID ${data!.session!.recId!}");
                       final response = await providerEndSession.endSession(
@@ -340,6 +343,11 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
 
                         await provider.fetchActiveSessions(context, "Active");
                       }
+} else {
+  // ❌ User clicked NO or closed dialog
+  print("User cancelled");
+}
+                     
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: CommonColors.blue,

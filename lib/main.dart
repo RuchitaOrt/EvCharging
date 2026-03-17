@@ -185,6 +185,7 @@
 //     );
 //   }
 // }
+
 import 'dart:async';
 import 'dart:io';
 
@@ -215,6 +216,7 @@ import 'package:HyCharge/Screens/SplashScreen.dart';
 import 'package:HyCharge/Services/ChargingHistorySessionProvider.dart';
 import 'package:HyCharge/Utils/UtilityFile.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -262,7 +264,7 @@ class _MyAppState extends State<MyApp> {
 
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
-
+String? pendingChargerId;
   /// 🔥 Navigate to estimation screen
  void _navigateToEstimate(String chargerId) {
 SplashScreen.deepLinkHandled = true;
@@ -281,11 +283,17 @@ SplashScreen.deepLinkHandled = true;
 
   });
 }
-
-  /// 🔥 Handle Deep Link
-  void _handleDeepLink(Uri uri) {
-
-    print("Deep link received: $uri");
+void _handleDeepLink(Uri uri) {
+  if(Platform.isIOS)
+  {
+ print("Deep link received: $uri");
+ 
+  if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == "c") {
+    pendingChargerId = uri.pathSegments[1];
+    GlobalLists.globalChargerId = pendingChargerId;
+  }
+  }else{
+       print("Deep link received: $uri");
 
     if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == "c") {
 
@@ -296,6 +304,22 @@ SplashScreen.deepLinkHandled = true;
       _navigateToEstimate(chargerId);
     }
   }
+ 
+}
+  /// 🔥 Handle Deep Link
+  // void _handleDeepLink(Uri uri) {
+
+  //   print("Deep link received: $uri");
+
+  //   if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == "c") {
+
+  //     final chargerId = uri.pathSegments[1];
+
+  //     print("Charger ID: $chargerId");
+
+  //     _navigateToEstimate(chargerId);
+  //   }
+  // }
 
   /// 🔥 Initialize deep links
   Future<void> _initDeepLinks() async {
@@ -329,7 +353,14 @@ SplashScreen.deepLinkHandled = true;
 
   @override
   Widget build(BuildContext context) {
-
+//     if(Platform.isIOS){
+// WidgetsBinding.instance.addPostFrameCallback((_) {
+//   if (pendingChargerId != null && routeGlobalKey.currentState != null) {
+//     _navigateToEstimate(pendingChargerId!);
+//     pendingChargerId = null;
+//   }
+// });
+//     }
     final mapController = MapController();
     final mapDriverController = DriverMapController();
     final mapOverViewController = OverViewMapController();

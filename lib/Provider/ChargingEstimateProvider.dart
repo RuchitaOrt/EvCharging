@@ -90,7 +90,8 @@ if (activeMode != "time") {
 
 if (activeMode != "amount") {
   amount = _estimateResponse!.estimatedCost;
-  controller.text = amount.toStringAsFixed(0);
+  controller.text = amount.toString();
+  //.toStringAsFixed(0);
 }
       percentage = _estimateResponse!.estimatedBatteryIncrease;
     }

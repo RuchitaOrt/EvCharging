@@ -2,6 +2,7 @@ import 'package:HyCharge/Provider/ChargingProvider.dart';
 import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
@@ -372,7 +373,11 @@ showToast("Charging session completed");
                       ? null
                       : () async {
                           // print("Charging session ID ${data!.session!.recId!}");
-                          final response = await provider.endSession(
+
+                          bool? result = await stopSessionDialog(context);
+                          if (result == true) {
+  // ✅ User clicked YES
+   final response = await provider.endSession(
                               context: context,
                               sessionId:
                                   widget.args.sessionId!, // 🔑 station id
@@ -383,7 +388,7 @@ showToast("Charging session completed");
                             if (await Vibration.hasVibrator() ?? false) {
                               Vibration.vibrate(pattern: [0, 500, 200, 500]);
                             }
-showToast("harging session stopped");
+showToast("charging session stopped");
                            
                             status = response!.data!.session!.status;
 
@@ -404,11 +409,12 @@ showToast("harging session stopped");
                                 stationName=response.data!.session!.chargingStationName;
                                 // ConnectorGunID=response.data!.session!.connectorName;
                           });
-                          // 📳 Vibrate when user manually stops charging
-
-                          // if (success) {
-                          //   Navigator.pop(context);
-                          // }
+                        
+} else {
+  // ❌ User clicked NO or closed dialog
+  print("User cancelled");
+}
+                        
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.blue,
@@ -429,7 +435,9 @@ showToast("harging session stopped");
                   onPressed: status == "Completed"
                       ? null
                       : () async {
-                        _durationTimer?.cancel();
+                        bool? result = await unlockSessionDialog(context);
+                        if (result == true) {
+  _durationTimer?.cancel();
 
                           print(
                               "Charging STATION ID ${data!.session!.chargingStationId!}");
@@ -443,10 +451,12 @@ showToast("harging session stopped");
                                   // int.parse(data.session!.chargingGunId!)
                                   );
                           status = response!.data!.status;
+} else {
+  // ❌ User clicked NO or closed dialog
+  print("User cancelled");
+}
+                       
 
-                          // if (response.success) {
-                          //   Navigator.pop(context);
-                          // }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.white,
@@ -539,7 +549,7 @@ showToast("harging session stopped");
                                       .toString();
                                 });
                               },
-                              child: Icon(Icons.refresh)),
+                              child:provider.loading?CircularProgressIndicator(color: CommonColors.blue,): Icon(Icons.refresh)),
                         ),
                       ],
                     ),
@@ -590,7 +600,7 @@ showToast("harging session stopped");
                       ),
                     ),
                         Text(
-                          "${stationName}",
+                          "${stationName!.toUpperCase()}",
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: 14,
@@ -793,7 +803,7 @@ showToast("harging session stopped");
       childAspectRatio: 1.8,
       children: [
         _infoCard(
-            "Current Price", "₹ ${"${cost}" ?? 0}", CommonImagePath.current),
+            "Amount", "₹ ${"${cost}" ?? 0}", CommonImagePath.current),
         // _infoCard(
         //   "Battery",
         //   "${25.0 ?? 0} km",

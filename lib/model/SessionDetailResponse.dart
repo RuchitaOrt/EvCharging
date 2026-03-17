@@ -192,21 +192,59 @@ class ChargerDetails {
     );
   }
 }
+// class CostDetails {
+//   final double? energyCost;
+//   final double? serviceFee;
+//   final double? taxes;
+//   final double? totalCost;
+//   final String? currency;
+//   final double? tariffApplied;
+//   final String? tariffUnit;
+//   final String? breakdown;
+
+//   CostDetails({
+//     this.energyCost,
+//     this.serviceFee,
+//     this.taxes,
+//     this.totalCost,
+//     this.currency,
+//     this.tariffApplied,
+//     this.tariffUnit,
+//     this.breakdown,
+//   });
+
+//   factory CostDetails.fromJson(Map<String, dynamic> json) {
+//     return CostDetails(
+//       energyCost: _toDouble(json['energyCost']),
+//       serviceFee: _toDouble(json['serviceFee']),
+//       taxes: _toDouble(json['taxes']),
+//       totalCost: _toDouble(json['totalCost']),
+//       currency: json['currency'],
+//       tariffApplied: _toDouble(json['tariffApplied']),
+//       tariffUnit: json['tariffUnit'],
+//       breakdown: json['breakdown'],
+//     );
+//   }
+// }
 class CostDetails {
-  final double? energyCost;
-  final double? serviceFee;
-  final double? taxes;
-  final double? totalCost;
-  final String? currency;
-  final double? tariffApplied;
-  final String? tariffUnit;
-  final String? breakdown;
+  double? energyCost;
+  double? serviceFee;
+  double? taxes;
+  double? totalCost;
+  double? cgst;
+  double? sgst;
+  String? currency;
+  double? tariffApplied;
+  String? tariffUnit;
+  String? breakdown;
 
   CostDetails({
     this.energyCost,
     this.serviceFee,
     this.taxes,
     this.totalCost,
+    this.cgst,
+    this.sgst,
     this.currency,
     this.tariffApplied,
     this.tariffUnit,
@@ -215,15 +253,32 @@ class CostDetails {
 
   factory CostDetails.fromJson(Map<String, dynamic> json) {
     return CostDetails(
-      energyCost: _toDouble(json['energyCost']),
-      serviceFee: _toDouble(json['serviceFee']),
-      taxes: _toDouble(json['taxes']),
-      totalCost: _toDouble(json['totalCost']),
+      energyCost: (json['energyCost'] as num?)?.toDouble(),
+      serviceFee: (json['serviceFee'] as num?)?.toDouble(),
+      taxes: (json['taxes'] as num?)?.toDouble(),
+      totalCost: (json['totalCost'] as num?)?.toDouble(),
+      cgst: (json['cgst'] as num?)?.toDouble(),
+      sgst: (json['sgst'] as num?)?.toDouble(),
       currency: json['currency'],
-      tariffApplied: _toDouble(json['tariffApplied']),
+      tariffApplied: (json['tariffApplied'] as num?)?.toDouble(),
       tariffUnit: json['tariffUnit'],
       breakdown: json['breakdown'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "energyCost": energyCost,
+      "serviceFee": serviceFee,
+      "taxes": taxes,
+      "totalCost": totalCost,
+      "cgst": cgst,
+      "sgst": sgst,
+      "currency": currency,
+      "tariffApplied": tariffApplied,
+      "tariffUnit": tariffUnit,
+      "breakdown": breakdown,
+    };
   }
 }
 class Timing {

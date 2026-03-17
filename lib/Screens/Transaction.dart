@@ -75,7 +75,8 @@ if (_scrollController.position.pixels >=
             mainAxisSize: MainAxisSize.min,
             children: WalletFilterType.values.map((filter) {
               return RadioListTile<WalletFilterType>(
-                title: Text(filter.name),
+                title:Text(filter.label),
+                //  Text(filter.name),
                 value: filter,
                 groupValue: tempSelected,
                 onChanged: (v) => setState(() => tempSelected = v!),
@@ -124,12 +125,33 @@ if (_scrollController.position.pixels >=
       ),
     );
   }
+String _formatDate(String? isoDate) {
+  if (isoDate == null || isoDate.isEmpty) return "";
 
-  String _formatDate(String? isoDate) {
-    if (isoDate == null || isoDate.isEmpty) return "";
-    final date = DateTime.parse(isoDate).toLocal();
-    return DateFormat('EEE, MMM dd, yyyy hh:mm a').format(date);
-  }
+  final parsed = DateTime.parse(isoDate);
+
+  // Treat API time as UTC
+  final utcTime = DateTime.utc(
+    parsed.year,
+    parsed.month,
+    parsed.day,
+    parsed.hour,
+    parsed.minute,
+    parsed.second,
+    parsed.millisecond,
+    parsed.microsecond,
+  );
+
+  // Convert to IST
+  final istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
+
+  return DateFormat('EEE, MMM dd, yyyy hh:mm a').format(istTime);
+}
+  // String _formatDate(String? isoDate) {
+  //   if (isoDate == null || isoDate.isEmpty) return "";
+  //   final date = DateTime.parse(isoDate).toLocal();
+  //   return DateFormat('EEE, MMM dd, yyyy hh:mm a').format(date);
+  // }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -256,6 +278,7 @@ class _TransactionSectionState extends State<_TransactionSection> {
 
   @override
   Widget build(BuildContext context) {
+   
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Consumer<WalletProvider>(
@@ -313,14 +336,16 @@ class _TransactionSectionState extends State<_TransactionSection> {
                   }
 
                   final tx = transactions[index];
+                    
                   final isCredit = tx.transactionType == "Credit";
-
+               
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12),
                     child: _TransactionTile(
                       item: _Tx(
                         tx.transactionType ?? "",
                         "₹${tx.amount ?? 0}",
+                        
                         _formatDate(tx.createdOn?.toString()),
                         isCredit,
                         tx.additionalInfo1 ?? "",
@@ -368,6 +393,8 @@ class _TransactionSectionState extends State<_TransactionSection> {
   }
 
   String _formatDate(String? isoDate) {
+    print("DATEvale");
+    print(isoDate);
     if (isoDate == null || isoDate.isEmpty) return "";
     final date = DateTime.parse(isoDate).toLocal();
     return DateFormat('EEE, MMM dd, yyyy hh:mm a').format(date);

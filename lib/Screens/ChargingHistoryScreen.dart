@@ -287,6 +287,9 @@ String formatTime(String dateTimeString) {
 }
 
   Widget _historyCard(ChargingSession data) {
+    print("API VALUE");
+    print(data.startTime!);
+    print(data.endTime!);
     return Column(
       children: [
         GestureDetector(
@@ -338,7 +341,7 @@ String formatTime(String dateTimeString) {
                   
                   children: [
                     Text(
-                      "Station: ${ capitalizeWords(data.chargingStationName?? "Station")}",
+                      "Station: ${ data.chargingStationName!.toUpperCase()?? "Station"}",
                       style: const TextStyle(fontWeight: FontWeight.w600,fontSize: 12),
                     ),
                      Text(
@@ -380,8 +383,11 @@ String formatTime(String dateTimeString) {
                   ),
                   Text(
                     data.status == "Active"
-                        ? formatonlyTime("${data.startTime}")
-                        : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
+    ? formatonlyTimeIST(data.startTime!)
+    : "${formatonlyTimeIST(data.startTime!)} - ${formatonlyTimeIST(data.endTime!)}",
+                    // data.status == "Active"
+                    //     ? formatonlyTime("${data.startTime}")
+                    //     : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
                     style: const TextStyle(
                       fontWeight: FontWeight.w400,
                       color: CommonColors.neutral500,
@@ -639,10 +645,42 @@ String formatTime(String dateTimeString) {
       ],
     );
   }
+  String formatonlyTimeIST(DateTime time) {
+  final utcTime = DateTime.utc(
+    time.year,
+    time.month,
+    time.day,
+    time.hour,
+    time.minute,
+    time.second,
+    time.millisecond,
+    time.microsecond,
+  );
+
+  final istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
+
+  return DateFormat("hh.mm a").format(istTime);
+}
   String formatonlyTime(String dateTimeString) {
   final dateTime = DateTime.parse(dateTimeString);
   return DateFormat('hh.mm a').format(dateTime);
 }
+
+DateTime convertToIST(DateTime time) {
+  return time.toUtc().add(const Duration(hours: 5, minutes: 30));
+}
+
+// String formatonlyTimeIST(DateTime time) {
+//   final istTime = convertToIST(time);
+//   return DateFormat("hh.mm a").format(istTime);
+// }
+// DateTime convertToIST(DateTime time) {
+//   return time.toUtc().add(const Duration(hours: 5, minutes: 30));
+// }
+// String formatonlyTimeIST(DateTime time) {
+//   final istTime = convertToIST(time);
+//   return DateFormat("hh.mm a").format(istTime);
+// }
 Widget _statusChip(String isActive,String recId,) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),

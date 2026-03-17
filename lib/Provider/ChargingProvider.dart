@@ -25,6 +25,7 @@ class ChargingProvider extends ChangeNotifier {
      required String costLimit,
       required String timeLimit,
        required String batteryIncreaseLimit,
+       required String tabIndex
   }) async {
     loading = true;
     notifyListeners();
@@ -37,12 +38,21 @@ class ChargingProvider extends ChangeNotifier {
       "connectorId": connectorId,
       "startMeterReading": startMeterReading,
       "chargingTariff": chargingTariff,
-      // "energyLimit": energyLimit,
-      "costLimit": costLimit,
+      //  "energyLimit": energyLimit,
+      // "costLimit": costLimit,
       // "timeLimit": timeLimit,
-      // "batteryIncreaseLimit": batteryIncreaseLimit
+       //"batteryIncreaseLimit": batteryIncreaseLimit
     };
-
+if (tabIndex == "0") {
+  payload["costLimit"] = costLimit;
+} 
+else if (tabIndex == "1") {
+  payload["energyLimit"] = energyLimit;
+} 
+else if (tabIndex == "2") {
+  payload["timeLimit"] = timeLimit;
+}
+print(payload);
     try {
       final res = await _service.startChargingSession(context, payload);
       sessionResponse = res;
@@ -158,10 +168,11 @@ class ChargingProvider extends ChangeNotifier {
         context,
         sessionId,
       );
-
+   loading = false;
       sessionDetails = res;
       return res; // ✅ return response
     } catch (e) {
+        loading = false;
       FocusScope.of(context).unfocus();
       showToast(e.toString());
       return null;

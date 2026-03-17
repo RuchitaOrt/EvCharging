@@ -350,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       padding: const EdgeInsets.only(bottom: 40),
                       child: Center(
                           child: Text(
-                        "Version: 1.0.0",
+                       Platform.isIOS? "Version: 1.0.9": "Version: 1.1.5",
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.black87,

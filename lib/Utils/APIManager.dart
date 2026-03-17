@@ -187,15 +187,24 @@ class APIManager {
             print("🔒 401 detected");
 
             // If refresh already failed → logout immediately
-            if (_refreshFailed) {
-              await clearCookies();
-              unAthorizedTokenErrorDialog(
-                routeGlobalKey.currentContext!,
-                message: "Your Session has Expired. Please Login Again",
-              );
-              return handler.reject(e);
-            }
+            // if (_refreshFailed) {
+            //   await clearCookies();
+            //   unAthorizedTokenErrorDialog(
+            //     routeGlobalKey.currentContext!,
+            //     message: "Your Session has Expired. Please Login Again",
+            //   );
+            //   return handler.reject(e);
+            // }
+if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
+    await clearCookies();
 
+    unAthorizedTokenErrorDialog(
+      routeGlobalKey.currentContext!,
+      message: "Your Session has Expired. Please Login Again",
+    );
+
+    return handler.reject(e);
+  }
             final refreshed = await _refreshToken();
 
             if (refreshed) {
@@ -813,6 +822,7 @@ class APIManager {
   bool _isRefreshingToken = false;
   bool _refreshFailed = false;
   Future<bool> _refreshToken() async {
+    print("REfresh Called");
     if (_isRefreshingToken || _refreshFailed) {
       return false;
     }

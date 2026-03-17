@@ -60,7 +60,7 @@ Future<void> loadData() async {
           children: [
             /// Amount Section
              Text(
-              "₹ ${response!.data!.session!.chargingTotalFee}",
+              "₹ ${response!.data!.costDetails!.totalCost.toString()}",
               style: TextStyle(
                 fontSize: 34,
                 fontWeight: FontWeight.bold,
@@ -124,13 +124,49 @@ Future<void> loadData() async {
   );
 }
   String formatTime(String dateTimeString) {
-    final dateTime = DateTime.parse(dateTimeString);
+  final dateTime = DateTime.parse(dateTimeString);
 
-    return DateFormat('EEE ddMMM yyyy').format(dateTime);
-  }
+  return DateFormat('EEE dd MMM yyyy').format(dateTime);
+}
   String formatonlyTime(String dateTimeString) {
   final dateTime = DateTime.parse(dateTimeString);
   return DateFormat('hh.mm a').format(dateTime);
+}
+// String formatonlyTimeIST(DateTime time) {
+//   final utcTime = DateTime.utc(
+//     time.year,
+//     time.month,
+//     time.day,
+//     time.hour,
+//     time.minute,
+//     time.second,
+//     time.millisecond,
+//     time.microsecond,
+//   );
+
+//   final istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
+
+//   return DateFormat("hh.mm a").format(istTime);
+// }
+String formatonlyTimeIST(String? timeString) {
+  if (timeString == null || timeString.isEmpty) return "";
+
+  final parsed = DateTime.parse(timeString);
+
+  final utcTime = DateTime.utc(
+    parsed.year,
+    parsed.month,
+    parsed.day,
+    parsed.hour,
+    parsed.minute,
+    parsed.second,
+    parsed.millisecond,
+    parsed.microsecond,
+  );
+
+  final istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
+
+  return DateFormat("hh.mm a").format(istTime);
 }
   Widget _buildDetailsCard() {
     return Container(
@@ -138,21 +174,21 @@ Future<void> loadData() async {
       decoration: _cardDecoration(),
       child: Column(
         children: [
-          _item("Date & time", "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTime("${response!.data!.session!.startTime}")} - ${formatonlyTime("${response!.data!.session!.endTime}")}"),
+          _item("Date & time", "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTimeIST("${response!.data!.session!.startTime}")} - ${formatonlyTimeIST("${response!.data!.session!.endTime}")}"),
       //     _item("Address details",
       // (response!.data!.session!.chargingHub!.addressLine1==null)?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
           _item("Charger type", "${response!.data!.chargerDetails!.chargerType}"),
           _item("Price per unit", "${response!.data!.summary!.costPerKwh}"),
           _item("Connector details", "${response!.data!.session!.chargingHubName}"),
-          // _item("Vehicle details", "MH05EV5322"),
-          _item("Total kW used", "₹ ${response!.data!.energyConsumption!.totalEnergy}"),
+        //  _item("Energy Cost",  "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
+          _item("Total kW used", "${response!.data!.energyConsumption!.totalEnergy}"),
           _item("Total charging time", "${response!.data!.timing!.duration!.formattedDuration}"),
-          // _item("Service charge", "₹173.48"),
+         _item("Service charge", "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
           // // _item("Discount", "₹0.0"),
           // // _item("Cashback", "0.0"),
-          // _item("SGST (9%)", "₹15.62"),
-          // _item("CGST (9%)", "₹15.61"),
-          // _item("Charge coins used", "0"),
+          _item("SGST (9%)",  "₹ ${response!.data!.costDetails!.sgst.toString()}"),
+          _item("CGST (9%)", "₹ ${response!.data!.costDetails!.cgst.toString()}"),
+         _item("Duration", "${response!.data!.timing!.duration!.formattedDuration.toString()}"),
           // _item("Charge coins credited", "55"),
 
           const Divider(height: 24),
@@ -169,7 +205,7 @@ Future<void> loadData() async {
               ),
               Spacer(),
               Text(
-                "₹ ${response!.data!.session!.chargingTotalFee}",
+                "₹ ${response!.data!.costDetails!.totalCost.toString()}",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.green,

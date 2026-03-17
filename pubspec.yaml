@@ -69,7 +69,7 @@ dependencies:
   new_version_plus:
   syncfusion_flutter_pdfviewer: ^32.2.4
   mobile_scanner: ^5.2.3
-  # ^6.0.0 android
+  # ^6.0.0 android 7.2.0
   # ^5.2.3 ios
   app_links: ^6.0.0
   vibration: 

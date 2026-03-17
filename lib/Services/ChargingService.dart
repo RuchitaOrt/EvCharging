@@ -179,7 +179,8 @@ if (currentBatteryPercentage != null) {
 if (desiredCost != null) {
   body["desiredCost"] = desiredCost;
 }
-
+print("Estimation");
+print(body);
     // final body = {
     //   "chargingGunId": chargingGunId,
     //   "chargingStationId": chargingStationId,
