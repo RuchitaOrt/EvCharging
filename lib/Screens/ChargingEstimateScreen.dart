@@ -50,6 +50,13 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
     _selectedStationID = widget.selectedStationID;
     // print("CHSGE");
     // print(_selectedCharger!.recId!);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+  final provider = context.read<WalletProvider>();
+
+  if (provider.walletListResponse == null) {
+    provider.fetchWallet(context);
+  }
+});
     if (widget.isAPPLINK == "1") {
       getChagerDetails(widget.chargerID!);
     }
@@ -76,6 +83,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
     currentWalletPrice = walletProvider.currentBalance;
 
     print("Current BALANCE ${walletProvider.currentBalance}");
+    print(walletProvider.isInitialLoading);
     return DefaultTabController(
       length: 3,
       child: WillPopScope(
@@ -137,7 +145,44 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
+               walletProvider.isInitialLoading?
+                 SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: Consumer<ChargingProvider>(
+                      builder: (context, provider, _) => ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: CommonColors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: walletProvider.isInitialLoading
+                            ? null // disable button while loading
+                            : () async {
+                               
+                              },
+                        child: provider.loading
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      CommonColors.white),
+                                ),
+                              )
+                            : const Text(
+                                "Start Charging",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ):   SizedBox(
                     width: double.infinity,
                     height: 44,
                     child: Consumer<ChargingProvider>(

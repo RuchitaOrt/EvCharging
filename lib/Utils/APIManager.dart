@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:HyCharge/model/AppVersionResponse.dart';
 import 'package:HyCharge/model/ForgetPasswordResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
@@ -92,7 +93,8 @@ enum API {
   resendOtp,
   estimateCharging,
   forgetPassword,
-  chargerDetails
+  chargerDetails,
+   appVersionInfo,
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -220,7 +222,9 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
                     headers: requestOptions.headers,
                   ),
                 );
-
+                print(requestOptions.path);
+                print(requestOptions.data);
+             print(requestOptions.queryParameters);
                 return handler.resolve(retryResponse);
               } catch (_) {
                 return handler.reject(e);
@@ -230,7 +234,7 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
               await clearCookies();
               unAthorizedTokenErrorDialog(
                 routeGlobalKey.currentContext!,
-                message: "Your Session has Expired. Please Login Again",
+                message: "Your Session has Expired. Please Login Again.",
               );
               return handler.reject(e);
             }
@@ -628,6 +632,8 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
         return "/User/forgot-password";
         case API.chargerDetails:
   return "/ChargingHub/charger-details";
+  case API.appVersionInfo:
+  return "/AppVersionInfo";
     }
   }
 
@@ -651,6 +657,7 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.charginggunstatus:
       case API.razorpayKey:
       case API.chargerDetails:
+      case API.appVersionInfo:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:
@@ -743,7 +750,8 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
         return ResendOtpResponse.fromJson(json);
       case API.estimateCharging:
         return EstimateChargingResponse.fromJson(json);
-
+      case API.appVersionInfo:
+  return AppVersionResponse.fromJson(json);
       default:
         return json;
     }

@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
+import 'package:HyCharge/main.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -53,7 +57,7 @@ class _ScanScreenState extends State<ScanScreen> {
     }
 
     // 🌐 Normal Link
-    else if (code.startsWith("http://") || code.startsWith("https://")) {
+    else if ((code.startsWith("http://") || code.startsWith("https://")) && Platform.isAndroid) {
       final uri = Uri.parse(code);
       try {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -61,7 +65,30 @@ class _ScanScreenState extends State<ScanScreen> {
         debugPrint("Error launching URL: $e");
       }
     }
+else if (code.startsWith("http://") || code.startsWith("https://")) {
+  final uri = Uri.parse(code);
 
+  debugPrint("Handling deep link internally: $uri");
+
+  if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == "c") {
+    final chargerId = uri.pathSegments[1];
+
+    Navigator.pop(context); // close scanner
+
+    // 🔥 Navigate directly
+    routeGlobalKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (_) => ChargingEstimateScreen(
+          chargerID: chargerId,
+          isAPPLINK: "1",
+        ),
+      ),
+    );
+  } else {
+    // fallback → open browser
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+}
     // 🚗 Station ID or Plain Text
     else {
       Navigator.pop(context, code);

@@ -287,9 +287,9 @@ String formatTime(String dateTimeString) {
 }
 
   Widget _historyCard(ChargingSession data) {
-    print("API VALUE");
-    print(data.startTime!);
-    print(data.endTime!);
+    // print("API VALUE");
+    // print(data.startTime!);
+    // print(data.endTime!);
     return Column(
       children: [
         GestureDetector(

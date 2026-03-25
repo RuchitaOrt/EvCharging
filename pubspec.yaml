@@ -68,11 +68,12 @@ dependencies:
   image_picker: ^1.0.7
   new_version_plus:
   syncfusion_flutter_pdfviewer: ^32.2.4
-  mobile_scanner: ^5.2.3
-  # ^6.0.0 android 7.2.0
+  mobile_scanner: ^7.2.0
+  # ^6.0.0 android ^7.2.0
   # ^5.2.3 ios
   app_links: ^6.0.0
   vibration: 
+  package_info_plus: ^8.0.0
 
   
   # 4.0.1

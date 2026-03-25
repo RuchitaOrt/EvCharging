@@ -1360,7 +1360,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                   // ✅ Status is available, navigate
                   bool? confirmed = await gunConnectorDialog(
   context,
-  message: "Please connect gun to the vehicle",
+  message: "Plug the charging connector into your vehicle to begin charging.",
 );
 
 if (confirmed == true) {

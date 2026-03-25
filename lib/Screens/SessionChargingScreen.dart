@@ -203,7 +203,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     final newStatus = res!.data!.session!.status ?? "";
     final newCost = "${res.data!.costDetails!.totalCost}";
     final newUnitConsumed = "${res.data!.energyConsumption!.totalEnergy}";
-    final newOutputPower = "${res.data!.chargerDetails!.powerOutput} KW";
+    final newOutputPower = "${res.data!.chargingPerformance!.averageChargingSpeed} KW";
     final isActive = res.data!.session!.active == 1;
     final newBatteryPercentage = isActive
         ? res.data!.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
@@ -374,7 +374,7 @@ showToast("Charging session completed");
                       : () async {
                           // print("Charging session ID ${data!.session!.recId!}");
 
-                          bool? result = await stopSessionDialog(context);
+                          bool? result = await stopSessionDialog(context,amount:cost,units: unitConsumed);
                           if (result == true) {
   // ✅ User clicked YES
    final response = await provider.endSession(

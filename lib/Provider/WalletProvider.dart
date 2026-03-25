@@ -26,11 +26,12 @@ class WalletProvider extends ChangeNotifier {
       walletListResponse?.wallet?.currentBalance?.toDouble() ?? 0.0;
 
   WalletFilterType selectedFilter = WalletFilterType.all;
-
+  // bool isLoadingWallet = false;
   // ---------------- FETCH FIRST PAGE ----------------
   Future<void> fetchWallet(BuildContext context) async {
     try {
       isInitialLoading = true;
+      // isLoadingWallet=true;
       notifyListeners();
 
       _pageNumber = 1;
@@ -52,10 +53,13 @@ class WalletProvider extends ChangeNotifier {
       if (newList.length < _pageSize) {
         hasMore = false;
       }
+     isInitialLoading = false;
     } catch (e) {
+       isInitialLoading = false;
       debugPrint("Wallet fetch error: $e");
     } finally {
-      isInitialLoading = false;
+     
+     isInitialLoading = false;
       notifyListeners();
     }
   }
