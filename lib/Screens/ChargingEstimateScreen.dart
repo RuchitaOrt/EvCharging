@@ -57,9 +57,19 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
     provider.fetchWallet(context);
   }
 });
-    if (widget.isAPPLINK == "1") {
-      getChagerDetails(widget.chargerID!);
-    }
+//  if (widget.isAPPLINK == "1") {
+//       getChagerDetails(widget.chargerID!);
+//     }
+    // if (widget.isAPPLINK == "1") {
+    //   getChagerDetails(widget.chargerID!);
+    // }
+    if (widget.isAPPLINK == "1" && widget.chargerID != null) {
+  getChagerDetails(widget.chargerID!);
+   MyApp.pendingChargerId = null;
+} else {
+  //  rToast("chargerID is NULL");
+  debugPrint("❌ chargerID is NULL");
+}
   }
 
   getChagerDetails(String chargerID) async {

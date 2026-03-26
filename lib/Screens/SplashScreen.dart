@@ -1,3 +1,4 @@
+
 import 'dart:io';
 
 import 'package:HyCharge/Provider/AppVersionProvider.dart';
@@ -5,6 +6,7 @@ import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/OnboardingScreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/Utils/UtilityFile.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
@@ -26,92 +28,168 @@ static bool deepLinkHandled = false;
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  
-// Future<void> _initApp() async {
-//  WidgetsBinding.instance.addPostFrameCallback((_) async {
+  bool _hasNavigated = false;
+Future<void> _initApp() async {
+  rToast("SPLASH INIT START");
 
-//     if (SplashScreen.deepLinkHandled) return; // 🔥 STOP EARLY
+  /// ✅ RESET (VERY IMPORTANT)
+  SplashScreen.deepLinkHandled = false;
+
+  await Future.delayed(const Duration(milliseconds: 300));
+
+  if (!mounted) return;
+
+  final versionProvider =
+      Provider.of<AppVersionProvider>(context, listen: false);
+
+  try {
+    await versionProvider.checkAppVersion(context);
+  } catch (e) {
+    rToast("VERSION ERROR: $e");
+  }
+
+  // rToast("WAITING FOR DEEPLINK CHECK");
+
+  int waitCount = 0;
+
+  // while (!MyApp.deepLinkChecked && waitCount < 20) {
+  //   await Future.delayed(const Duration(milliseconds: 100));
+  //   waitCount++;
+  // }
+
+  rToast("DEEPLINK WAIT EXIT ${MyApp.pendingChargerId}");
+
+  /// ❌ REMOVE THIS LINE (IMPORTANT)
+  // if (SplashScreen.deepLinkHandled) return;
+
+  /// ✅ DEEP LINK FLOW
+  if (MyApp.pendingChargerId != null) {
+    _hasNavigated = true;
+
+    SplashScreen.deepLinkHandled = true;
+
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    if (!mounted) return;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChargingEstimateScreen(
+          chargerID: MyApp.pendingChargerId,
+          isAPPLINK: "1",
+        ),
+      ),
+    );
+
+    /// ✅ RESET AFTER USE
+    // MyApp.pendingChargerId = null;
+
+    return;
+  }
+
+  /// ✅ NORMAL FLOW
+  await Future.delayed(const Duration(seconds: 1));
+/// 🛑 EXTRA SAFETY
+if (!MyApp.deepLinkChecked) {
+  rToast("DEEPLINK NOT READY → STOP FLOW");
+  return;
+}
+  if (!mounted) return;
+
+  loadDataCombine();
+}
+// Future<void> _initApp() async {
+//   WidgetsBinding.instance.addPostFrameCallback((_) async {
+
+//     rToast("SPLASH INIT START");
 
 //     final versionProvider =
 //         Provider.of<AppVersionProvider>(context, listen: false);
 
 //     await versionProvider.checkAppVersion(context);
 
-//     // final shouldBlock = await _handleForceUpdate(versionProvider);
+//     rToast("WAITING FOR DEEPLINK CHECK");
 
-//     // if (!shouldBlock && !SplashScreen.deepLinkHandled) {
-//       // Platform.isAndroid ? loadData() : loadIOSData();
-//       Future.delayed(const Duration(seconds: 3), () {
-//   if (!SplashScreen.deepLinkHandled && mounted) {
-//     print("Fallback → loading normal flow");
-//     loadDataCombine();
-//   }
-// });
-//       // loadDataCombine();
-//     // }
-//   });
-// // WidgetsBinding.instance.addPostFrameCallback((_) async {
-    
-// //   final versionProvider =
-// //       Provider.of<AppVersionProvider>(context, listen: false);
-// // await versionProvider.checkAppVersion(context);
 
-// //   final shouldBlock = await _handleForceUpdate(versionProvider);
+// int waitCount = 0;
 
-// //   if (!shouldBlock) {
-// //     Platform.isAndroid ? loadData() : loadIOSData();
-// //    }
-// // });
- 
+// while (!MyApp.deepLinkChecked && waitCount < 20) {
+//   await Future.delayed(const Duration(milliseconds: 100));
+//   waitCount++;
 // }
-Future<void> _initApp() async {
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
 
-    final versionProvider =
-        Provider.of<AppVersionProvider>(context, listen: false);
+// rToast("DEEPLINK WAIT EXIT (SAFE)");
+//     rToast("DEEPLINK CHECK DONE IN SPLASH");
 
-    await versionProvider.checkAppVersion(context);
+// if (SplashScreen.deepLinkHandled) {
+//   rToast("DEEPLINK ALREADY HANDLED - STOP SPLASH");
+//   return;
+// }
+// if (MyApp.pendingChargerId != null && !_hasNavigated) {
+//   rToast("SPLASH NAVIGATING FROM PENDING ID");
+// print("SPLASH NAVIGATING FROM PENDING ID ${MyApp.pendingChargerId }");
 
-    /// 🔥 WAIT until deep link check completes
-    int retry = 0;
-  while (!MyApp.deepLinkChecked) {
-  await Future.delayed(const Duration(milliseconds: 100));
-}
+// _hasNavigated = true;
+//   SplashScreen.deepLinkHandled = true;
 
-    /// ✅ If deep link already navigated → stop
-    if (SplashScreen.deepLinkHandled) {
-      print("Deep link handled → skip splash");
-      return;
-    }
+//   await Future.delayed(const Duration(milliseconds: 300));
+// if (!mounted) return;
+//  rToast("SPLASH NAVIGATING FROM PENDING ID ${MyApp.pendingChargerId!}");
+// Navigator.pushReplacement(
+//   context,
+//   MaterialPageRoute(
+//     builder: (_) => ChargingEstimateScreen(
+//       chargerID:MyApp.pendingChargerId ?? '',
+//       isAPPLINK: "1",
+//     ),
+//   ),
+// );
+ 
 
-    /// ✅ Normal flow
-    await Future.delayed(const Duration(seconds: 2));
+//   return;
+// }
 
-    if (!SplashScreen.deepLinkHandled && mounted) {
-      loadDataCombine();
-    }
-  });
-}
+
+//     rToast("GOING NORMAL FLOW");
+
+//     await Future.delayed(const Duration(seconds: 2));
+
+//     if (!SplashScreen.deepLinkHandled && mounted) {
+//       loadDataCombine();
+//     }
+    
+//   });
+// }
 Future<void> loadDataCombine() async {
-  await Future.delayed(const Duration(seconds: 2));
+  // rToast("LOAD DATA COMBINE START");
+
+  await Future.delayed(const Duration(milliseconds: 300));
 
   if (!mounted) return;
 
-  /// 🔥 STOP if deep link already handled
-  if (SplashScreen.deepLinkHandled) {
-    print("Deep link → skip splash");
-    return;
-  }
+  try {
+    // rToast("CHECKING FIRST TIME");
 
-  final isFirstTime = await AuthStorage.isFirstTime();
+    final isFirstTime = await AuthStorage.isFirstTime();
 
-  if (isFirstTime) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-    );
-  } else {
+    // rToast("IS FIRST TIME: $isFirstTime");
+
+    if (isFirstTime) {
+      // rToast("GO TO ONBOARDING");
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+      );
+      return;
+    }
+
+    // rToast("CHECKING LOGIN");
+
     final loggedIn = await AuthStorage.isLoggedIn();
+
+    rToast("LOGGED IN: $loggedIn");
 
     Navigator.pushReplacement(
       context,
@@ -119,8 +197,13 @@ Future<void> loadDataCombine() async {
         builder: (_) => MainTab(isLoggedIn: loggedIn),
       ),
     );
+
+  } catch (e, stack) {
+    rToast("CRASH IN AUTH: $e");
+    print(stack);
   }
 }
+
 Future<bool> _handleForceUpdate(AppVersionProvider provider) async {
   final data = provider.appVersionData;
 
@@ -276,6 +359,8 @@ bool isUpdateAvailable(String current, String latest) {
   void initState() {
     super.initState();
     _initApp();
+    
+    
   //  Platform.isAndroid? loadData():loadIOSData();
   }
 
@@ -341,57 +426,6 @@ bool isUpdateAvailable(String current, String latest) {
     );
   }
 }
-// Future<void> loadIOSData() async {
-//   await Future.delayed(
-//     Duration(seconds: Platform.isIOS ? 1 : 3),
-//   );
-
-//   if (!mounted) return;
-
-//   /// ✅ Check Deep Link FIRST
-//  if (GlobalLists.globalChargerId != null) {
-//   final chargerId = GlobalLists.globalChargerId!;
-
-//   /// ✅ CLEAR AFTER USING
-//   GlobalLists.globalChargerId = null;
-
-//   SplashScreen.deepLinkHandled = true;
-
-//   /// ✅ USE CONTEXT (NOT global navigator)
-//   Navigator.pushReplacement(
-//     context,
-//     MaterialPageRoute(
-//       builder: (_) => ChargingEstimateScreen(
-//         chargerID: chargerId,
-//         isAPPLINK: "1",
-//       ),
-//     ),
-//   );
-
-//   return;
-// }
-//   /// Normal flow
-//   final isFirstTime = await AuthStorage.isFirstTime();
-
-//   if (isFirstTime) {
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(
-//         builder: (_) => const OnboardingScreen(),
-//       ),
-//     );
-//   } else {
-//     final loggedIn = await AuthStorage.isLoggedIn();
-
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(
-//         builder: (_) => MainTab(isLoggedIn: loggedIn),
-//       ),
-//     );
-//   }
-// }
-
 
 
 Future<void> loadData() async {
@@ -423,43 +457,6 @@ Future<void> loadData() async {
     );
   }
 }
-//   Future<void> loadData() async {
-
-//     /// Splash Delay
-//     await Future.delayed(
-//       Duration(seconds: Platform.isIOS ? 1 : 3),
-//     );
-// print("returned");
-//     // if (!mounted) return;
-//  if (!mounted || SplashScreen.deepLinkHandled) return; // ✅ Skip if deep link handled
-//  print("returning");
-//     /// Check First Time User
-//     final isFirstTime = await AuthStorage.isFirstTime();
-//     print("SPLASH -> isFirstTime: $isFirstTime");
-
-//     if (isFirstTime) {
-
-//       Navigator.pushReplacement(
-//         context,
-//         MaterialPageRoute(
-//           builder: (_) => const OnboardingScreen(),
-//         ),
-//       );
-
-//     } else {
-
-//       /// Check Login Status
-//       final loggedIn = await AuthStorage.isLoggedIn();
-//       print("SPLASH -> loggedIn: $loggedIn");
-
-//       Navigator.pushReplacement(
-//         context,
-//         MaterialPageRoute(
-//           builder: (_) => MainTab(isLoggedIn: loggedIn),
-//         ),
-//       );
-//     }
-//   }
 
   @override
   Widget build(BuildContext context) {
