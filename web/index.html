@@ -1,70 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-
+  <!-- ✅ Security: Upgrade HTTP to HTTPS -->
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="HyCharge EV Charging">
+  
+  <!-- ✅ Critical for iOS -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-  <!-- Mobile viewport -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- iOS support -->
+  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="HyCharge">
-
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- favicon -->
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.ico"/>
-
-  <!-- Material Icons -->
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/icon?family=Material+Icons">
-
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
   <!-- Google Maps -->
-  <!-- <script async defer
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdTSK2ZYsXBQMa-PnFx4BHRfE5RIM0uNs&libraries=places">
-  </script> -->
-
-  <script
-   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdTSK2ZYsXBQMa-PnFx4BHRfE5RIM0uNs&libraries=places">
-</script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDdTSK2ZYsXBQMa-PnFx4BHRfE5RIM0uNs&libraries=places"></script>
 
   <title>HyCharge</title>
-
   <link rel="manifest" href="manifest.json">
-
 </head>
-
 <body>
-
-  <!-- Loading screen -->
-  <div id="loading" style="
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-family: sans-serif;
-      color: #666;">
+  
+  <!-- ✅ Loading indicator for iOS -->
+  <!-- <div id="loading" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: sans-serif; color: #666;">
     Loading HyCharge...
-  </div>
+  </div> -->
 
+  <!-- ✅ Error logger for iOS debugging -->
   <script>
-    window.addEventListener("load", function () {
-      var loader = document.getElementById("loading");
-      if (loader) {
-        loader.remove();
-      }
+    window.onerror = function(msg, url, line, col, error) {
+      document.getElementById('loading').innerHTML = 'Error: ' + msg + '<br>Line: ' + line;
+      return false;
+    };
+    
+    window.addEventListener('unhandledrejection', function(event) {
+      document.getElementById('loading').innerHTML = 'Promise Error: ' + event.reason;
     });
+
+    // Remove loading screen after 10 seconds (if Flutter loads successfully)
+    setTimeout(function() {
+      var loading = document.getElementById('loading');
+      if (loading) loading.remove();
+    }, 10000);
   </script>
 
-  <!-- Flutter bootstrap -->
-  <script src="flutter_bootstrap.js"></script>
-
+  <script src="flutter_bootstrap.js" async></script>
+  
 </body>
 </html>
