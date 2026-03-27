@@ -32,9 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
 Future<void> _initApp() async {
   rToast("SPLASH INIT START");
 
-  /// ✅ RESET (VERY IMPORTANT)
   SplashScreen.deepLinkHandled = false;
-
   await Future.delayed(const Duration(milliseconds: 300));
 
   if (!mounted) return;
@@ -48,29 +46,49 @@ Future<void> _initApp() async {
     rToast("VERSION ERROR: $e");
   }
 
-  // rToast("WAITING FOR DEEPLINK CHECK");
+  // ✅ Force Update Check
+  bool forceUpdateHandled = await _handleForceUpdate(versionProvider);
+  if (!mounted) return;
 
-  int waitCount = 0;
+  // Only continue if user hasn't navigated yet
+  if (!_hasNavigated) {
+    await _continueSplashFlow();
+  }
+}
 
-  // while (!MyApp.deepLinkChecked && waitCount < 20) {
-  //   await Future.delayed(const Duration(milliseconds: 100));
-  //   waitCount++;
-  // }
+Future<bool> _handleForceUpdate(AppVersionProvider provider) async {
+  final data = provider.appVersionData;
+  if (data == null) return false;
 
-  rToast("DEEPLINK WAIT EXIT ${MyApp.pendingChargerId}");
+  final currentVersion = await getCurrentVersion();
+  final latestVersion = Platform.isAndroid
+      ? data.latestVersionAndroid ?? ""
+      : data.latestVersionIos ?? "";
 
-  /// ❌ REMOVE THIS LINE (IMPORTANT)
-  // if (SplashScreen.deepLinkHandled) return;
+  final updateAvailable = isUpdateAvailable(currentVersion, latestVersion);
 
-  /// ✅ DEEP LINK FLOW
+  if (updateAvailable) {
+    bool? userChoice = await _showForceUpdateDialog(data); // wait for user choice
+
+    // ✅ User chose "Not Now" → do NOT block, but mark flow as handled
+    if (userChoice == false) {
+      rToast("User skipped update");
+      return false;
+    } else {
+      // Update clicked, splash flow stops until update
+      _hasNavigated = true;
+      return true;
+    }
+  }
+
+  return false; // always continue splash flow
+}
+Future<void> _continueSplashFlow() async {
+  if (_hasNavigated || SplashScreen.deepLinkHandled) return; // prevent double nav
+
   if (MyApp.pendingChargerId != null) {
     _hasNavigated = true;
-
     SplashScreen.deepLinkHandled = true;
-
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    if (!mounted) return;
 
     Navigator.pushReplacement(
       context,
@@ -81,102 +99,54 @@ Future<void> _initApp() async {
         ),
       ),
     );
-
-    /// ✅ RESET AFTER USE
-    // MyApp.pendingChargerId = null;
-
     return;
   }
 
-  /// ✅ NORMAL FLOW
-  await Future.delayed(const Duration(seconds: 1));
-/// 🛑 EXTRA SAFETY
-if (!MyApp.deepLinkChecked) {
-  rToast("DEEPLINK NOT READY → STOP FLOW");
-  return;
+  final isFirstTime = await AuthStorage.isFirstTime();
+
+  if (_hasNavigated || SplashScreen.deepLinkHandled) return; // double check
+
+  if (isFirstTime) {
+    _hasNavigated = true;
+    SplashScreen.deepLinkHandled = true;
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+    );
+    return;
+  }
+
+  final loggedIn = await AuthStorage.isLoggedIn();
+
+  _hasNavigated = true;
+  SplashScreen.deepLinkHandled = true;
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => MainTab(isLoggedIn: loggedIn),
+    ),
+  );
 }
-  if (!mounted) return;
-
-  loadDataCombine();
-}
-// Future<void> _initApp() async {
-//   WidgetsBinding.instance.addPostFrameCallback((_) async {
-
-//     rToast("SPLASH INIT START");
-
-//     final versionProvider =
-//         Provider.of<AppVersionProvider>(context, listen: false);
-
-//     await versionProvider.checkAppVersion(context);
-
-//     rToast("WAITING FOR DEEPLINK CHECK");
 
 
-// int waitCount = 0;
-
-// while (!MyApp.deepLinkChecked && waitCount < 20) {
-//   await Future.delayed(const Duration(milliseconds: 100));
-//   waitCount++;
-// }
-
-// rToast("DEEPLINK WAIT EXIT (SAFE)");
-//     rToast("DEEPLINK CHECK DONE IN SPLASH");
-
-// if (SplashScreen.deepLinkHandled) {
-//   rToast("DEEPLINK ALREADY HANDLED - STOP SPLASH");
-//   return;
-// }
-// if (MyApp.pendingChargerId != null && !_hasNavigated) {
-//   rToast("SPLASH NAVIGATING FROM PENDING ID");
-// print("SPLASH NAVIGATING FROM PENDING ID ${MyApp.pendingChargerId }");
-
-// _hasNavigated = true;
-//   SplashScreen.deepLinkHandled = true;
-
-//   await Future.delayed(const Duration(milliseconds: 300));
-// if (!mounted) return;
-//  rToast("SPLASH NAVIGATING FROM PENDING ID ${MyApp.pendingChargerId!}");
-// Navigator.pushReplacement(
-//   context,
-//   MaterialPageRoute(
-//     builder: (_) => ChargingEstimateScreen(
-//       chargerID:MyApp.pendingChargerId ?? '',
-//       isAPPLINK: "1",
-//     ),
-//   ),
-// );
- 
-
-//   return;
-// }
-
-
-//     rToast("GOING NORMAL FLOW");
-
-//     await Future.delayed(const Duration(seconds: 2));
-
-//     if (!SplashScreen.deepLinkHandled && mounted) {
-//       loadDataCombine();
-//     }
-    
-//   });
-// }
 Future<void> loadDataCombine() async {
-  // rToast("LOAD DATA COMBINE START");
+ 
 
   await Future.delayed(const Duration(milliseconds: 300));
 
   if (!mounted) return;
 
   try {
-    // rToast("CHECKING FIRST TIME");
+   
 
     final isFirstTime = await AuthStorage.isFirstTime();
 
-    // rToast("IS FIRST TIME: $isFirstTime");
+   
 
     if (isFirstTime) {
-      // rToast("GO TO ONBOARDING");
+     
 
       Navigator.pushReplacement(
         context,
@@ -185,7 +155,7 @@ Future<void> loadDataCombine() async {
       return;
     }
 
-    // rToast("CHECKING LOGIN");
+  
 
     final loggedIn = await AuthStorage.isLoggedIn();
 
@@ -204,26 +174,6 @@ Future<void> loadDataCombine() async {
   }
 }
 
-Future<bool> _handleForceUpdate(AppVersionProvider provider) async {
-  final data = provider.appVersionData;
-
-  if (data == null) return false;
-
-  final currentVersion = await getCurrentVersion();
-
-  final latestVersion = Platform.isAndroid
-      ? data.latestVersionAndroid ?? ""
-      : data.latestVersionIos ?? "";
-
-  final updateAvailable =
-      isUpdateAvailable(currentVersion, latestVersion);
-
-  if (updateAvailable) {
-    await _showForceUpdateDialog(data); // 👈 WAIT here
-  }
-
-  return false; // allow navigation AFTER user action
-}
 Future<String> getCurrentVersion() async {
   final packageInfo = await PackageInfo.fromPlatform();
   
@@ -328,7 +278,7 @@ Future<bool> _showForceUpdateDialog(AppVersionData data) async {
 SizedBox(height: 10,),
                      GestureDetector(
                        onTap: ()
-                       {
+                       {rToast("CLICLED NOT NOW");
                           Navigator.pop(context, false); // 👈 user skips
                        },
                        child: const Text("Not Now",style: TextStyle(color: CommonColors.hintGrey),)),

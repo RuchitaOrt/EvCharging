@@ -35,6 +35,7 @@ import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 // import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'package:provider/provider.dart';
@@ -52,12 +53,12 @@ void rToast(String message) {
 
   // Fluttertoast.cancel(); // clear old toasts
 
-  Fluttertoast.showToast(
-    msg: "🔥 $message",
-    toastLength: Toast.LENGTH_LONG,
-    gravity: ToastGravity.CENTER, // 👈 VERY IMPORTANT (center = always visible)
-    timeInSecForIosWeb: 3,
-  );
+  // Fluttertoast.showToast(
+  //   msg: "🔥 $message",
+  //   toastLength: Toast.LENGTH_LONG,
+  //   gravity: ToastGravity.CENTER, // 👈 VERY IMPORTANT (center = always visible)
+  //   timeInSecForIosWeb: 3,
+  // );
 }
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
@@ -66,12 +67,10 @@ final GlobalKey<NavigatorState> routeGlobalKey = GlobalKey();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-// FlutterError.onError = (FlutterErrorDetails details) {
-//   FlutterError.dumpErrorToConsole(details);
-// };
-//  if (Platform.isAndroid) {
-//   AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
-// }
+
+ if (Platform.isAndroid) {
+  AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
+}
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -83,14 +82,7 @@ Future<void> main() async {
 MyApp.deepLinkChecked = false;
 SplashScreen.deepLinkHandled = false;
  await Utility().loadAPIConfig();
-//  runZonedGuarded(() {
- 
-//   print("🚀 APP STARTED");
-//     runApp(const MyApp());
-//   }, (error, stack) {
-//     print("🔥 ZONE ERROR: $error");
-//     print(stack);
-//   });
+
    runApp(const MyApp());
 }
 
@@ -107,16 +99,6 @@ class MyAppState extends State<MyApp> {
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
 
-//   void _navigateToEstimateIOS(String chargerId) {
-//      MyApp.pendingChargerId = chargerId;
-// //   if (_hasNavigated) return;
-// //  _hasNavigated = true; // ✅ ADD THIS
-//   rToast("STORE PENDING NAVIGATION");
-
- 
-
-//   SplashScreen.deepLinkHandled = true; // ✅ ADD THIS
-// }
 void _navigateToEstimateIOS(String chargerId) {
    MyApp.pendingChargerId = chargerId;
  if (_hasNavigated) return;
@@ -127,25 +109,7 @@ void _navigateToEstimateIOS(String chargerId) {
 
   rToast("STORE PENDING NAVIGATION");
 
-  // SplashScreen.deepLinkHandled = true;
-
-  /// ✅ HANDLE CASE: APP ALREADY RUNNING
-  // Future.delayed(const Duration(milliseconds: 300), () {
-  //   final navigator = routeGlobalKey.currentState;
-
-  //   if (navigator != null) {
-  //     rToast("IOS DIRECT NAVIGATION");
-
-  //     navigator.pushReplacement(
-  //       MaterialPageRoute(
-  //         builder: (_) => ChargingEstimateScreen(
-  //           chargerID: chargerId,
-  //           isAPPLINK: "1",
-  //         ),
-  //       ),
-  //     );
-  //   }
-  // });
+ 
 }
 void _navigateToEstimate(String chargerId) {
   if (_hasNavigated) {
