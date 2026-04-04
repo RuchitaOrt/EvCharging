@@ -1,6 +1,7 @@
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/PaymentProvider.dart';
 import 'package:HyCharge/Screens/BookingDetailsScreen.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/LocationConvert.dart';
@@ -9,6 +10,7 @@ import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -58,43 +60,79 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: CommonAppBar(
-          title: "Charging History",
+    return WillPopScope(
+       onWillPop: () async {
+    
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
         ),
-        backgroundColor: CommonColors.neutral50,
-        body: Consumer<ActiveSessionProvider>(
-          builder: (context, provider, _) {
-            if (provider.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (provider.sessions.isEmpty) {
-              return const Center(child: Text("No charging history found"));
-            }
-            return ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              children: [
-                _summaryRow(),
-                const SizedBox(height: 20),
-                const FilterTabsWidget(),
-                const SizedBox(height: 20),
-                ...provider.sessions.map(
-                  (session) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12,top: 12),
-                    child: _historyCard(session),
-                  ),
-                ),
-                if (provider.loadingMore)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-              ],
-            );
-          },
-        ));
+      );
+  
+    return false; // ✅ now it's Future<bool>
+  },
+      child: Scaffold(
+          appBar: CommonAppBar(
+            title: "Charging History",
+            onBack: ()
+            {
+                Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
+          ),
+        );
+            },
+          ),
+          backgroundColor: CommonColors.neutral50,
+          body: Consumer<ActiveSessionProvider>(
+            builder: (context, provider, _) {
+              if (provider.loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+      //  if (provider.sessions.isEmpty) {
+      //           return  Center(child: Text("No charging history found"));
+      //         }
+              if (provider.totalSessions=="0") {
+                return  Center(child: Text("No charging history found"));
+              }
+              return ListView(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _summaryRow(),
+                  const SizedBox(height: 20),
+                  const FilterTabsWidget(),
+                  const SizedBox(height: 20),
+                  provider.sessions.isEmpty
+    ? Center(
+        child: Center(child: Text("No charging history found"))
+      )
+    : Column(
+        children: provider.sessions.map(
+          (session) => Padding(
+            padding: const EdgeInsets.only(bottom: 12, top: 12),
+            child: _historyCard(session),
+          ),
+        ).toList(),
+      ),
+                  // ...provider.sessions.map(
+                  //   (session) => Padding(
+                  //     padding: const EdgeInsets.only(bottom: 12,top: 12),
+                  //     child: _historyCard(session),
+                  //   ),
+                  // ),
+                  if (provider.loadingMore)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                ],
+              );
+            },
+          )),
+    );
   }
 Widget _summaryRow() {
   return Consumer<ActiveSessionProvider>(
@@ -290,7 +328,7 @@ String formatTime(String dateTimeString) {
     // print("API VALUE");
     // print(data.startTime!);
     // print(data.endTime!);
-    return Column(
+    return  Column(
       children: [
         GestureDetector(
           onTap: ()

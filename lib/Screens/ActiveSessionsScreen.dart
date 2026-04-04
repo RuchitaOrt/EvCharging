@@ -1,5 +1,6 @@
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Screens/ChargingHistoryScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
@@ -339,6 +340,11 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen> {
                           endMeterReading: session.endMeterReading!.toString());
 
                       if (response!.success!) {
+                         Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                              builder: (context) => ChargingHistoryScreen()),
+                        );
                         final provider = context.read<ActiveSessionProvider>();
 
                         await provider.fetchActiveSessions(context, "Active");

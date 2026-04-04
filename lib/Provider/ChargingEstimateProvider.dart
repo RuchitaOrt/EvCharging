@@ -14,7 +14,16 @@ class ChargingEstimateProvider extends ChangeNotifier {
   double time = 0;
   double percentage = 0;
 
- 
+ void resetValues() {
+  amount = 0;
+  units = 0;
+  time = 0;
+  percentage = 0;
+
+  controller.clear();
+
+  notifyListeners();
+}
 bool isDragging = false;
 
 String activeMode = "amount"; // amount / units / time

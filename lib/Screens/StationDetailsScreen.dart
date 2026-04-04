@@ -1093,15 +1093,15 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
           color: CommonColors.white,
           shadowColor: Colors.black26,
           child: Container(
-            margin: const EdgeInsets.only(bottom: 8),
+            //margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: isSelected
                   ? CommonColors.blue.withOpacity(0.1)
                   : CommonColors.white,
               border: Border.all(
-                color: isSelected ? CommonColors.blue : Colors.transparent,
-                width: 1.2,
+                color: isSelected ? CommonColors.blue : CommonColors.blue,
+                width:isSelected? 1.2:0.5,
               ),
               borderRadius: BorderRadius.circular(10),
             ),
@@ -1142,6 +1142,12 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                               style: const TextStyle(
                                   fontWeight: FontWeight.w600, fontSize: 13),
                             ),
+                            //  Text(
+                            //   "Connector - ${charger.recId}" ??
+                            //       "Connector",
+                            //   style: const TextStyle(
+                            //       fontWeight: FontWeight.w600, fontSize: 13),
+                            // ),
                             const SizedBox(height: 2),
                             Text(
                               "₹ ${charger.chargerTariff}/kW",
@@ -1254,10 +1260,14 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
           child: Container(
-            padding: const EdgeInsets.all(12),
+          
             decoration: BoxDecoration(
               color: CommonColors.white,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+      color: CommonColors.blue, // 👈 your border color
+      width: 2,         // 👈 thickness
+    ),
               boxShadow: const [
                 BoxShadow(
                   color: Colors.black12,
@@ -1269,57 +1279,80 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  capitalizeWords(station.chargePointName ?? "Station"),
-                  style: const TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w600),
+                Container(
+                  width: SizeConfig.blockSizeHorizontal *100,
+                   decoration: BoxDecoration(
+                     borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)),
+              color: CommonColors.blue,
+             
+            ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12,top: 8,bottom: 8),
+                    child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          capitalizeWords(station.chargePointName ?? "Station"),
+                          style: const TextStyle(color: CommonColors.white,
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                                    Text(
+                    "${station.availableChargers}/${station.totalChargers} Chargers Available",
+                    style: const TextStyle(
+                        fontSize: 12, color: CommonColors.white),
+                                    ),
+                                    const SizedBox(height: 12),
+                      ],
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  "${station.availableChargers}/${station.totalChargers} Chargers Available",
-                  style: const TextStyle(
-                      fontSize: 12, color: CommonColors.neutral500),
-                ),
-                const SizedBox(height: 12),
-                _stationTabs(
-                  stationId: station.recId!,
-                  onChanged: (index) {
-                    setState(() {
-                      _stationTabIndex[station.recId!] = index;
-                    });
-                  },
+                
+                Padding(
+                 padding: const EdgeInsets.only(left: 12,right: 12),
+                  child: _stationTabs(
+                    stationId: station.recId!,
+                    onChanged: (index) {
+                      setState(() {
+                        _stationTabIndex[station.recId!] = index;
+                      });
+                    },
+                  ),
                 ),
                 const SizedBox(height: 12),
                 if (selectedTab == 0)
-                  Column(
-                    children: chargers.map((charger) {
-                      final isAvailable = charger.lastStatus == "Available";
-
-                      final isSelected = _selectedCharger?.connectorId ==
-                              charger.connectorId &&
-                          selectedStationID == station.recId;
-
-                      return _chargerCard(
-                        charger: charger,
-                        isSelected: isSelected,
-                        isAvailable: isAvailable,
-                        onTap: () {
-                          setState(() {
-                            print("is Availabe ${isAvailable}");
-                            //  showToast("Last Availabe Status${isAvailable}");
-                            try {
-                              _selectedCharger = charger;
-                              selectedStationID = station.recId;
-                              FocusScope.of(context).unfocus();
-                              showToast(_selectedCharger!.connectorName!);
-                            } catch (e) {
-                              FocusScope.of(context).unfocus();
-                              showToast(e.toString());
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12,right: 12),
+                    child: Column(
+                      children: chargers.map((charger) {
+                        final isAvailable = charger.lastStatus == "Available";
+                    
+                        final isSelected = _selectedCharger?.connectorId ==
+                                charger.connectorId &&
+                            selectedStationID == station.recId;
+                    
+                        return _chargerCard(
+                          charger: charger,
+                          isSelected: isSelected,
+                          isAvailable: isAvailable,
+                          onTap: () {
+                            setState(() {
+                              print("is Availabe ${isAvailable}");
+                              //  showToast("Last Availabe Status${isAvailable}");
+                              try {
+                                _selectedCharger = charger;
+                                selectedStationID = station.recId;
+                                FocusScope.of(context).unfocus();
+                                showToast(_selectedCharger!.connectorName!);
+                              } catch (e) {
+                                FocusScope.of(context).unfocus();
+                                showToast(e.toString());
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ),
                 if (selectedTab == 1)
                   _stationReviews(station.recId!, station.chargePointName!,
@@ -1373,6 +1406,7 @@ if (confirmed == true) {
                         child: ChargingEstimateScreen(
                           selectedCharger: _selectedCharger,
                           selectedStationID: selectedStationID,
+                   
                         ),
                       ),
                     ),

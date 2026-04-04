@@ -10,9 +10,11 @@ import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
+import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
@@ -26,12 +28,16 @@ class ChargingEstimateScreen extends StatefulWidget {
   String? selectedStationID;
   final String? isAPPLINK;
   final String? chargerID;
+  final String? selectedStationName;
+ final  String? station;
+  final String? chargingConnector;
   ChargingEstimateScreen(
       {super.key,
       this.selectedCharger,
       this.selectedStationID,
       this.isAPPLINK = "0",
-      this.chargerID});
+      this.chargerID,
+      this.chargingConnector,this.selectedStationName,this.station});
 
   @override
   State<ChargingEstimateScreen> createState() => _ChargingEstimateScreenState();
@@ -40,14 +46,30 @@ class ChargingEstimateScreen extends StatefulWidget {
 class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
   double currentWalletPrice = 0.0;
   String? selectedStationID;
+ 
   Charger? _selectedCharger;
   String? _selectedStationID;
+    String? selectedStationName;
   
+  String? chargingConnector;
   @override
   void initState() {
     super.initState();
+    
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+    final estimateProvider = context.read<ChargingEstimateProvider>();
+
+    /// ✅ RESET EVERYTHING
+    estimateProvider.controller.clear();
+    estimateProvider.resetValues(); // 👈 create this (below)
+  });
+
     _selectedCharger = widget.selectedCharger;
+
     _selectedStationID = widget.selectedStationID;
+
+    selectedStationName= widget.selectedCharger?.chargePointName ??"";
+    chargingConnector= widget.selectedCharger?.connectorName ?? "";
     // print("CHSGE");
     // print(_selectedCharger!.recId!);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -57,21 +79,30 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
     provider.fetchWallet(context);
   }
 });
-//  if (widget.isAPPLINK == "1") {
-//       getChagerDetails(widget.chargerID!);
-//     }
-    // if (widget.isAPPLINK == "1") {
-    //   getChagerDetails(widget.chargerID!);
-    // }
+
+  
     if (widget.isAPPLINK == "1" && widget.chargerID != null) {
+      
   getChagerDetails(widget.chargerID!);
    MyApp.pendingChargerId = null;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+    gunPOPUP(); // ✅ SAFE
+  });
+   
 } else {
   //  rToast("chargerID is NULL");
   debugPrint("❌ chargerID is NULL");
 }
   }
-
+gunPOPUP()
+async {
+  print("gunPOPUP");
+ await gunConnectorDialog(
+  context,
+  message: "Plug the charging connector into your vehicle to begin charging.",
+);
+}
   getChagerDetails(String chargerID) async {
     final provider =
         Provider.of<ChargerDetailsProvider>(context, listen: false);
@@ -81,9 +112,15 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
       chargerID,
     );
     _selectedCharger = response!.charger;
-    _selectedStationID = response!.charger!.chargingStationId;
-    print(response?.charger?.chargerTypeName);
-    widget.selectedCharger = response!.charger;
+    _selectedStationID = response.charger!.chargingStationId;
+     selectedStationName=response.charger?.chargePointName ?? "";
+    chargingConnector= response.charger?.connectorName ?? "";
+    // print(response.charger?.chargerTypeName);
+    widget.selectedCharger = response.charger;
+
+
+
+
   }
 
   @override
@@ -341,9 +378,36 @@ print("Selected Tab Index: $tabIndex");
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 👇 TabBar moved OUT of AppBar
+                Container(
+                  width: SizeConfig.blockSizeHorizontal *100,
+                   decoration: BoxDecoration(
+              color: CommonColors.blue,
+             
+            ),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12,top: 8,bottom: 1),
+                    child: Column(
+                       crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          capitalizeWords( "${selectedStationName}"),
+                          style: const TextStyle(color: CommonColors.white,
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 4),
+                                    Text(
+                    "Connector ${chargingConnector}",
+                    style: const TextStyle(
+                        fontSize: 12, color: CommonColors.white),
+                                    ),
+                                    const SizedBox(height: 12),
+                      ],
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16),
-                child: Text("Select Charging Type",
+                child: Text("Select Charging Method",
                     style: const TextStyle(
                         fontSize: 14, fontWeight: FontWeight.w600)),
               ),
@@ -485,80 +549,84 @@ class _TabViews extends StatelessWidget {
   Widget build(BuildContext context) {
     return TabBarView(
       children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _AmountTab(
-              selectedCharger: selectedCharger,
-              selectedStationID: selectedStationID,
-            ),
-            textInfo(),
-            const SizedBox(height: 8),
-            // _EstimateCard("Time", "Unit", "Percentage", "-", "-", "0 %"),
-            Consumer<ChargingEstimateProvider>(
-              builder: (_, p, __) {
-                return _EstimateCard(
-                  "Time",
-                  "Unit",
-                  "Percentage",
-                  "${(p.time ?? 0).round()} min",
-                  // "${p.time.toStringAsFixed(2)} min",
-                  "${p.units.toStringAsFixed(2)}",
-                  "${p.percentage} %",
-                );
-              },
-            ),
-          ],
+        SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _AmountTab(
+                selectedCharger: selectedCharger,
+                selectedStationID: selectedStationID,
+              ),
+              textInfo(),
+              const SizedBox(height: 8),
+              // _EstimateCard("Time", "Unit", "Percentage", "-", "-", "0 %"),
+              Consumer<ChargingEstimateProvider>(
+                builder: (_, p, __) {
+                  return _EstimateCard(
+                    "Time",
+                    "Unit",
+                    "Percentage",
+                    "${(p.time ?? 0).round()} min",
+                    // "${p.time.toStringAsFixed(2)} min",
+                    "${p.units.toStringAsFixed(2)}",
+                    "${p.percentage} %",
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sliderTab(
-              label: "Select Units (kWh)",
-              min: 1,
-              max: 40,
-              onChanged: (v) {
-                final provider = context.read<ChargingEstimateProvider>();
-                provider.isDragging = true;
-                provider.activeMode = "units";
-                provider.setUnits(v);
-              },
-              onChangeEnd: (v) {
-                final provider = context.read<ChargingEstimateProvider>();
-                provider.isDragging = false;
-                provider.activeMode = "units";
-
-                provider.estimateCharging(
-                  context: context,
-                  chargingGunId: selectedCharger!.recId.toString(),
-                  chargingStationId: selectedStationID!,
-                  connectorId: selectedCharger!.connectorId.toString(),
-                  desiredEnergy: v,
-                );
-              },
-              valueSelector: (p) => p.units,
-            ),
-
-            textInfo(),
-            const SizedBox(height: 2),
-            // _EstimateCard(
-            //     "Time", "Percentage", "Amount", "-", "0 %", "₹ 0"),
-            Consumer<ChargingEstimateProvider>(
-              builder: (_, p, __) {
-                return _EstimateCard(
-                  "Time",
-                  "Percentage",
-                  "Amount",
-                  "${(p.time ?? 0).round()} min",
-                  // "${p.time.toStringAsFixed(2)} min",
-                  "${p.percentage} %",
-                  "₹ ${p.amount.round()}",
-                );
-              },
-            ),
-          ],
+        SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _sliderTab(
+                label: "Select Units (kWh)",
+                min: 1,
+                max: 40,
+                onChanged: (v) {
+                  final provider = context.read<ChargingEstimateProvider>();
+                  provider.isDragging = true;
+                  provider.activeMode = "units";
+                  provider.setUnits(v);
+                },
+                onChangeEnd: (v) {
+                  final provider = context.read<ChargingEstimateProvider>();
+                  provider.isDragging = false;
+                  provider.activeMode = "units";
+          
+                  provider.estimateCharging(
+                    context: context,
+                    chargingGunId: selectedCharger!.recId.toString(),
+                    chargingStationId: selectedStationID!,
+                    connectorId: selectedCharger!.connectorId.toString(),
+                    desiredEnergy: v,
+                  );
+                },
+                valueSelector: (p) => p.units,
+              ),
+          
+              textInfo(),
+              const SizedBox(height: 2),
+              // _EstimateCard(
+              //     "Time", "Percentage", "Amount", "-", "0 %", "₹ 0"),
+              Consumer<ChargingEstimateProvider>(
+                builder: (_, p, __) {
+                  return _EstimateCard(
+                    "Time",
+                    "Percentage",
+                    "Amount",
+                    "${(p.time ?? 0).round()} min",
+                    // "${p.time.toStringAsFixed(2)} min",
+                    "${p.percentage} %",
+                    "₹ ${p.amount.round()}",
+                  );
+                },
+              ),
+            ],
+          ),
         ),
         SingleChildScrollView(
           child: Column(
@@ -799,6 +867,7 @@ if (provider.activeMode != "time" &&
     // color: CraftColors.neutral20Color,
     width: 1.0,
   );
+  
 Widget _sliderTab({
   required String label,
   required double min,
@@ -1046,7 +1115,7 @@ class _AmountTabState extends State<_AmountTab> {
           SizedBox(
             height: 10,
           ),
-          Text("How much amount do you wamt to charge for (Excl of Taxes)",
+          Text("How much amount do you want to charge for ?\n(Excl. of Taxes)",
               style:
                   const TextStyle(fontSize: 12, fontWeight: FontWeight.w400)),
           CustomTextFieldWidget(

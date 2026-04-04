@@ -1,5 +1,6 @@
 import 'package:HyCharge/Provider/ChargingProvider.dart';
 import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';
+import 'package:HyCharge/Screens/ChargingHistoryScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/LocationConvert.dart';
@@ -221,6 +222,11 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
         Vibration.vibrate(duration: 800);
       }
 showToast("Charging session completed");
+   Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                              builder: (context) => ChargingHistoryScreen()),
+                        );
      
     }
 
@@ -389,7 +395,11 @@ showToast("Charging session completed");
                               Vibration.vibrate(pattern: [0, 500, 200, 500]);
                             }
 showToast("charging session stopped");
-                           
+                            Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                              builder: (context) => ChargingHistoryScreen()),
+                        );
                             status = response!.data!.session!.status;
 
                             cost = response.data!.cost!.toString();
