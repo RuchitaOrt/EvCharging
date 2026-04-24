@@ -8,7 +8,10 @@ import 'package:HyCharge/Screens/Map/ActiveSessionCardWidget.dart';
 import 'package:HyCharge/Screens/SearchBarWidget.dart';
 import 'package:HyCharge/Screens/auth/login_bottom_sheet.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/enum/enum.dart';
 import 'package:HyCharge/main.dart';
+import 'package:HyCharge/widget/FilterBottomSheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -27,7 +30,7 @@ class _MapScreenState extends State<MapScreen> {
   late MapController controller;
   String? mapsStyle;
   bool isLoggedIn = false;
-
+Set<ChargerFilterType> selectedFilters = {};
   @override
   void initState() {
     super.initState();
@@ -125,11 +128,77 @@ class _MapScreenState extends State<MapScreen> {
 
               /// Search
               Positioned(
-                top: 20,
-                left: 20,
-                right: 20,
-                child: SearchBarWidget(onSearch: _onSearchHub),
-              ),
+  top: 20,
+  left: 20,
+  right: 20,
+  child: Row(
+    children: [
+      /// 🔍 SEARCH BAR (takes full remaining width)
+      Expanded(
+        child: SearchBarWidget(
+          onSearch: _onSearchHub,
+        ),
+      ),
+
+      // const SizedBox(width: 10),
+
+      /// 🔽 FILTER ICON
+//       GestureDetector(
+//        onTap: () async {
+//   final result = await showModalBottomSheet<Set<ChargerFilterType>>(
+//     context: context,
+//     isScrollControlled: true,
+//     backgroundColor: Colors.white,
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+//     ),
+//     builder: (_) => FilterBottomSheet(selectedFilters: selectedFilters),
+//   );
+
+//   if (result != null) {
+//     setState(() {
+//       selectedFilters = result;
+//     });
+
+//     applyFilters(); // 🔥 IMPORTANT
+//   }
+// },
+//         child:
+//        Stack(
+//   children: [
+//      Image.asset(
+//         CommonImagePath.filter,
+//         height: 40,
+//         width: 40,
+       
+//       ),
+//     /// 🔴 ACTIVE DOT
+//     if (selectedFilters.isNotEmpty)
+//       Positioned(
+//         right: 4,
+//         top: 4,
+//         child: Container(
+//           height: 8,
+//           width: 8,
+//           decoration: BoxDecoration(
+//             color: Colors.red,
+//             shape: BoxShape.circle,
+//           ),
+//         ),
+//       ),
+//   ],
+// )
+//       ),
+    ],
+  ),
+),
+              // Positioned(
+              //   top: 20,
+              //   left: 20,
+              //   right: 20,
+              //   child: 
+              //   SearchBarWidget(onSearch: _onSearchHub),
+              // ),
 
               /// GPS Button
               Positioned(
@@ -137,6 +206,11 @@ class _MapScreenState extends State<MapScreen> {
                 right: 20,
                 child: _gpsButton(),
               ),
+  // Positioned(
+  //               bottom: 200,
+  //               right: 20,
+  //               child: _gpsButton(),
+  //             ),
 
               /// Route loading
               if (hubProvider.isRouteLoading)
@@ -208,4 +282,30 @@ class _MapScreenState extends State<MapScreen> {
   void _onSearchHub(String value) {
     context.read<HubProvider>().searchAndFocusHub(value);
   }
+  void applyFilters() {
+  // if (selectedFilters.isEmpty) {
+  //   filteredList = originalList;
+  // } else {
+  //   filteredList = originalList.where((station) {
+  //     return selectedFilters.any((filter) {
+  //       switch (filter) {
+  //         case ChargerFilterType.ac:
+  //           return station.type == "AC";
+  //         case ChargerFilterType.dc:
+  //           return station.type == "DC";
+  //         case ChargerFilterType.car:
+  //           return station.vehicle == "Car";
+  //         case ChargerFilterType.bike:
+  //           return station.vehicle == "Bike";
+  //         case ChargerFilterType.both:
+  //           return station.vehicle == "Both";
+  //         case ChargerFilterType.fast:
+  //           return station.isFast == true;
+  //       }
+  //     });
+  //   }).toList();
+  // }
+
+  setState(() {});
+}
 }

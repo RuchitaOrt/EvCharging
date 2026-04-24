@@ -4,6 +4,7 @@ import 'package:HyCharge/Screens/Controller/map_controller.dart';
 import 'package:HyCharge/Screens/MapOverviewScreen.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/googleMap.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
@@ -111,7 +112,30 @@ class _StationCardState extends State<_StationCard> {
     _fetchCurrentLocation();
   }
    Widget _filter24hourChip() {
-    return Container(
+    return widget.chargingHub!.recId==CommonStrings.strDummyRecID?
+     Container(
+      
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+      decoration: BoxDecoration(
+         color: CommonColors.red.withOpacity(0.15),
+        border: Border.all(
+          color: CommonColors.brownRed.withOpacity(0.15), // choose your color here
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Restricted",
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400,color: CommonColors.brownRed),
+          ),
+        ],
+      ),
+     )
+    :
+     Container(
       
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       decoration: BoxDecoration(
@@ -275,7 +299,9 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                     child: Wrap(
                       spacing: 16,
                       runSpacing: 6,
-                      children: [
+                      children:
+                       widget.chargingHub!.recId==CommonStrings.strDummyRecID?
+                       [ _TypeInfo(type: 'AC Station', price:typeAPrice)]: [
                         _TypeInfo(type: 'Station 1', price: typeAPrice),
                         _TypeInfo(type: 'Station 2', price: typeBPrice),
                       ],

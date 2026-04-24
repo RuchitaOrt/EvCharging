@@ -21,3 +21,13 @@ extension WalletFilterTypeExtension on WalletFilterType {
     }
   }
 }
+
+
+enum ChargerFilterType {
+  ac,
+  dc,
+  car,
+  bike,
+  both,
+  fast,
+}

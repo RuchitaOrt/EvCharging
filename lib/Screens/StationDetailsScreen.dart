@@ -21,6 +21,7 @@ import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/ValidationHelper.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
@@ -60,7 +61,7 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   GoogleMapController? mapController;
 
   Set<Marker> markers = {};
-
+Map<String, bool> stationExpansionState = {};
   Charger? _selectedCharger;
   String? selectedStationID;
   Position? _currentPosition;
@@ -126,19 +127,10 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
   void initState() {
     super.initState();
     print("Current BALNCE");
-    // Force status bar visible
-    // ✅ Force status bar visible
-// Force status bar visible
-    // SystemChrome.setEnabledSystemUIMode(
-    //   SystemUiMode.edgeToEdge, // ensures system overlays are visible
-    // );
-
-    // // Set status bar color & icon brightness
-    // SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    //   statusBarColor: Colors.white,           // white background
-    //   statusBarIconBrightness: Brightness.dark, // dark icons for Android
-    //   statusBarBrightness: Brightness.light,    // dark icons for iOS
-    // ));
+    
+     for (var station in widget.hub.stations ?? []) {
+    stationExpansionState.putIfAbsent(station.recId!, () => false);
+  }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getUserInfo();
@@ -810,25 +802,28 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                                 stationId: widget.hub.recId!, // fallback
                               );
                             },
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "${totalReviews} Reviews",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: CommonColors.blue,
-                                    fontWeight: FontWeight.w400,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 2),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                totalReviews==0 ?"Reviews":    "${totalReviews} Reviews",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: CommonColors.blue,
+                                      fontWeight: FontWeight.w400,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(
-                                    height: 2), // 👈 SPACE between text & line
-                                Container(
-                                  width: 40,
-                                  height: 1.5,
-                                  color: CommonColors.blue,
-                                ),
-                              ],
+                                  const SizedBox(
+                                      height: 2), // 👈 SPACE between text & line
+                                  Container(
+                                    width: 40,
+                                    height: 1.5,
+                                    color: CommonColors.blue,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -1251,65 +1246,104 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
 //           word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
 //       .join(' ');
 // }
-  Widget _stationsList(List<ChargingStation> stations) {
-    return Column(
-      children: stations.map((station) {
-        final chargers = station.chargers ?? [];
-        final selectedTab = _stationTabIndex[station.recId] ?? 0;
+Widget _stationsList(List<ChargingStation> stations) {
+  return Column(
+    children: stations.map((station) {
+      final chargers = station.chargers ?? [];
+      final selectedTab = _stationTabIndex[station.recId] ?? 0;
+      final isExpanded = stationExpansionState[station.recId] ?? false;
 
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-          
-            decoration: BoxDecoration(
-              color: CommonColors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-      color: CommonColors.blue, // 👈 your border color
-      width: 2,         // 👈 thickness
-    ),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, 2),
-                )
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: SizeConfig.blockSizeHorizontal *100,
-                   decoration: BoxDecoration(
-                     borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)),
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: CommonColors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
               color: CommonColors.blue,
-             
+              width: 2,
             ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 12,top: 8,bottom: 8),
-                    child: Column(
-                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          capitalizeWords(station.chargePointName ?? "Station"),
-                          style: const TextStyle(color: CommonColors.white,
-                              fontSize: 15, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 4),
-                                    Text(
-                    "${station.availableChargers}/${station.totalChargers} Chargers Available",
-                    style: const TextStyle(
-                        fontSize: 12, color: CommonColors.white),
-                                    ),
-                                    const SizedBox(height: 12),
-                      ],
+          ),
+          child: Column(
+            children: [
+              /// 🔹 HEADER (CLICKABLE)
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    /// close others (optional)
+                    stationExpansionState.forEach((key, value) {
+                      stationExpansionState[key] = false;
+                    });
+
+                    /// toggle current
+                    stationExpansionState[station.recId!] = !isExpanded;
+                  });
+                },
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: CommonColors.blue,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10),
                     ),
                   ),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            
+                            Row(
+                              children: [
+                                 station.recId==CommonStrings.strDummyBikeRecId?Row(
+                                   children: [
+                                     Icon(Icons.pedal_bike,color: CommonColors.cardWhite,),
+                                     SizedBox(width: 8,)
+                                   ],
+                                 ):Container(),
+                                Text(
+                                  capitalizeWords(
+                                      station.chargePointName ?? "Station"),
+                                  style: const TextStyle(
+                                      color: CommonColors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "${station.availableChargers}/${station.totalChargers} Chargers Available",
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  color: CommonColors.white),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      /// 🔹 ARROW
+                      Icon(
+                        isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                        color: CommonColors.white,
+                      )
+                    ],
+                  ),
                 ),
-                
+              ),
+
+              /// 🔹 EXPANDABLE CONTENT
+              if (isExpanded) ...[
+                const SizedBox(height: 12),
+
                 Padding(
-                 padding: const EdgeInsets.only(left: 12,right: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: _stationTabs(
                     stationId: station.recId!,
                     onChanged: (index) {
@@ -1319,52 +1353,169 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
                     },
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
                 if (selectedTab == 0)
                   Padding(
-                    padding: const EdgeInsets.only(left: 12,right: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Column(
                       children: chargers.map((charger) {
-                        final isAvailable = charger.lastStatus == "Available";
-                    
-                        final isSelected = _selectedCharger?.connectorId ==
-                                charger.connectorId &&
-                            selectedStationID == station.recId;
-                    
+                        final isAvailable =
+                            charger.lastStatus == "Available";
+
+                        final isSelected =
+                            _selectedCharger?.connectorId ==
+                                    charger.connectorId &&
+                                selectedStationID == station.recId;
+
                         return _chargerCard(
                           charger: charger,
                           isSelected: isSelected,
                           isAvailable: isAvailable,
                           onTap: () {
                             setState(() {
-                              print("is Availabe ${isAvailable}");
-                              //  showToast("Last Availabe Status${isAvailable}");
-                              try {
-                                _selectedCharger = charger;
-                                selectedStationID = station.recId;
-                                FocusScope.of(context).unfocus();
-                                showToast(_selectedCharger!.connectorName!);
-                              } catch (e) {
-                                FocusScope.of(context).unfocus();
-                                showToast(e.toString());
-                              }
+                              _selectedCharger = charger;
+                              selectedStationID = station.recId;
+                              showToast(
+                                  _selectedCharger!.connectorName!);
                             });
                           },
                         );
                       }).toList(),
                     ),
                   ),
+
                 if (selectedTab == 1)
-                  _stationReviews(station.recId!, station.chargePointName!,
-                      widget.hub.recId),
+                  _stationReviews(
+                    station.recId!,
+                    station.chargePointName!,
+                    widget.hub.recId,
+                  ),
+
                 const SizedBox(height: 12),
               ],
-            ),
+            ],
           ),
-        );
-      }).toList(),
-    );
-  }
+        ),
+      );
+    }).toList(),
+  );
+}
+  // Widget _stationsList(List<ChargingStation> stations) {
+  //   return Column(
+  //     children: stations.map((station) {
+  //       final chargers = station.chargers ?? [];
+  //       final selectedTab = _stationTabIndex[station.recId] ?? 0;
+
+  //       return Padding(
+  //         padding: const EdgeInsets.only(bottom: 12),
+  //         child: Container(
+          
+  //           decoration: BoxDecoration(
+  //             color: CommonColors.white,
+  //             borderRadius: BorderRadius.circular(12),
+  //             border: Border.all(
+  //     color: CommonColors.blue, // 👈 your border color
+  //     width: 2,         // 👈 thickness
+  //   ),
+  //             boxShadow: const [
+  //               BoxShadow(
+  //                 color: Colors.black12,
+  //                 blurRadius: 6,
+  //                 offset: Offset(0, 2),
+  //               )
+  //             ],
+  //           ),
+  //           child: Column(
+  //             crossAxisAlignment: CrossAxisAlignment.start,
+  //             children: [
+  //               Container(
+  //                 width: SizeConfig.blockSizeHorizontal *100,
+  //                  decoration: BoxDecoration(
+  //                    borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)),
+  //             color: CommonColors.blue,
+             
+  //           ),
+  //                 child: Padding(
+  //                   padding: const EdgeInsets.only(left: 12,top: 8,bottom: 8),
+  //                   child: Column(
+  //                      crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       Text(
+  //                         capitalizeWords(station.chargePointName ?? "Station"),
+  //                         style: const TextStyle(color: CommonColors.white,
+  //                             fontSize: 15, fontWeight: FontWeight.w600),
+  //                       ),
+  //                       const SizedBox(height: 4),
+  //                                   Text(
+  //                   "${station.availableChargers}/${station.totalChargers} Chargers Available",
+  //                   style: const TextStyle(
+  //                       fontSize: 12, color: CommonColors.white),
+  //                                   ),
+  //                                   const SizedBox(height: 12),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               ),
+                
+  //               Padding(
+  //                padding: const EdgeInsets.only(left: 12,right: 12),
+  //                 child: _stationTabs(
+  //                   stationId: station.recId!,
+  //                   onChanged: (index) {
+  //                     setState(() {
+  //                       _stationTabIndex[station.recId!] = index;
+  //                     });
+  //                   },
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 12),
+  //               if (selectedTab == 0)
+  //                 Padding(
+  //                   padding: const EdgeInsets.only(left: 12,right: 12),
+  //                   child: Column(
+  //                     children: chargers.map((charger) {
+  //                       final isAvailable = charger.lastStatus == "Available";
+                    
+  //                       final isSelected = _selectedCharger?.connectorId ==
+  //                               charger.connectorId &&
+  //                           selectedStationID == station.recId;
+                    
+  //                       return _chargerCard(
+  //                         charger: charger,
+  //                         isSelected: isSelected,
+  //                         isAvailable: isAvailable,
+  //                         onTap: () {
+  //                           setState(() {
+  //                             print("is Availabe ${isAvailable}");
+  //                             //  showToast("Last Availabe Status${isAvailable}");
+  //                             try {
+  //                               _selectedCharger = charger;
+  //                               selectedStationID = station.recId;
+  //                               FocusScope.of(context).unfocus();
+  //                               showToast(_selectedCharger!.connectorName!);
+  //                             } catch (e) {
+  //                               FocusScope.of(context).unfocus();
+  //                               showToast(e.toString());
+  //                             }
+  //                           });
+  //                         },
+  //                       );
+  //                     }).toList(),
+  //                   ),
+  //                 ),
+  //               if (selectedTab == 1)
+  //                 _stationReviews(station.recId!, station.chargePointName!,
+  //                     widget.hub.recId),
+  //               const SizedBox(height: 12),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     }).toList(),
+  //   );
+  // }
 
   Widget _navigateButton() {
     final provider = context.watch<ChargingGunStatusProvider>();
@@ -1412,20 +1563,6 @@ if (confirmed == true) {
                     ),
                   );
 }
-                  // gunConnectorDialog(context,message: "Please connect gun to the vehicle");
-                  // _statusTimer?.cancel();
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (_) => ChangeNotifierProvider(
-                  //       create: (_) => ChargingEstimateProvider(),
-                  //       child: ChargingEstimateScreen(
-                  //         selectedCharger: _selectedCharger,
-                  //         selectedStationID: selectedStationID,
-                  //       ),
-                  //     ),
-                  //   ),
-                  // );
                 } else {
                   FocusScope.of(context).unfocus();
                   showToast(
@@ -1534,7 +1671,29 @@ if (confirmed == true) {
   }
 
   Widget _filter24hourChip() {
-    return Container(
+    return   widget.hub.recId==CommonStrings.strDummyRecID?
+     Container(
+      
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+         color: CommonColors.red.withOpacity(0.15),
+        border: Border.all(
+          color: CommonColors.brownRed.withOpacity(0.15), // choose your color here
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Restricted",
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400,color: CommonColors.brownRed),
+          ),
+        ],
+      ),
+     )
+    :Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: CommonColors.darkgreen.withOpacity(0.15),
@@ -1810,19 +1969,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
               Text("$totalImages / 4"),
             ],
           ),
-          // Row(
-          //   children: [
-          //     ElevatedButton.icon(
-
-          //       onPressed: _pickImages,
-          //       icon: const Icon(Icons.image, size: 18),
-          //       label:  Text("Add Images",style: TextStyle(color: CommonColors.blue),),
-          //     ),
-          //     const SizedBox(width: 10),
-          //     Text("$totalImages / 4"),
-          //   ],
-          // ),
-
+         
           const SizedBox(height: 10),
 
           /// Preview (existing + new)
@@ -1925,336 +2072,6 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
     );
   }
 }
-// class _WriteReviewSheet extends StatefulWidget {
-//   final String hubId;
-//   final String stationId;
-//   final String stationName;
-
-//   const _WriteReviewSheet({
-//     required this.stationId,
-//     required this.stationName, required this.hubId,
-//   });
-
-//   @override
-//   State<_WriteReviewSheet> createState() => _WriteReviewSheetState();
-// }
-// class _WriteReviewSheet extends StatefulWidget {
-//   final String hubId;
-//   final String stationId;
-//   final String stationName;
-//   final bool isEdit;
-
-//   /// 👇 optional for edit
-//   final int? initialRating;
-//   final String? initialDescription;
-//   final String? recId;
-
-//   const _WriteReviewSheet(
-//       {Key? key,
-//       required this.hubId,
-//       required this.stationId,
-//       required this.stationName,
-//       this.initialRating,
-//       this.initialDescription,
-//       required this.isEdit,
-//       this.recId})
-//       : super(key: key);
-
-//   @override
-//   State<_WriteReviewSheet> createState() => _WriteReviewSheetState();
-// }
-
-// class _WriteReviewSheetState extends State<_WriteReviewSheet> {
-//   int rating = 0;
-//   TextEditingController reviewCtrl = TextEditingController();
-//   final ImagePicker _picker = ImagePicker();
-// Future<void> _pickImages() async {
-//   if (selectedImages.length >= 4) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text("Maximum 4 images allowed")),
-//     );
-//     return;
-//   }
-
-//   final List<XFile>? images = await _picker.pickMultiImage();
-
-//   if (images == null) return;
-
-//   final remainingSlots = 4 - selectedImages.length;
-
-//   final filesToAdd = images.take(remainingSlots).map((e) => File(e.path));
-
-//   setState(() {
-//     selectedImages.addAll(filesToAdd);
-//   });
-// }
-// Future<void> _uploadSelectedImages() async {
-//   uploadedImageIds.clear();
-
-//   final uploadProvider = context.read<UploadProvider>();
-
-//   for (File file in selectedImages) {
-//     final res = await uploadProvider.upload(file: file);
-
-//     if (res != null && res.success) {
-//       uploadedImageIds.add(res.fileId ?? "");
-//     }
-//   }
-// }
-// List<File> selectedImages = [];
-// List<String> uploadedImageIds = [];
-//   @override
-//   void initState() {
-//     super.initState();
-
-//     rating = widget.initialRating ?? 0;
-//     reviewCtrl = TextEditingController(
-//       text: widget.initialDescription ?? '',
-//     );
-//   }
-
-//   @override
-//   void dispose() {
-//     reviewCtrl.dispose();
-//     super.dispose();
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: EdgeInsets.only(
-//         left: 16,
-//         right: 16,
-//         top: 16,
-//         bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-//       ),
-//       child: Column(
-//         mainAxisSize: MainAxisSize.min,
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           // Title
-//           Text(
-//             widget.stationName,
-//             style: const TextStyle(
-//               fontSize: 18,
-//               fontWeight: FontWeight.w600,
-//             ),
-//           ),
-
-//           const SizedBox(height: 8),
-
-//           // ⭐ Rating
-//           Row(
-//             children: List.generate(5, (index) {
-//               final starIndex = index + 1;
-
-//               return IconButton(
-//                 padding: EdgeInsets.zero,
-//                 onPressed: () {
-//                   setState(() {
-//                     if (rating == starIndex) {
-//                       rating = starIndex - 1; // 👈 remove only this star
-//                     } else {
-//                       rating = starIndex;
-//                     }
-//                   });
-//                 },
-//                 icon: Icon(
-//                   index < rating ? Icons.star : Icons.star_border,
-//                   color: Colors.amber,
-//                   size: 28,
-//                 ),
-//               );
-//             }),
-//           ),
-
-//           // ✍️ Review Text
-//           CustomTextFieldWidget(
-//             isMandatory: false,
-//             title: "",
-//             hintText: "Share your experience",
-//             onChange: (val) {},
-//             textFieldLines: 4,
-//             textEditingController: reviewCtrl,
-//             autovalidateMode: AutovalidateMode.disabled,
-//           ),
-
-//           const SizedBox(height: 8),
-// const SizedBox(height: 12),
-
-// /// Add Image Button
-// Row(
-//   children: [
-//     ElevatedButton.icon(
-//       onPressed: _pickImages,
-//       icon: const Icon(Icons.image, size: 18),
-//       label: const Text("Add Images"),
-//       style: ElevatedButton.styleFrom(
-//         backgroundColor: Colors.grey.shade200,
-//         foregroundColor: Colors.black,
-//         elevation: 0,
-//       ),
-//     ),
-//     const SizedBox(width: 8),
-//     Text("${selectedImages.length}/4"),
-//   ],
-// ),
-
-// const SizedBox(height: 10),
-
-// /// Image Preview
-// if (selectedImages.isNotEmpty)
-//   SizedBox(
-//     height: 70,
-//     child: ListView.builder(
-//       scrollDirection: Axis.horizontal,
-//       itemCount: selectedImages.length,
-//       itemBuilder: (context, index) {
-//         return Stack(
-//           children: [
-//             Container(
-//               margin: const EdgeInsets.only(right: 8),
-//               width: 70,
-//               height: 70,
-//               decoration: BoxDecoration(
-//                 borderRadius: BorderRadius.circular(8),
-//                 image: DecorationImage(
-//                   image: FileImage(selectedImages[index]),
-//                   fit: BoxFit.cover,
-//                 ),
-//               ),
-//             ),
-
-//             /// Remove button
-//             Positioned(
-//               right: 4,
-//               top: 4,
-//               child: GestureDetector(
-//                 onTap: () {
-//                   setState(() {
-//                     selectedImages.removeAt(index);
-//                   });
-//                 },
-//                 child: const CircleAvatar(
-//                   radius: 10,
-//                   backgroundColor: Colors.black54,
-//                   child: Icon(Icons.close, size: 12, color: Colors.white),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         );
-//       },
-//     ),
-//   ),
-//           // Submit Button
-//           SizedBox(
-//             width: double.infinity,
-//             child: ElevatedButton(
-//               onPressed: () async {
-//   if (rating == 0 || reviewCtrl.text.trim().isEmpty) {
-//     ScaffoldMessenger.of(context).showSnackBar(
-//       const SnackBar(content: Text("Please add rating & review")),
-//     );
-//     return;
-//   }
-
-//   /// Upload images first
-//   await _uploadSelectedImages();
-
-//   String? img1 = uploadedImageIds.length > 0 ? uploadedImageIds[0] : null;
-//   String? img2 = uploadedImageIds.length > 1 ? uploadedImageIds[1] : null;
-//   String? img3 = uploadedImageIds.length > 2 ? uploadedImageIds[2] : null;
-//   String? img4 = uploadedImageIds.length > 3 ? uploadedImageIds[3] : null;
-
-//   if (widget.isEdit) {
-//     context.read<ChargingHubReviewProvider>().updateReview(
-//       context: context,
-//       chargingHubId: widget.hubId,
-//       chargingStationId: widget.stationId,
-//       rating: rating,
-//       description: reviewCtrl.text,
-//       recId: widget.recId!,
-//       reviewImage1: img1,
-//       reviewImage2: img2,
-//       reviewImage3: img3,
-//       reviewImage4: img4,
-//     );
-//   } else {
-//     context.read<ChargingHubReviewProvider>().addReview(
-//       context: context,
-//       chargingHubId: widget.hubId,
-//       chargingStationId: widget.stationId,
-//       rating: rating,
-//       description: reviewCtrl.text,
-//       reviewImage1: img1,
-//       reviewImage2: img2,
-//       reviewImage3: img3,
-//       reviewImage4: img4,
-//     );
-//   }
-
-//   Navigator.pop(context);
-// },
-//               // onPressed: () {
-//               //   if (rating == 0 || reviewCtrl.text.trim().isEmpty) {
-//               //     ScaffoldMessenger.of(context).showSnackBar(
-//               //       const SnackBar(
-//               //         content: Text("Please add rating & review"),
-//               //       ),
-//               //     );
-//               //     return;
-//               //   }
-
-//               //   if (widget.isEdit) {
-//               //     context.read<ChargingHubReviewProvider>().updateReview(
-//               //         context: context,
-//               //         chargingHubId: widget.hubId,
-//               //         chargingStationId: widget.stationId,
-//               //         rating: rating,
-//               //         description: reviewCtrl.text,
-//               //         recId: widget.recId!);
-//               //   } else {
-//               //     context.read<ChargingHubReviewProvider>().addReview(
-//               //           context: context,
-//               //           chargingHubId: widget.hubId,
-//               //           chargingStationId: widget.stationId,
-//               //           rating: rating,
-//               //           description: reviewCtrl.text,
-//               //         );
-//               //   }
-
-//               //   // 🔥 CALL API HERE
-//               //   // context.read<ChargingHubReviewProvider>()
-//               //   //   .submitReview(widget.stationId, rating, reviewCtrl.text);
-
-//               //   Navigator.pop(context);
-//               // },
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: CommonColors.blue,
-//                 foregroundColor: CommonColors.blue,
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(12),
-//                   side: BorderSide(
-//                     color: CommonColors.blue.withOpacity(0.4),
-//                     width: 0.8,
-//                   ),
-//                 ),
-//               ),
-//               child: const Text(
-//                 "Submit",
-//                 style: TextStyle(
-//                     fontSize: 12,
-//                     color: CommonColors.white,
-//                     fontWeight: FontWeight.w600),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 
 class MoreOptionsMenu extends StatelessWidget {
   final VoidCallback onEdit;

@@ -58,4 +58,7 @@ static const String strOldPasswordHint = "Enter your old password";
 
     static const String strOldPassword = "Old Password";
     static const String strNewPassword = "New Password";
+
+   static const String strDummyRecID =  "d2212615-12fa-4431-ab39-20a8db27d9f3"; //"11a3d81d-5c20-4dca-ab3a-a2a27c297104";
+ static const String strDummyBikeRecId =  "3a518c96-2f0e-40f7-9bee-61cfb832024e"; //"10de1620-3ce7-41c1-bb3d-748211f1942a";
 }

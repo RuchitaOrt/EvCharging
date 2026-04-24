@@ -8,6 +8,7 @@ import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/InternetConnection.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/googleMap.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
@@ -154,7 +155,54 @@ Future<void> _onScroll() async {
       ),
     );
   }
-
+  Widget _filter24hourChip(dynamic hub) {
+    return   hub.recId==CommonStrings.strDummyRecID?
+     Container(
+      
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+         color: CommonColors.red.withOpacity(0.15),
+        border: Border.all(
+          color: CommonColors.brownRed.withOpacity(0.15), // choose your color here
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "Restricted",
+            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w400,color: CommonColors.brownRed),
+          ),
+        ],
+      ),
+     )
+    :Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: CommonColors.darkgreen.withOpacity(0.15),
+        border: Border.all(
+          color: CommonColors.darkgreen
+              .withOpacity(0.15), // choose your color here
+          width: 1.5,
+        ),
+        borderRadius: BorderRadius.circular(24),
+       ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            "24 hrs Available",
+            style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w400,
+                color: CommonColors.darkgreen),
+          ),
+        ],
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -372,8 +420,13 @@ itemBuilder: (context, index) {
                                    hub.averageRating.toStringAsFixed(0) ?? 0.0
                                   ),
                               const SizedBox(width: 4),
-                              _infoTag(
-                                  CommonImagePath.clock, "$opening - $closing"),
+                              // _infoTag(
+                              //     CommonImagePath.clock, "$opening - $closing"),
+                              //      const SizedBox(width: 4),
+                              // Image.asset(  CommonImagePath.clock),
+                               const SizedBox(width: 2),
+                                   _filter24hourChip(hub)
+                                  
                             ],
                           ),
                         ],
