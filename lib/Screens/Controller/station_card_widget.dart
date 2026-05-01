@@ -56,11 +56,11 @@ class StationCardWidget extends StatelessWidget {
   final isSelected = value.currentVisibleIndex == index;
 
   return Padding(
-    padding: const EdgeInsets.only(left: 18),
+    padding: const EdgeInsets.only(left: 2),
     child: _StationCard(
       chargingHub: value.recordsStation[index],
       isSelected: isSelected,
-      cardWidth: screenWidth * 0.88,
+      cardWidth: screenWidth *0.87,
       nearbyHubs: value.recordsStation,
     ),
   );
