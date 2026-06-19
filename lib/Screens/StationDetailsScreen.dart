@@ -1671,7 +1671,7 @@ if (confirmed == true) {
   }
 
   Widget _filter24hourChip() {
-    return   widget.hub.recId==CommonStrings.strDummyRecID?
+    return   (widget.hub.recId==CommonStrings.strDummyRecID ||  widget.hub.recId ==CommonStrings.strDummyRecID1)?
      Container(
       
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),

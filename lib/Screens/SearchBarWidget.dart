@@ -14,10 +14,19 @@ class SearchBarWidget extends StatefulWidget {
   @override
   State<SearchBarWidget> createState() => _SearchBarWidgetState();
 }
-
 class _SearchBarWidgetState extends State<SearchBarWidget> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+
+    /// updates clear icon while typing
+    _controller.addListener(() {
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -44,38 +53,43 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
-              style:  TextStyle(color: Colors.white),
-              textInputAction: TextInputAction.search, // shows Search/Done
+              style: const TextStyle(color: Colors.white),
+              textInputAction: TextInputAction.search,
               cursorColor: Colors.white,
 
-              decoration:  InputDecoration(
-                
+              decoration: InputDecoration(
                 hintText: "Search nearby charging station",
-                hintStyle: TextStyle(color: CommonColors.background,fontSize: 13),
+                hintStyle: TextStyle(
+                  color: CommonColors.background,
+                  fontSize: 13,
+                ),
                 border: InputBorder.none,
-                
+
                 suffixIcon: _controller.text.isNotEmpty
-    ? IconButton(
-        icon: Icon(Icons.clear, color: Colors.white),
-        onPressed: () {
-           FocusManager.instance.primaryFocus?.unfocus();
-          _controller.clear();
-          setState(() {});
-        },
-      )
-    : null,
+                    ? IconButton(
+                        icon: const Icon(
+                          Icons.clear,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          FocusManager.instance.primaryFocus?.unfocus();
+
+                          _controller.clear();
+
+                          /// optional reset callback
+                          widget.onSearch?.call("");
+                        },
+                      )
+                    : null,
               ),
 
               onSubmitted: (value) {
                 if (value.trim().isEmpty) return;
 
-                // 🔍 Trigger search
                 widget.onSearch?.call(value.trim());
 
-                // Optional: close keyboard
                 _focusNode.unfocus();
               },
-              
             ),
           ),
         ],
@@ -83,6 +97,74 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     );
   }
 }
+// class _SearchBarWidgetState extends State<SearchBarWidget> {
+//   final TextEditingController _controller = TextEditingController();
+//   final FocusNode _focusNode = FocusNode();
+
+//   @override
+//   void dispose() {
+//     _controller.dispose();
+//     _focusNode.dispose();
+//     super.dispose();
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       height: 50,
+//       padding: const EdgeInsets.symmetric(horizontal: 16),
+//       decoration: BoxDecoration(
+//         color: Colors.black,
+//         borderRadius: BorderRadius.circular(12),
+//       ),
+//       child: Row(
+//         children: [
+//           const Icon(Icons.search, color: Colors.white),
+//           const SizedBox(width: 10),
+
+//           Expanded(
+//             child: TextField(
+//               controller: _controller,
+//               focusNode: _focusNode,
+//               style:  TextStyle(color: Colors.white),
+//               textInputAction: TextInputAction.search, // shows Search/Done
+//               cursorColor: Colors.white,
+
+//               decoration:  InputDecoration(
+                
+//                 hintText: "Search nearby charging station",
+//                 hintStyle: TextStyle(color: CommonColors.background,fontSize: 13),
+//                 border: InputBorder.none,
+                
+//                 suffixIcon: _controller.text.isNotEmpty
+//     ? IconButton(
+//         icon: Icon(Icons.clear, color: Colors.white),
+//         onPressed: () {
+//            FocusManager.instance.primaryFocus?.unfocus();
+//           _controller.clear();
+//           setState(() {});
+//         },
+//       )
+//     : null,
+//               ),
+
+//               onSubmitted: (value) {
+//                 if (value.trim().isEmpty) return;
+
+//                 // 🔍 Trigger search
+//                 widget.onSearch?.call(value.trim());
+
+//                 // Optional: close keyboard
+//                 _focusNode.unfocus();
+//               },
+              
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
 // class SearchBarWidget extends StatelessWidget {
 //   const SearchBarWidget({super.key});

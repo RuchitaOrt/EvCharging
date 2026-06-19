@@ -112,7 +112,7 @@ class _StationCardState extends State<_StationCard> {
     _fetchCurrentLocation();
   }
    Widget _filter24hourChip() {
-    return widget.chargingHub!.recId==CommonStrings.strDummyRecID?
+    return (widget.chargingHub!.recId==CommonStrings.strDummyRecID ||  widget.chargingHub!.recId ==CommonStrings.strDummyRecID1)?
      Container(
       
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
@@ -300,7 +300,8 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                       spacing: 16,
                       runSpacing: 6,
                       children:
-                       widget.chargingHub!.recId==CommonStrings.strDummyRecID?
+                    (   widget.chargingHub!.recId==CommonStrings.strDummyRecID||  widget.chargingHub!.recId ==CommonStrings.strDummyRecID1)
+                    ?
                        [ _TypeInfo(type: 'AC Station', price:typeAPrice)]: [
                         _TypeInfo(type: 'Station 1', price: typeAPrice),
                         _TypeInfo(type: 'Station 2', price: typeBPrice),

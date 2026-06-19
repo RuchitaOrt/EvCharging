@@ -503,11 +503,11 @@ Future<bool?> unlockSessionDialog(BuildContext context,
 //     },
 //   );
 // }
-   void showToast(String message) {
+   void showToast(String message,{ToastGravity gravity=ToastGravity.BOTTOM}) {
     Fluttertoast.showToast(
     msg: message,
     toastLength: Toast.LENGTH_LONG,
-    gravity: ToastGravity.BOTTOM,
+    gravity:gravity?? ToastGravity.BOTTOM,
     backgroundColor: Colors.black.withOpacity(0.7),
     textColor: Colors.white,
     fontSize: 12.0,

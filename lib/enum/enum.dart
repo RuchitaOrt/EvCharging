@@ -31,3 +31,9 @@ enum ChargerFilterType {
   both,
   fast,
 }
+
+enum SearchHubResult {
+  found,
+  notFound,
+  sameLocation,
+}

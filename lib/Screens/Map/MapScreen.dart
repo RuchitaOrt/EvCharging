@@ -8,12 +8,15 @@ import 'package:HyCharge/Screens/Map/ActiveSessionCardWidget.dart';
 import 'package:HyCharge/Screens/SearchBarWidget.dart';
 import 'package:HyCharge/Screens/auth/login_bottom_sheet.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
+import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/enum/enum.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/widget/FilterBottomSheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
@@ -125,10 +128,20 @@ Set<ChargerFilterType> selectedFilters = {};
                 trafficEnabled: false,
                 style: mapsStyle,
               ),
+              Positioned(
+  top: 10,
+  left: 20,
+  right: 20,
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      /// 🔍 SEARCH BAR (takes full remaining width)
+      Text("UAT",style: TextStyle(color: CommonColors.background,fontSize: 14,fontWeight: FontWeight.bold),),
+    ])),
 
               /// Search
               Positioned(
-  top: 20,
+  top: 30,
   left: 20,
   right: 20,
   child: Row(
@@ -278,10 +291,32 @@ Set<ChargerFilterType> selectedFilters = {};
       ),
     );
   }
+void _onSearchHub(String value) async {
+  if (value.trim().isEmpty) return;
 
-  void _onSearchHub(String value) {
-    context.read<HubProvider>().searchAndFocusHub(value);
+  final result =
+      await context.read<HubProvider>().searchAndFocusHub(value);
+
+  switch (result) {
+    case SearchHubResult.notFound:
+   
+      showToast("We couldn’t find any nearby chargers for this location.",gravity: ToastGravity.CENTER);
+      break;
+
+    case SearchHubResult.sameLocation:
+     
+      // showToast( "You're already viewing this charging station.",gravity: ToastGravity.CENTER);
+      break;
+
+    case SearchHubResult.found:
+     
+      // showToast( "Charging station located successfully.",gravity: ToastGravity.CENTER);
+      break;
   }
+}
+  // void _onSearchHub(String value) {
+  //   context.read<HubProvider>().searchAndFocusHub(value);
+  // }
   void applyFilters() {
   // if (selectedFilters.isEmpty) {
   //   filteredList = originalList;

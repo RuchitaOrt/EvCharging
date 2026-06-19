@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:HyCharge/enum/enum.dart';
 import 'package:dio/dio.dart';
 import 'package:HyCharge/Screens/StationDetailsScreen.dart';
 import 'package:HyCharge/Services/hub_repository.dart';
@@ -477,31 +478,172 @@ void scrollToStation(String markerId) {
   }
   return -1;
 }
-
-void searchAndFocusHub(String query) async {
-  final index = findHubIndex(query);
-
-  if (index == -1) {
-    debugPrint("No hub found");
-    return;
+Future<SearchHubResult> searchAndFocusHub(String query) async {
+  if (query.trim().isEmpty) {
+    return SearchHubResult.notFound;
   }
 
-  final hub = recordsStation[index];
-  final location = LocationConvert.getLatLngFromHub(hub);
-  if (location == null) return;
+  try {
+    /// FIND INDEX
+    final index = recordsStation.indexWhere(
+      (e) => (e.chargingHubName ?? "")
+          .toLowerCase()
+          .contains(query.toLowerCase()),
+    );
 
-  // Move map
- mapController.moveToLocation(location);
+    if (index == -1) {
+      return SearchHubResult.notFound;
+    }
 
-  // Scroll card
-  scrollController.animateTo(
-    index * 350.0,
-    duration: const Duration(milliseconds: 500),
-    curve: Curves.easeInOut,
-  );
+    final hub = recordsStation[index];
 
-  notifyListeners();
+    LatLng? target = LocationConvert.getLatLngFromHub(hub);
+
+    if (target == null) {
+      return SearchHubResult.notFound;
+    }
+
+    /// CHECK SAME LOCATION
+    final visibleRegion =
+        await mapController.googleMapController?.getVisibleRegion();
+
+    if (visibleRegion != null) {
+      final centerLat =
+          (visibleRegion.northeast.latitude +
+                  visibleRegion.southwest.latitude) /
+              2;
+
+      final centerLng =
+          (visibleRegion.northeast.longitude +
+                  visibleRegion.southwest.longitude) /
+              2;
+
+      final isSameLocation =
+          (centerLat - target.latitude).abs() < 0.0005 &&
+          (centerLng - target.longitude).abs() < 0.0005;
+
+      if (isSameLocation) {
+        /// ALSO MOVE CARD
+        scrollController.animateTo(
+          index * 330,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+
+        currentVisibleIndex = index;
+        notifyListeners();
+
+        return SearchHubResult.sameLocation;
+      }
+    }
+
+    /// MOVE MAP
+    await mapController.googleMapController?.animateCamera(
+      CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: target,
+          zoom: 16,
+        ),
+      ),
+    );
+
+    /// MOVE CARD
+    scrollController.animateTo(
+      index * 330,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+
+    /// UPDATE SELECTED CARD
+    currentVisibleIndex = index;
+
+    notifyListeners();
+
+    return SearchHubResult.found;
+  } catch (e) {
+    return SearchHubResult.notFound;
+  }
 }
+// Future<SearchHubResult> searchAndFocusHub(String query) async {
+//   if (query.trim().isEmpty) {
+//     return SearchHubResult.notFound;
+//   }
+
+//   try {
+//     final hub = recordsStation.firstWhere(
+//       (e) =>
+//           (e.chargingHubName ?? "")
+//               .toLowerCase()
+//               .contains(query.toLowerCase()),
+//     );
+
+//     LatLng? target = LocationConvert.getLatLngFromHub(hub);
+
+//     if (target == null) {
+//       return SearchHubResult.notFound;
+//     }
+
+//     final visibleRegion =
+//         await mapController.googleMapController?.getVisibleRegion();
+
+//     if (visibleRegion != null) {
+//       final centerLat =
+//           (visibleRegion.northeast.latitude +
+//                   visibleRegion.southwest.latitude) /
+//               2;
+
+//       final centerLng =
+//           (visibleRegion.northeast.longitude +
+//                   visibleRegion.southwest.longitude) /
+//               2;
+
+//       final isSameLocation =
+//           (centerLat - target.latitude).abs() < 0.0005 &&
+//           (centerLng - target.longitude).abs() < 0.0005;
+
+//       if (isSameLocation) {
+//         return SearchHubResult.sameLocation;
+//       }
+//     }
+
+//     await mapController.googleMapController?.animateCamera(
+//       CameraUpdate.newCameraPosition(
+//         CameraPosition(
+//           target: target,
+//           zoom: 16,
+//         ),
+//       ),
+//     );
+
+//     return SearchHubResult.found;
+//   } catch (e) {
+//     return SearchHubResult.notFound;
+//   }
+// }
+// void searchAndFocusHub(String query) async {
+//   final index = findHubIndex(query);
+
+//   if (index == -1) {
+//     debugPrint("No hub found");
+//     return;
+//   }
+
+//   final hub = recordsStation[index];
+//   final location = LocationConvert.getLatLngFromHub(hub);
+//   if (location == null) return;
+
+//   // Move map
+//  mapController.moveToLocation(location);
+
+//   // Scroll card
+//   scrollController.animateTo(
+//     index * 350.0,
+//     duration: const Duration(milliseconds: 500),
+//     curve: Curves.easeInOut,
+//   );
+
+//   notifyListeners();
+// }
 
 
 }

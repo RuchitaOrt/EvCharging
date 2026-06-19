@@ -156,7 +156,7 @@ Future<void> _onScroll() async {
     );
   }
   Widget _filter24hourChip(dynamic hub) {
-    return   hub.recId==CommonStrings.strDummyRecID?
+    return   (hub.recId==CommonStrings.strDummyRecID ||  hub.recId ==CommonStrings.strDummyRecID1)?
      Container(
       
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
