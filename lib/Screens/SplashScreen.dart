@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:HyCharge/Provider/AppVersionProvider.dart';
 import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/Vehicle/MyVehicleScreen.dart';
 import 'package:HyCharge/Screens/OnboardingScreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/UtilityFile.dart';
@@ -162,7 +163,9 @@ Future<bool> _handleForceUpdate(AppVersionProvider provider) async {
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
-      builder: (_) => MainTab(isLoggedIn: loggedIn),
+      builder: (_) => 
+      
+       MainTab(isLoggedIn: loggedIn),
     ),
   );
 }
@@ -230,56 +233,12 @@ Future<void> _continueSplashFlowAndroid() async {
   Navigator.pushReplacement(
     context,
     MaterialPageRoute(
-      builder: (_) => MainTab(isLoggedIn: loggedIn),
+      builder: (_) => 
+    //  VehicleSelectionScreen()
+        MainTab(isLoggedIn: loggedIn),
     ),
   );
 }
-// Future<void> _continueSplashFlow() async {
-//   if (_hasNavigated || SplashScreen.deepLinkHandled) return; // prevent double nav
-
-//   if (MyApp.pendingChargerId != null) {
-//     _hasNavigated = true;
-//     SplashScreen.deepLinkHandled = true;
-
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(
-//         builder: (_) => ChargingEstimateScreen(
-//           chargerID: MyApp.pendingChargerId,
-//           isAPPLINK: "1",
-//         ),
-//       ),
-//     );
-//     return;
-//   }
-
-//   final isFirstTime = await AuthStorage.isFirstTime();
-
-//   if (_hasNavigated || SplashScreen.deepLinkHandled) return; // double check
-
-//   if (isFirstTime) {
-//     _hasNavigated = true;
-//     SplashScreen.deepLinkHandled = true;
-
-//     Navigator.pushReplacement(
-//       context,
-//       MaterialPageRoute(builder: (_) => const OnboardingScreen()),
-//     );
-//     return;
-//   }
-
-//   final loggedIn = await AuthStorage.isLoggedIn();
-
-//   _hasNavigated = true;
-//   SplashScreen.deepLinkHandled = true;
-
-//   Navigator.pushReplacement(
-//     context,
-//     MaterialPageRoute(
-//       builder: (_) => MainTab(isLoggedIn: loggedIn),
-//     ),
-//   );
-// }
 
 
 Future<void> loadDataCombine() async {

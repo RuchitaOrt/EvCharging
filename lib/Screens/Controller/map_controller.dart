@@ -33,11 +33,29 @@ class MapController {
   }
 
   /// One-time camera move
+  // Future<void> moveToCurrentLocation() async {
+  //   final Position position = await getPosition();
+  //   // print('Current Location: ${position.latitude}, ${position.longitude}');
+  //   zoomTo(LatLng(position.latitude, position.longitude));
+  // }
+
+  
   Future<void> moveToCurrentLocation() async {
-    final Position position = await getPosition();
-    // print('Current Location: ${position.latitude}, ${position.longitude}');
-    zoomTo(LatLng(position.latitude, position.longitude));
-  }
+  final position = await getCurrentPosition();
+
+  googleMapController?.animateCamera(
+    CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(
+          position.latitude,
+          position.longitude,
+        ),
+        zoom: 17,
+      ),
+    ),
+  );
+}
+
  /// 🔥 ADD THIS METHOD
   Future<void> animateCamera(CameraUpdate update) async {
     if (googleMapController == null) return;

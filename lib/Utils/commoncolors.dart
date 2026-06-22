@@ -10,6 +10,9 @@ class CommonColors {
   static const Color blacklight = Color(0xff212121);
   static const Color white = Colors.white;
   static const Color blue = Color(0xff0C2964);
+
+
+   static const Color neutral400 = Color(0xFF9CA3AF);
   static const Color neutral200 = Color(0xffEEEEEE);
   static const Color neutral500 = Color(0xff9E9E9E);
   static const Color primary = Color(0xff212121);

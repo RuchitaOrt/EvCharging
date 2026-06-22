@@ -63,4 +63,7 @@ static const String strOldPasswordHint = "Enter your old password";
 
    static const String strDummyRecID1 =  "542da75a-1693-45ca-8d92-5b33ef5baa55";
  static const String strDummyBikeRecId =  "3a518c96-2f0e-40f7-9bee-61cfb832024e"; //"10de1620-3ce7-41c1-bb3d-748211f1942a";
+static const String strVehicleNo = "Enter Vehicle No";
+static const String strVehicle = "Vehicle No";
+static const String strVehicleNote = '"Just once! Register your vehicle now and we will remember it for you"';
 }

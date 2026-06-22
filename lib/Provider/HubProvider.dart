@@ -1,5 +1,9 @@
 import 'dart:ui';
+import 'package:HyCharge/Bottomsheet/showMyVehiclesBottomSheet.dart';
+import 'package:HyCharge/Bottomsheet/showVehicleBottomsheet.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/enum/enum.dart';
+import 'package:HyCharge/model/VehicleModel.dart';
 import 'package:dio/dio.dart';
 import 'package:HyCharge/Screens/StationDetailsScreen.dart';
 import 'package:HyCharge/Services/hub_repository.dart';
@@ -98,27 +102,6 @@ final APIManager _api = APIManager();
   }
 
 
-  // void listenToScroll(double itemWidth) {
-  //   scrollController.addListener(() {
-  //     final offset = scrollController.offset;
-  //     final index = (offset / itemWidth).round();
-  //     if (index != currentVisibleIndex && index >= 0 && index < recordsStation.length) {
-  //       currentVisibleIndex = index;
-  //       ChargingHub hub = recordsStation[index];
-  //       print('$index Item Position: ${hub.chargingHubName}');
-  //       clearRoute();
-  //       // selectMarker(hub.recId);
-  //       LatLng? location = LocationConvert.getLatLngFromHub(hub);
-  //       if (location != null) {
-  //         print(location.latitude);  // 19.0991
-  //         print(location.longitude); // 72.9165
-  //         mapController.zoomTo(location);
-  //         getDirection(hub.recId!);
-  //       }
-  //       notifyListeners();
-  //     }
-  //   });
-  // }
 void listenToScroll(double itemWidth) {
   scrollController.addListener(() {
     final offset = scrollController.offset;
@@ -148,7 +131,46 @@ void listenToScroll(double itemWidth) {
     }
   });
 }
+Future<void> showCurrentLocationMarker() async {
+  final position = await mapController.getCurrentPosition();
 
+  // Remove old current location marker
+  markers.removeWhere(
+    (marker) => marker.markerId.value == "12345678",
+  );
+
+  // Add car marker
+  markers.add(
+    _buildMarker(
+      id: "12345678",
+      position: LatLng(
+        position.latitude,
+        position.longitude,
+      ),
+      title: "My Location",
+      icon: currentMarkerIcon,
+      onTap: () {
+      showMyVehiclesBottomSheet(
+        routeGlobalKey.currentContext!, 
+      );
+    },
+    ),
+  );
+
+  notifyListeners();
+
+  mapController.animateCamera(
+    CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(
+          position.latitude,
+          position.longitude,
+        ),
+        zoom: 17,
+      ),
+    ),
+  );
+}
 
   @override
   void dispose() {
@@ -167,9 +189,13 @@ void listenToScroll(double itemWidth) {
       width: 125,
     );
     currentMarkerIcon = await getResizedMarker(
-      'assets/images/currentMarker.png',
-      width: 125,
+      //  'assets/images/currentMarker.png',
+     CommonImagePath.vehicle7,
+      width: 60,
     );
+    print("VEHICLE");
+    print(currentMarkerIcon);
+    print(CommonImagePath.vehicle7);
   }
 
   
@@ -230,44 +256,6 @@ Future<void> loadHubs(
   isMoreLoading = false;
   notifyListeners();
 }
-
-  // Future<void> loadHubs(
-  //   BuildContext context, {
-  //   bool reset = false,
-  // }) async {
-  //   clearRoute();
-  //   if (loading || !hasMore) return;
-  //   if (reset) {
-  //     page = 1;
-  //     _recordsStation.clear();
-  //     markers.clear();
-  //     hasMore = true;
-  //     // polyLines.clear(); remove routes
-  //   }
-  //   loading = true;
-  //   notifyListeners();
-  
-  //   try {
-  //     _recordsStation.clear();
-  //     await loadIcons();
-  //     final ChargingcomprehensiveHubResponse res = await _repo.getChargingHubsMap(context);
-  //     print('Hub Stations Lists: ${res.hubs!.length}');
-  //     final List<ChargingHub> data = res.hubs ?? [];
-  //     if (data.isEmpty) {
-  //       hasMore = false;
-  //     } else {
-  //       _recordsStation.addAll(data);
-  //       _createMarkers( _recordsStation,);
-  //       page++;
-  //       initFirstItem(350);
-  //     }
-  //   } catch (e) {
-  //      debugPrint("loadHUB Error");
-  //     debugPrint(e.toString());
-  //   }
-  //   loading = false;
-  //   // notifyListeners();
-  // }
 
 
   Future<void> _createMarkers(List<ChargingHub> hubList) async {

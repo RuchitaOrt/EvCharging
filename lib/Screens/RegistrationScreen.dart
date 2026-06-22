@@ -1,6 +1,7 @@
 import 'package:HyCharge/Provider/AuthProvider.dart';
 import 'package:HyCharge/Request/RegisterRequest.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/Vehicle/MyVehicleScreen.dart';
 import 'package:HyCharge/Services/pdf_viewer_screen.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
@@ -288,43 +289,50 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         ),
                         onPressed: () async {
                           FocusManager.instance.primaryFocus?.unfocus();
+         Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(
+      builder: (_) => 
+     VehicleSelectionScreen(isVehicleAdded: false,)
+      //  MainTab(isLoggedIn: loggedIn),
+    ),
+  );
+        //                   // Login logic
+        //                   final request = RegisterRequest(
+        //                     firstName: firstNameController.text.trim(),
+        //                     lastName: lastNameController.text.trim(),
+        //                     eMailID: emailController.text.trim(),
+        //                     phoneNumber: mobileController.text,
+        //                     countryCode: "",
+        //                     password: passwordController.text.trim(),
+        //                     confirmPassword:
+        //                         confirmpasswordController.text.trim(),
+        //                     addressLine1: "",
+        //                     addressLine2: "",
+        //                     addressLine3: "",
+        //                     state: "",
+        //                     city: "",
+        //                     pinCode: "",
+        //                   );
+        //                   final provider = context.read<AuthProvider>();
         
-                          // Login logic
-                          final request = RegisterRequest(
-                            firstName: firstNameController.text.trim(),
-                            lastName: lastNameController.text.trim(),
-                            eMailID: emailController.text.trim(),
-                            phoneNumber: mobileController.text,
-                            countryCode: "",
-                            password: passwordController.text.trim(),
-                            confirmPassword:
-                                confirmpasswordController.text.trim(),
-                            addressLine1: "",
-                            addressLine2: "",
-                            addressLine3: "",
-                            state: "",
-                            city: "",
-                            pinCode: "",
-                          );
-                          final provider = context.read<AuthProvider>();
+        //                   bool success =
+        //                       await provider.register(context, request);
+        // // bool success = await context.read<AuthProvider>().register(context, request);
         
-                          bool success =
-                              await provider.register(context, request);
-        // bool success = await context.read<AuthProvider>().register(context, request);
-        
-                          if (success) {
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              FocusScope.of(context).unfocus();
-                              showToast("${provider.message}");
-                              Navigator.pushReplacement(
-                                routeGlobalKey.currentContext!,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      MainTab(isLoggedIn: GlobalLists.islLogin),
-                                ),
-                              );
-                            });
-                          }
+        //                   if (success) {
+        //                     WidgetsBinding.instance.addPostFrameCallback((_) {
+        //                       FocusScope.of(context).unfocus();
+        //                       showToast("${provider.message}");
+        //                       Navigator.pushReplacement(
+        //                         routeGlobalKey.currentContext!,
+        //                         MaterialPageRoute(
+        //                           builder: (context) =>
+        //                               MainTab(isLoggedIn: GlobalLists.islLogin),
+        //                         ),
+        //                       );
+        //                     });
+        //                   }
                         },
                         child: authProvider.isLoading
                             ? const SizedBox(

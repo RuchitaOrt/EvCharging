@@ -1,4 +1,4 @@
-import 'package:HyCharge/Screens/MyVehicleScreen.dart';
+import 'package:HyCharge/Screens/Vehicle/MyVehicleScreen.dart';
 import 'package:HyCharge/Screens/SelectVehicleScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';

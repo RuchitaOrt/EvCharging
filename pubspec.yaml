@@ -114,6 +114,7 @@ flutter:
     - assets/API-Configuration.json
     - assets/map_styles/dark_map.json
     - assets/lottie/animationCharger.json
+    - assets/lottie/check.json
     - assets/pdfs/terms.pdf
     - assets/pdfs/privacy.pdf
   # An image asset can refer to one or more resolution-specific "variants", see

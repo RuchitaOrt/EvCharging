@@ -9,10 +9,11 @@ import 'package:HyCharge/Screens/ChargingEstimateScreen.dart';
 import 'package:HyCharge/Screens/ChargingHistoryScreen.dart';
 import 'package:HyCharge/Screens/EditProfileScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
-import 'package:HyCharge/Screens/MyVehicleScreen.dart';
+import 'package:HyCharge/Screens/Vehicle/MyVehicleScreen.dart';
 import 'package:HyCharge/Screens/NotificationScreen.dart';
 import 'package:HyCharge/Screens/ResetPassword.dart';
 import 'package:HyCharge/Screens/SupportScreen.dart';
+import 'package:HyCharge/Screens/Vehicle/ManageVehicleScreen.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/ImageHelper.dart';
@@ -240,17 +241,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     //     // );
                     //   },
                     // ),
-                    // _profileTile(
-                    //   CommonImagePath.vehicle,
-                    //   'Vehicle Information',
-                    //   () {
-                    //     Navigator.push(
-                    //       routeGlobalKey.currentContext!,
-                    //       MaterialPageRoute(
-                    //           builder: (context) => MyVehicleScreen()),
-                    //     );
-                    //   },
-                    // ),
+                    _profileTile(
+                      CommonImagePath.vehicle,
+                      'Vehicle',
+                      () {
+                        Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                              builder: (context) => ManageVehicleScreen()),
+                        );
+                      },
+                    ),
                     // _profileTile(
                     //   CommonImagePath.notification,
                     //   'Notification',

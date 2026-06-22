@@ -115,7 +115,8 @@ Set<ChargerFilterType> selectedFilters = {};
                 onMapCreated: (mapController) {
                   hubProvider.mapController.onMap2Created(mapController);
                 },
-                myLocationEnabled: true,
+               //  myLocationEnabled: true,
+                 myLocationEnabled: false,
                 myLocationButtonEnabled: false,
                 markers: hubProvider.markers,
                 polylines: hubProvider.polyLines,
@@ -153,65 +154,11 @@ Set<ChargerFilterType> selectedFilters = {};
         ),
       ),
 
-      // const SizedBox(width: 10),
-
-      /// 🔽 FILTER ICON
-//       GestureDetector(
-//        onTap: () async {
-//   final result = await showModalBottomSheet<Set<ChargerFilterType>>(
-//     context: context,
-//     isScrollControlled: true,
-//     backgroundColor: Colors.white,
-//     shape: RoundedRectangleBorder(
-//       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-//     ),
-//     builder: (_) => FilterBottomSheet(selectedFilters: selectedFilters),
-//   );
-
-//   if (result != null) {
-//     setState(() {
-//       selectedFilters = result;
-//     });
-
-//     applyFilters(); // 🔥 IMPORTANT
-//   }
-// },
-//         child:
-//        Stack(
-//   children: [
-//      Image.asset(
-//         CommonImagePath.filter,
-//         height: 40,
-//         width: 40,
-       
-//       ),
-//     /// 🔴 ACTIVE DOT
-//     if (selectedFilters.isNotEmpty)
-//       Positioned(
-//         right: 4,
-//         top: 4,
-//         child: Container(
-//           height: 8,
-//           width: 8,
-//           decoration: BoxDecoration(
-//             color: Colors.red,
-//             shape: BoxShape.circle,
-//           ),
-//         ),
-//       ),
-//   ],
-// )
-//       ),
+      
     ],
   ),
 ),
-              // Positioned(
-              //   top: 20,
-              //   left: 20,
-              //   right: 20,
-              //   child: 
-              //   SearchBarWidget(onSearch: _onSearchHub),
-              // ),
+            
 
               /// GPS Button
               Positioned(
@@ -219,11 +166,6 @@ Set<ChargerFilterType> selectedFilters = {};
                 right: 20,
                 child: _gpsButton(),
               ),
-  // Positioned(
-  //               bottom: 200,
-  //               right: 20,
-  //               child: _gpsButton(),
-  //             ),
 
               /// Route loading
               if (hubProvider.isRouteLoading)
@@ -286,11 +228,13 @@ Set<ChargerFilterType> selectedFilters = {};
       child: IconButton(
         icon: const Icon(Icons.gps_fixed, color: Colors.black),
         onPressed: () {
-          context.read<HubProvider>().mapController.moveToCurrentLocation();
+          context.read<HubProvider>().showCurrentLocationMarker();
+          // moveToCurrentLocation();
         },
       ),
     );
   }
+  
 void _onSearchHub(String value) async {
   if (value.trim().isEmpty) return;
 

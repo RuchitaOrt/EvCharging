@@ -43,7 +43,7 @@ class CommonImagePath {
   static String profileImage = "assets/images/profile.png";
   static String profileIcon = "assets/images/user.png";
   // logoios.jpg";
-  
+
   static String edit = "assets/images/edit.png";
   static String greencharge = "assets/images/greencharge.png";
 
@@ -89,4 +89,14 @@ class CommonImagePath {
   static String unitconsumed = "assets/images/unit.svg";
   static String poweroutput = "assets/images/poweroutput.svg";
   static String current = "assets/images/currency.svg";
+
+  static String vehicle1 = "assets/images/BYD.jpeg";
+  static String vehicle2 = "assets/images/EV.jpeg";
+  static String vehicle3 = "assets/images/EV2.jpeg";
+  static String vehicle4 = "assets/images/EV3.jpeg";
+  static String vehicle5 = "assets/images/EV4.jpeg";
+  static String vehicle6 = "assets/images/EV6.jpeg";
+
+  static String vehicle7 = "assets/images/Nexon.jpeg";
+  static String vehicle8 = "assets/images/white.jpeg";
 }
