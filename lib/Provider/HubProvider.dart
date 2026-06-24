@@ -149,11 +149,11 @@ Future<void> showCurrentLocationMarker() async {
       ),
       title: "My Location",
       icon: currentMarkerIcon,
-      onTap: () {
-      showMyVehiclesBottomSheet(
-        routeGlobalKey.currentContext!, 
-      );
-    },
+      // onTap: () {
+      // showMyVehiclesBottomSheet(
+      //   routeGlobalKey.currentContext!, 
+      // );
+    // },
     ),
   );
 
@@ -189,13 +189,15 @@ Future<void> showCurrentLocationMarker() async {
       width: 125,
     );
     currentMarkerIcon = await getResizedMarker(
-      //  'assets/images/currentMarker.png',
-     CommonImagePath.vehicle7,
-      width: 60,
+       'assets/images/currentMarker.png',
+       width: 125,
+    //  CommonImagePath.vehicle9,
+    //   width: 80,
     );
+    //  currentMarkerIcon = await createCurrentLocationMarker();
     print("VEHICLE");
     print(currentMarkerIcon);
-    print(CommonImagePath.vehicle7);
+    print(CommonImagePath.vehicle9);
   }
 
   

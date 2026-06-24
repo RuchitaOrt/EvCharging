@@ -98,5 +98,6 @@ class CommonImagePath {
   static String vehicle6 = "assets/images/EV6.jpeg";
 
   static String vehicle7 = "assets/images/Nexon.jpeg";
-  static String vehicle8 = "assets/images/white.jpeg";
+  static String vehicle8 = "assets/images/whitecar.jpeg";
+  static String vehicle9 = "assets/images/img.png";
 }
