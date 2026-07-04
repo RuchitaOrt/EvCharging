@@ -289,6 +289,7 @@ void showAddMoneyBottomSheet(BuildContext context,String currentBalance) {
                      
                         final key = context.read<PaymentProvider>().razorpayKey;
                         print("RAZORPAY");
+                        print("key");
                 print(key);
                 if (key != null && key.isNotEmpty) {
                   // final response = context.read<PaymentProvider>().createRazorpayOrder(context, amount: amount);
@@ -319,6 +320,9 @@ void showAddMoneyBottomSheet(BuildContext context,String currentBalance) {
                   );
                 }
                 
+                }else
+                {
+                   print("Razorpay key error: ");
                 }
                 
                   

@@ -1,14 +1,20 @@
+import 'package:HyCharge/Provider/VehicleProvider.dart';
+import 'package:HyCharge/Screens/Vehicle/ManageVehicleScreen.dart';
+import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 
 import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/VehicleModel.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
 void showAddVehicleBottomSheet(
-    BuildContext context, VehicleModel selectedVehicle) {
+    BuildContext context, EvModelData selectedVehicle) {
   final controller = TextEditingController();
 
   // controller.text = selectedVehicle.vehicleName ?? "";
@@ -113,14 +119,30 @@ void showAddVehicleBottomSheet(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   if (!formKey.currentState!.validate()) {
                     return;
                   }
 
                   Navigator.pop(context);
+final provider = context.read<VehicleProvider>();
 
-                  showSubmittedVehicleBottomSheet(context, selectedVehicle);
+final success = await provider.addVehicle(
+  context,
+  manufacturerId: selectedVehicle.manufacturerId!,
+  modelId: selectedVehicle.recId!,
+  registrationNumber: controller.text.trim(),
+);
+print(success);
+if (success) {
+  // Navigator.pop(routeGlobalKey.currentContext!);
+print(selectedVehicle);
+  showSubmittedVehicleBottomSheet(routeGlobalKey.currentContext!, selectedVehicle);
+} else {
+  showToast("Failed to add vehicle");
+  
+}
+                  
                 },
                 child: Text(
                   "Submit",
@@ -155,7 +177,7 @@ void showAddVehicleBottomSheet(
 }
 
 void showSubmittedVehicleBottomSheet(
-    BuildContext context, VehicleModel selectedVehicle) {
+    BuildContext context, EvModelData selectedVehicle) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -229,7 +251,13 @@ void showSubmittedVehicleBottomSheet(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                   Navigator.push(
+                          routeGlobalKey.currentContext!,
+                          MaterialPageRoute(
+                              builder: (context) => ManageVehicleScreen()),
+                        );
+                },
                 child: Text(
                   "Continue",
                   style: TextStyle(

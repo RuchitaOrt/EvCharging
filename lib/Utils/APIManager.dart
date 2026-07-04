@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:HyCharge/model/AppVersionResponse.dart';
+import 'package:HyCharge/model/CarManufacturerResponse.dart';
+import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/ForgetPasswordResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
@@ -95,6 +97,8 @@ enum API {
   forgetPassword,
   chargerDetails,
    appVersionInfo,
+  
+
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -695,10 +699,7 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
         return WalletResponse.fromJson(json);
       case API.walletDetails:
         return WalletListResponse.fromJson(json);
-      case API.userVehicleList:
-        return VehicleListResponse.fromJson(json);
-      case API.userVehicleAdd:
-        return UserVehicleResponse.fromJson(json);
+     
       case API.userVehicleDelete:
         return DeleteVehicleResponse.fromJson(json);
       case API.userVehicleUpdate:
@@ -752,6 +753,18 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
         return EstimateChargingResponse.fromJson(json);
       case API.appVersionInfo:
   return AppVersionResponse.fromJson(json);
+
+case API.carManufacturerList:
+  return CarManufacturerResponse.fromJson(json);
+
+case API.evModelList:
+  return EvModelResponse.fromJson(json);
+
+
+   case API.userVehicleList:
+        return VehicleListResponse.fromJson(json);
+      case API.userVehicleAdd:
+        return UserVehicleResponse.fromJson(json);
       default:
         return json;
     }

@@ -26,8 +26,10 @@ class PaymentProvider extends ChangeNotifier {
          print("RAZOR KEY ${_razorpayKey}");
       }
     } catch (e) {
-      debugPrint("Razorpay key error: $e");
+     _loading = false;
+      print("Razorpay key error: $e");
     } finally {
+        print("Razorpay key error: ");
       _loading = false;
       notifyListeners();
     }

@@ -32,6 +32,7 @@ class Vehicle {
   final String? batteryCapacityId;
   final DateTime? createdOn;
   final DateTime? updatedOn;
+  bool isSelected;
 
   Vehicle({
     this.recId,
@@ -45,6 +46,7 @@ class Vehicle {
     this.batteryCapacityId,
     this.createdOn,
     this.updatedOn,
+     this.isSelected = false,
   });
 
   factory Vehicle.fromJson(Map<String, dynamic> json) {

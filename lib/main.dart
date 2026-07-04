@@ -218,7 +218,9 @@ Future<void> _initDeepLinks() async {
 
     return MultiProvider(
       providers: [
-
+ChangeNotifierProvider(
+  create: (_) => VehicleProvider(),
+),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ChargerDetailsProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),

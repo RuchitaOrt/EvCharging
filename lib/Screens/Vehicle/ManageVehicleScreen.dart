@@ -1,13 +1,28 @@
+import 'package:HyCharge/Provider/VehicleProvider.dart';
 import 'package:HyCharge/Screens/Vehicle/MyVehicleScreen.dart';
 import 'package:HyCharge/Screens/Vehicle/VehicleDetailScreen.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/main.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class ManageVehicleScreen extends StatelessWidget {
+class ManageVehicleScreen extends StatefulWidget {
   const ManageVehicleScreen({super.key});
 
+  @override
+  State<ManageVehicleScreen> createState() => _ManageVehicleScreenState();
+}
+
+class _ManageVehicleScreenState extends State<ManageVehicleScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<VehicleProvider>().getUserVehicleList(context);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,36 +68,77 @@ class ManageVehicleScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          const SizedBox(height: 14),
+      body: 
+      Consumer<VehicleProvider>(
+  builder: (context, provider, child) {
+    if (provider.isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
 
-          /// Vehicle 1
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _vehicleCard(
-              title: "Tata Nexon EV",
-              vehicleNo: "MH04CB2522",
-              image:
-                 CommonImagePath.vehicle1,
-              isAutoCharge: true,
-            ),
-          ),
+    if (provider.userVehicles.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.only(top: 40),
+          child: Text("No Vehicle Found"),
+        ),
+      );
+    }
 
-          const SizedBox(height: 14),
-
-          /// Vehicle 2
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: _vehicleCard(
-              title: "MG ZS EV",
-              vehicleNo: "MH04CB2523",
-              image:
-                 CommonImagePath.vehicle2
-            ),
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 20,bottom: 20),
+      child: ListView.separated(
+        shrinkWrap: true,
+        physics: const ScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: provider.userVehicles.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 14),
+        itemBuilder: (context, index) {
+          final vehicle = provider.userVehicles[index];
+      
+          return _vehicleCard(
+            title: provider.getModelName(vehicle.carModelID),
+            vehicleNo: vehicle.carRegistrationNumber ?? "",
+            image: CommonImagePath.vehicle1,
+            isAutoCharge: true
+            // isAutoCharge: vehicle.autoChargeEnabled ?? false,
+          );
+        },
       ),
+    );
+  },
+),
+      // Column(
+      //   children: [
+      //     const SizedBox(height: 14),
+
+      //     /// Vehicle 1
+      //     Padding(
+      //       padding: const EdgeInsets.symmetric(horizontal: 16),
+      //       child: _vehicleCard(
+      //         title: "Tata Nexon EV",
+      //         vehicleNo: "MH04CB2522",
+      //         image:
+      //            CommonImagePath.vehicle1,
+      //         isAutoCharge: true,
+      //       ),
+      //     ),
+
+      //     const SizedBox(height: 14),
+
+      //     /// Vehicle 2
+      //     Padding(
+      //       padding: const EdgeInsets.symmetric(horizontal: 16),
+      //       child: _vehicleCard(
+      //         title: "MG ZS EV",
+      //         vehicleNo: "MH04CB2523",
+      //         image:
+      //            CommonImagePath.vehicle2
+      //       ),
+      //     ),
+      //   ],
+      // ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(
           16,

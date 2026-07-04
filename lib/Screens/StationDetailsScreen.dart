@@ -1247,6 +1247,12 @@ Map<String, bool> stationExpansionState = {};
 //       .join(' ');
 // }
 Widget _stationsList(List<ChargingStation> stations) {
+  print("How many station");
+  print(stations.length);
+  for(var sta in stations)
+  {
+    print(sta.chargePointName);
+  }
   return Column(
     children: stations.map((station) {
       final chargers = station.chargers ?? [];
