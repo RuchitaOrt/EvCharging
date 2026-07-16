@@ -1,16 +1,25 @@
 class DeleteVehicleResponse {
-  final bool success;
-  final String message;
+  bool? success;
+  String? message;
+  dynamic user;
 
   DeleteVehicleResponse({
-    required this.success,
-    required this.message,
+    this.success,
+    this.message,
+    this.user,
   });
 
-  factory DeleteVehicleResponse.fromJson(Map<String, dynamic> json) {
-    return DeleteVehicleResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
-    );
+  DeleteVehicleResponse.fromJson(Map<String, dynamic> json) {
+    success = json['success'];
+    message = json['message'];
+    user = json['user'];
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "success": success,
+      "message": message,
+      "user": user,
+    };
   }
 }

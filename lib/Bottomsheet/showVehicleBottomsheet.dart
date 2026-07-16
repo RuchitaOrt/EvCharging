@@ -44,6 +44,8 @@ void showAddVehicleBottomSheet(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     builder: (context) {
+       final provider = context.read<VehicleProvider>();
+
       return Padding(
         padding: EdgeInsets.only(
           left: 20,
@@ -124,34 +126,37 @@ void showAddVehicleBottomSheet(
                     return;
                   }
 
-                  Navigator.pop(context);
-final provider = context.read<VehicleProvider>();
-
-final success = await provider.addVehicle(
-  context,
-  manufacturerId: selectedVehicle.manufacturerId!,
-  modelId: selectedVehicle.recId!,
-  registrationNumber: controller.text.trim(),
-);
-print(success);
-if (success) {
-  // Navigator.pop(routeGlobalKey.currentContext!);
-print(selectedVehicle);
-  showSubmittedVehicleBottomSheet(routeGlobalKey.currentContext!, selectedVehicle);
-} else {
-  showToast("Failed to add vehicle");
-  
-}
-                  
+                
+                 
+                  final success = await provider.addVehicle(
+                    context,
+                    manufacturerId: selectedVehicle.manufacturerId!,
+                    modelId: selectedVehicle.recId!,
+                    registrationNumber: controller.text.trim(),
+                  );
+                  print(success);
+                  if (success) {
+                      Navigator.pop(context);
+                    // Navigator.pop(routeGlobalKey.currentContext!);
+                    print(selectedVehicle);
+                    showSubmittedVehicleBottomSheet(
+                        routeGlobalKey.currentContext!, selectedVehicle);
+                  } else {
+                    showToast("Failed to add vehicle");
+                  }
                 },
-                child: Text(
-                  "Submit",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
+                child: provider.isLoading
+                    ? CircularProgressIndicator(
+                        color: CommonColors.white,
+                      )
+                    : Text(
+                        "Submit",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
+                      ),
               ),
             ),
             SizedBox(
@@ -252,11 +257,11 @@ void showSubmittedVehicleBottomSheet(
                   ),
                 ),
                 onPressed: () {
-                   Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                              builder: (context) => ManageVehicleScreen()),
-                        );
+                  Navigator.pushReplacement(
+                    routeGlobalKey.currentContext!,
+                    MaterialPageRoute(
+                        builder: (context) => ManageVehicleScreen()),
+                  );
                 },
                 child: Text(
                   "Continue",

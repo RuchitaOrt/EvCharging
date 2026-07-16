@@ -1,5 +1,6 @@
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/model/CarManufacturerResponse.dart';
+import 'package:HyCharge/model/DeleteVehicleResponse.dart';
 import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/VehicleListResponse.dart';
 import 'package:HyCharge/model/user_vehicle_model.dart';
@@ -28,7 +29,21 @@ class VehicleService {
 
     return result as EvModelResponse;
   }
-
+Future<DeleteVehicleResponse?> deleteVehicle(
+  BuildContext context,
+  String vehicleId,
+) async {
+  try {
+    return await APIManager().apiRequest(
+      context,
+      API.userVehicleDelete,
+      path: "/$vehicleId",
+    );
+  } catch (e) {
+    print(e);
+    return null;
+  }
+}
   Future<UserVehicleResponse?> addVehicle(
     BuildContext context,
     Map<String, dynamic> body,

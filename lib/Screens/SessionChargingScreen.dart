@@ -300,6 +300,8 @@ showToast("Charging session completed");
   void dispose() {
     _controller.dispose();
     _refreshTimer?.cancel();
+     
+      _durationTimer?.cancel();
     super.dispose();
   }
 

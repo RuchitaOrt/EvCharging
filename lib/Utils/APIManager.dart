@@ -4,6 +4,7 @@ import 'package:HyCharge/model/AppVersionResponse.dart';
 import 'package:HyCharge/model/CarManufacturerResponse.dart';
 import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/ForgetPasswordResponse.dart';
+import 'package:HyCharge/model/SetDefaultVehicleResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
 import 'package:HyCharge/model/send_otp_response.dart';
@@ -97,7 +98,7 @@ enum API {
   forgetPassword,
   chargerDetails,
    appVersionInfo,
-  
+  setDefaultVehicle,
 
 }
 
@@ -638,6 +639,8 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
   return "/ChargingHub/charger-details";
   case API.appVersionInfo:
   return "/AppVersionInfo";
+  case API.setDefaultVehicle:
+  return "/User/set-default-vehicle";
     }
   }
 
@@ -672,6 +675,8 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.charginghubreviewdelete:
       case API.deleteAccount:
         return HTTPMethod.DELETE;
+        case API.setDefaultVehicle:
+  return HTTPMethod.PUT;
       default:
         return HTTPMethod.POST;
     }
@@ -765,6 +770,8 @@ case API.evModelList:
         return VehicleListResponse.fromJson(json);
       case API.userVehicleAdd:
         return UserVehicleResponse.fromJson(json);
+        case API.setDefaultVehicle:
+  return SetDefaultVehicleResponse.fromJson(json);
       default:
         return json;
     }

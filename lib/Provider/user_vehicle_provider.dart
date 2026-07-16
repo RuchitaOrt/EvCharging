@@ -53,84 +53,80 @@ class UserVehicleProvider extends ChangeNotifier {
   }
  List<UserVehicle> vehicles = [];
   
+// bool isLoading = false;
+// Future<bool> deleteVehicle(
+//   BuildContext context,
+//   String vehicleId,
+// ) async {
+//   isLoading = true;
+//   notifyListeners();
 
-   Future<bool> deleteVehicle(
-    BuildContext context,
-    String vehicleRecId,
-  ) async {
-    loading = true;
-    notifyListeners();
+//   final response = await _service.deleteVehicle(
+//     context,
+//     vehicleId,
+//   );
 
-    final res = await _service.deleteVehicle(
-      context: context,
-      vehicleRecId: vehicleRecId,
-    );
+//   isLoading = false;
 
-    loading = false;
+//   if (response?.success == true) {
+//     await getuse(context);
+//     notifyListeners();
+//     return true;
+//   }
 
-    if (res.success) {
-      vehicles.removeWhere((e) => e.recId == vehicleRecId);
-      message=res.message;
-      notifyListeners();
-      return true;
-    }
-    else{
-      message=res.message;
-    }
+//   notifyListeners();
+//   return false;
+// }
 
-    notifyListeners();
-    return false;
-  }
-
-UpdatedVehicle? updatedVehicle;
+// UpdatedVehicle? updatedVehicle;
 
 
-Future<bool> updateVehicle(
-  BuildContext context, {
-  required String recId,
-  required String evManufacturerID,
-  required String carModelID,
-  required String carModelVariant,
-  required String carRegistrationNumber,
-  required int defaultConfig,
-  required String batteryTypeId,
-  required String batteryCapacityId,
-}) async {
-  loading = true;
-  notifyListeners();
+// Future<bool> updateVehicle(
+//   BuildContext context, {
+//   required String recId,
+//   required String evManufacturerID,
+//   required String carModelID,
+//   required String carModelVariant,
+//   required String carRegistrationNumber,
+//   required int defaultConfig,
+//   required String batteryTypeId,
+//   required String batteryCapacityId,
+// }) async {
+//   loading = true;
+//   notifyListeners();
 
-  final payload = {
-    "recId": recId,
-    "evManufacturerID": evManufacturerID,
-    "carModelID": carModelID,
-    "carModelVariant": carModelVariant,
-    "carRegistrationNumber": carRegistrationNumber,
-    "defaultConfig": defaultConfig,
-    "batteryTypeId": batteryTypeId,
-    "batteryCapacityId": batteryCapacityId,
-  };
+//   final payload = {
+//     "recId": recId,
+//     "evManufacturerID": evManufacturerID,
+//     "carModelID": carModelID,
+//     "carModelVariant": carModelVariant,
+//     "carRegistrationNumber": carRegistrationNumber,
+//     "defaultConfig": defaultConfig,
+//     "batteryTypeId": batteryTypeId,
+//     "batteryCapacityId": batteryCapacityId,
+//   };
 
-  try {
-    final res = await _service.updateVehicle(
-      context,
-      payload: payload,
-    );
+//   try {
+//     final res = await _service.updateVehicle(
+//       context,
+//       payload: payload,
+//     );
 
-    if (res.success) {
-      updatedVehicle = res.vehicle;
-      message=res.message;
-      return true;
-    }else{
-      message=res.message;
-    }
-  } catch (e) {
-    debugPrint("❌ Update vehicle failed: $e");
-  } finally {
-    loading = false;
-    notifyListeners();
-  }
+//     if (res.success) {
+//       updatedVehicle = res.vehicle;
+//       message=res.message;
+//       return true;
+//     }else{
+//       message=res.message;
+//     }
+//   } catch (e) {
+//     debugPrint("❌ Update vehicle failed: $e");
+//   } finally {
+//     loading = false;
+//     notifyListeners();
+//   }
 
-  return false;
-}
+//   return false;
+// }
 
 }

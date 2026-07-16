@@ -110,14 +110,15 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen>
                         );
         },
       ),
-      body: Consumer<VehicleProvider>(builder: (context, provider, c) {
+      body: 
+      Consumer<VehicleProvider>(builder: (context, provider, c) {
         return Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (showMyVehicles)
             
-              Padding(
+           provider.userVehicles.length ==0?Container():   Padding(
                 padding: const EdgeInsets.only(left: 20, top: 12, bottom: 12),
                 child: Text(
                   "My Vehicles",
@@ -127,87 +128,97 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen>
                   ),
                 ),
               ),
-SizedBox(
-  height: 150,
-  child: ListView.separated(
-          shrinkWrap: true,
-          scrollDirection: Axis.horizontal,
-          physics: const ScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: provider.userVehicles.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 14),
-          itemBuilder: (context, index) {
-            final vehicle = provider.userVehicles[index];
-        
-            return  Container(
-                width: SizeConfig.blockSizeHorizontal * 35,
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFEAF7F5),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: CommonColors.blue,
-                    width: 1,
+provider.userVehicles.length ==0?Container():Padding(
+  padding: const EdgeInsets.only(bottom: 8),
+  child: SizedBox(
+    height: 150,
+    child: ListView.separated(
+            shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            physics: const ScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: provider.userVehicles.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 14),
+            itemBuilder: (context, index) {
+              final vehicle = provider.userVehicles[index];
+          
+
+    
+
+    final modelName = provider.getModelName(
+      vehicle.carModelID,
+    );
+              return  Container(
+                  width: SizeConfig.blockSizeHorizontal * 35,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 8,
                   ),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      width: 85,
-                      height: 65,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: Image.asset(
-                          CommonImagePath.vehicle1,
-                          height: 120,
-                          fit: BoxFit.contain,
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color:provider.selectedUserVehicleId == vehicle.recId?  const Color(0xffE8FFF3):Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color:provider.selectedUserVehicleId == vehicle.recId?   const Color(0xff53C98B)
+            : Colors.grey.shade300,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 85,
+                        height: 65,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      vehicle.evManufacturerID ?? "",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(
-                          Icons.directions_car,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          vehicle.carRegistrationNumber! ?? "",
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade700,
-                            fontWeight: FontWeight.w500,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            CommonImagePath.vehicle1,
+                            height: 120,
+                            fit: BoxFit.contain,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-          },
-        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        modelName ?? "",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.directions_car,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            vehicle.carRegistrationNumber! ?? "",
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+            },
+          ),
+  ),
 ),
            
 
@@ -330,31 +341,47 @@ SizedBox(
                             .toLowerCase()
                             .contains(searchText.toLowerCase());
                       }).toList();
+return ListView.builder(
+  padding: const EdgeInsets.all(16),
+  itemCount: data.length,
+  itemBuilder: (context, index) {
+    final vehicle = data[index];
 
-                      return GridView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: data.length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: .85,
-                        ),
-                        itemBuilder: (context, index) {
-                          final vehicle = data[index];
+    return VehicleCard(
+      vehicle: vehicle,
+      isSelected: provider.selectedModelId == vehicle.recId,
+      onTap: () {
+        provider.selectModel(vehicle);
+        // provider.selectVehicle(vehicle.recId ?? "");
+        
+      },
+    );
+  },
+);
+                      // return GridView.builder(
+                      //   padding: const EdgeInsets.all(12),
+                      //   itemCount: data.length,
+                      //   gridDelegate:
+                      //       const SliverGridDelegateWithFixedCrossAxisCount(
+                      //     crossAxisCount: 2,
+                      //     crossAxisSpacing: 14,
+                      //     mainAxisSpacing: 14,
+                      //     childAspectRatio: .85,
+                      //   ),
+                      //   itemBuilder: (context, index) {
+                      //     final vehicle = data[index];
 
-                          return VehicleCard(
-                            vehicle: vehicle,
-                            isSelected:
-                                provider.selectedVehicleId == vehicle.recId,
-                            onTap: () {
-                              provider.selectModel(vehicle);
-                              provider.selectVehicle(vehicle.recId ?? "");
-                            },
-                          );
-                        },
-                      );
+                      //     return VehicleCard(
+                      //       vehicle: vehicle,
+                      //       isSelected:
+                      //           provider.selectedVehicleId == vehicle.recId,
+                      //       onTap: () {
+                      //         provider.selectModel(vehicle);
+                      //         provider.selectVehicle(vehicle.recId ?? "");
+                      //       },
+                      //     );
+                      //   },
+                      // );
                     }).toList(),
                   );
                 },
@@ -429,10 +456,10 @@ SizedBox(
         return SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: provider.selectedVehicleId == null
+            onPressed: provider.selectedModel == null
                 ? null
                 : () {
-                    if (provider.selectedVehicleId != null) {
+                    if ( provider.selectedModel  != null) {
                       print(provider.selectedModel);
                       showAddVehicleBottomSheet(context, provider.selectedModel!);
                     }
@@ -458,7 +485,6 @@ SizedBox(
     );
   }
 }
-
 class VehicleCard extends StatelessWidget {
   final EvModelData vehicle;
   final bool isSelected;
@@ -477,53 +503,114 @@ class VehicleCard extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(bottom: 14),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFEAF7F5) : Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isSelected ? CommonColors.blue : CommonColors.neutral200,
-            width: isSelected ? 1 : .5,
+            width: isSelected ? 1.2 : .8,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(.03),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            )
+          ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              Expanded(
+        child: Row(
+          children: [
+            /// Vehicle Image
+            Container(
+              width: 58,
+              height: 58,
+              decoration: BoxDecoration(
+                color: const Color(0xffEEF3FF),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10),
                 child: vehicle.carModelImage != null
                     ? Image.network(
                         vehicle.carModelImage!,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) {
-                          return Image.asset(
-                            CommonImagePath.vehicle1,
-                          );
-                        },
+                        errorBuilder: (_, __, ___) =>
+                           Icon(
+    Icons.bolt,
+    color: Color(0xFF3D6AF2),
+    size: 30,
+  ),
                       )
-                    : Image.asset(
-                        CommonImagePath.vehicle1,
-                      ),
+                    : Icon(
+    Icons.bolt,
+    color: Color(0xFF3D6AF2),
+    size: 30,
+  ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                vehicle.modelName ?? "",
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            ),
+
+            const SizedBox(width: 14),
+
+            /// Vehicle Details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    vehicle.modelName ?? "",
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    vehicle.manufacturerName ?? "",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            /// Battery
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xffEEF3FF),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                "233 kWh",
                 style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                  color: CommonColors.blue,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 11
                 ),
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(width: 12),
+
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.grey,
+            ),
+          ],
         ),
       ),
     );
   }
 }
 // class VehicleCard extends StatelessWidget {
-//   final VehicleModel vehicle;
+//   final EvModelData vehicle;
 //   final bool isSelected;
 //   final VoidCallback onTap;
 
@@ -541,37 +628,35 @@ class VehicleCard extends StatelessWidget {
 //       child: AnimatedContainer(
 //         duration: const Duration(milliseconds: 200),
 //         decoration: BoxDecoration(
-//           color:isSelected?const Color(0xFFEAF7F5): Colors.white,
+//           color: isSelected ? const Color(0xFFEAF7F5) : Colors.white,
 //           borderRadius: BorderRadius.circular(14),
 //           border: Border.all(
-//             color: isSelected
-//                 ? CommonColors.blue
-//                 : CommonColors.neutral200,
-//             width: isSelected ? 1 : 0.5,
+//             color: isSelected ? CommonColors.blue : CommonColors.neutral200,
+//             width: isSelected ? 1 : .5,
 //           ),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black.withOpacity(.04),
-//               blurRadius: 8,
-//               offset: const Offset(0, 2),
-//             ),
-//           ],
 //         ),
 //         child: Padding(
 //           padding: const EdgeInsets.all(12),
 //           child: Column(
 //             children: [
 //               Expanded(
-//                 child: Image.asset(
-//                   vehicle.image,
-//                   fit: BoxFit.contain,
-//                 ),
+//                 child: vehicle.carModelImage != null
+//                     ? Image.network(
+//                         vehicle.carModelImage!,
+//                         fit: BoxFit.contain,
+//                         errorBuilder: (_, __, ___) {
+//                           return Image.asset(
+//                             CommonImagePath.vehicle1,
+//                           );
+//                         },
+//                       )
+//                     : Image.asset(
+//                         CommonImagePath.vehicle1,
+//                       ),
 //               ),
-
 //               const SizedBox(height: 8),
-
 //               Text(
-//                 vehicle.vehicleName,
+//                 vehicle.modelName ?? "",
 //                 textAlign: TextAlign.center,
 //                 maxLines: 2,
 //                 overflow: TextOverflow.ellipsis,

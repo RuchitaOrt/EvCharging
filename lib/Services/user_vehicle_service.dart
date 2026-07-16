@@ -37,27 +37,19 @@ class UserVehicleService {
     return res;
   }
 
-  Future<DeleteVehicleResponse> deleteVehicle({
-    required BuildContext context,
-    required String vehicleRecId,
-  }) async {
-    return await _api.apiRequest(
-      context,
-      API.userVehicleDelete,
-      path: "/$vehicleRecId", // 👈 important
-    );
-  }
-
-   Future<UserVehicleUpdateResponse> updateVehicle(
-    BuildContext context, {
-    required Map<String, dynamic> payload,
-  }) async {
-    final res = await _api.apiRequest(
-      context,
-      API.userVehicleUpdate,
-      jsonval: payload,
-    );
-
-    return res as UserVehicleUpdateResponse;
-  }
+// Future<DeleteVehicleResponse?> deleteVehicle(
+//   BuildContext context,
+//   String vehicleId,
+// ) async {
+//   try {
+//     return await APIManager().apiRequest(
+//       context,
+//       API.userVehicleDelete,
+//       path: "/$vehicleId",
+//     );
+//   } catch (e) {
+//     print(e);
+//     return null;
+//   }
+// }
 }

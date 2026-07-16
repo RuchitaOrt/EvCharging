@@ -1,4 +1,7 @@
 
+import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/DeleteVehicleResponse.dart';
+import 'package:HyCharge/model/SetDefaultVehicleResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:HyCharge/Services/VehicleService.dart';
 import 'package:HyCharge/model/CarManufacturerResponse.dart';
@@ -9,6 +12,13 @@ class VehicleProvider extends ChangeNotifier {
   final VehicleService _service = VehicleService();
 
   bool isLoading = false;
+
+
+/// Existing vehicle selection (My Vehicles)
+String? selectedUserVehicleId;
+
+/// EV model selection (Add Vehicle)
+String? selectedModelId;
 
   ///---------------------------------------------------------
   /// API DATA
@@ -66,56 +76,63 @@ List<String> get tabs {
 
   EvModelData? selectedModel;
 
-  void selectModel(EvModelData model) {
-    selectedModel = model;
-    notifyListeners();
-  }
-
+  // void selectModel(EvModelData model) {
+  //   selectedModel = model;
+  //   notifyListeners();
+  // }
+void selectModel(EvModelData model) {
+  selectedModel = model;
+  selectedModelId = model.recId;
+  notifyListeners();
+}
   ///---------------------------------------------------------
   /// USER VEHICLE
   ///---------------------------------------------------------
 
   Vehicle? selectedUserVehicle;
 
-  void selectUserVehicle(Vehicle vehicle) {
-    selectedUserVehicle = vehicle;
-    notifyListeners();
-  }
-
+  // void selectUserVehicle(Vehicle vehicle) {
+  //   selectedUserVehicle = vehicle;
+  //   notifyListeners();
+  // }
+void selectUserVehicle(String recId) {
+  selectedUserVehicleId = recId;
+  notifyListeners();
+}
   ///---------------------------------------------------------
   /// FILTERED MODELS
   ///---------------------------------------------------------
 
-  List<EvModelData> getFilteredModels(String tab) {
-    List<EvModelData> list;
+  // List<EvModelData> getFilteredModels(String tab) {
+  //   List<EvModelData> list;
 
-    if (tab == "All") {
-      list = evModels;
-    } else {
-      final manufacturer = manufacturers.firstWhere(
-        (e) => e.manufacturerName == tab,
-        orElse: () => CarManufacturerData(),
-      );
+  //   if (tab == "All") {
+  //     list = evModels;
+  //   } else {
+  //     final manufacturer = manufacturers.firstWhere(
+  //       (e) => e.manufacturerName == tab,
+  //       orElse: () => CarManufacturerData(),
+  //     );
 
-      if (manufacturer.recId == null) {
-        return [];
-      }
+  //     if (manufacturer.recId == null) {
+  //       return [];
+  //     }
 
-      list = evModels.where((e) {
-        return e.manufacturerId == manufacturer.recId;
-      }).toList();
-    }
+  //     list = evModels.where((e) {
+  //       return e.manufacturerId == manufacturer.recId;
+  //     }).toList();
+  //   }
 
-    if (searchText.isEmpty) {
-      return list;
-    }
+  //   if (searchText.isEmpty) {
+  //     return list;
+  //   }
 
-    return list.where((e) {
-      return (e.modelName ?? "")
-          .toLowerCase()
-          .contains(searchText.toLowerCase());
-    }).toList();
-  }
+  //   return list.where((e) {
+  //     return (e.modelName ?? "")
+  //         .toLowerCase()
+  //         .contains(searchText.toLowerCase());
+  //   }).toList();
+  // }
 
   ///---------------------------------------------------------
   /// GET MODELS BY MANUFACTURER
@@ -181,6 +198,15 @@ for (var e in manufacturers) {
 print(response);
     if (response != null) {
       userVehicles = response.vehicles;
+      notifyListeners();
+       // Select default vehicle from API
+    final defaultVehicle = userVehicles.where((e) => e.defaultConfig == 1);
+
+    if (defaultVehicle.isNotEmpty) {
+      selectedUserVehicleId = defaultVehicle.first.recId;
+    } else if (userVehicles.isNotEmpty) {
+      selectedUserVehicleId = userVehicles.first.recId;
+    }
     }
 
     isLoading = false;
@@ -220,6 +246,29 @@ Future<bool> addVehicle(
   return false;
 }
 
+Future<bool> deleteVehicle(
+  BuildContext context,
+  String vehicleId,
+) async {
+  isLoading = true;
+  notifyListeners();
+
+  final response = await _service.deleteVehicle(
+    context,
+    vehicleId,
+  );
+
+  isLoading = false;
+
+  if (response?.success == true) {
+    await getUserVehicleList(context);
+    notifyListeners();
+    return true;
+  }
+
+  notifyListeners();
+  return false;
+}
   ///---------------------------------------------------------
   /// HELPERS
   ///---------------------------------------------------------
@@ -234,14 +283,32 @@ Future<bool> addVehicle(
       return "";
     }
   }
+String getModelName(String? id) {
+  print("Searching ID: $id");
+  print("EV Models Count: ${evModels.length}");
 
-  String getModelName(String? id) {
-    try {
-      return evModels.firstWhere((e) => e.recId == id).modelName ?? "";
-    } catch (_) {
-      return "";
-    }
+  for (final e in evModels) {
+    print("${e.recId} -> ${e.modelName}");
   }
+
+  try {
+    return evModels.firstWhere((e) => e.recId == id).modelName ?? "";
+  } catch (e) {
+    print("Model not found");
+    return "";
+  }
+}
+  // String getModelName(String? id) {
+
+   
+  //   print(id);
+  //   try {
+  //     return evModels.firstWhere((e) => e.recId == id).modelName ?? "";
+  //   } catch (_) {
+  //     return "";
+  //   }
+    
+  // }
 
   EvModelData? getModel(String? id) {
     try {
@@ -270,10 +337,36 @@ Future<bool> addVehicle(
       getUserVehicleList(context),
     ]);
   }
-  String? selectedVehicleId;
+  // String? selectedVehicleId;
 
-void selectVehicle(String recId) {
-  selectedVehicleId = recId;
-  notifyListeners();
+// void selectVehicle(String recId) {
+//   selectedVehicleId = recId;
+//   notifyListeners();
+// }
+
+Vehicle? get defaultVehicle {
+  try {
+    return userVehicles.firstWhere((e) => e.defaultConfig == 1);
+  } catch (_) {
+    return null;
+  }
 }
+
+
+Future<SetDefaultVehicleResponse?> setDefaultVehicle(
+  BuildContext context,
+  String registrationNumber,
+) async {
+  try {
+    return await APIManager().apiRequest(
+      context,
+      API.setDefaultVehicle,
+      path: "/$registrationNumber",
+    );
+  } catch (e) {
+    print(e);
+    return null;
+  }
+}
+
 }

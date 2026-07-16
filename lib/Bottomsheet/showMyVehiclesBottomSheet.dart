@@ -1,9 +1,11 @@
+import 'package:HyCharge/Provider/VehicleProvider.dart';
 import 'package:HyCharge/Screens/Vehicle/MyVehicleScreen.dart';
 import 'package:HyCharge/Screens/Vehicle/VehicleDetailScreen.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/main.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 void showMyVehiclesBottomSheet(BuildContext context) {
   showModalBottomSheet(
@@ -53,34 +55,63 @@ void showMyVehiclesBottomSheet(BuildContext context) {
 
             const SizedBox(height: 14),
 
-            SizedBox(
-              height: 120,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                ),
-                children: [
+            // SizedBox(
+            //   height: 120,
+            //   child: ListView(
+            //     scrollDirection: Axis.horizontal,
+            //     padding: const EdgeInsets.symmetric(
+            //       horizontal: 16,
+            //     ),
+            //     children: [
 
-                  _vehicleCard(
-                    selected: true,
-                    title: "Tata Nexon EV",
-                    number: "MH04CB2522",
-                    image: CommonImagePath.vehicle1,
-                  ),
+            //       _vehicleCard(
+            //         selected: true,
+            //         title: "Tata Nexon EV",
+            //         number: "MH04CB2522",
+            //         image: CommonImagePath.vehicle1,
+            //       ),
 
-                  const SizedBox(width: 12),
+            //       const SizedBox(width: 12),
 
-                  _vehicleCard(
-                    selected: false,
-                    title: "MG ZS EV",
-                    number: "MH04CB2523",
-                    image: CommonImagePath.vehicle2,
-                  ),
-                ],
-              ),
-            ),
+            //       _vehicleCard(
+            //         selected: false,
+            //         title: "MG ZS EV",
+            //         number: "MH04CB2523",
+            //         image: CommonImagePath.vehicle2,
+            //       ),
+            //     ],
+            //   ),
+            // ),
+SizedBox(
+  height: 120,
+  child: Consumer<VehicleProvider>(
+    builder: (context, provider, child) {
+      return provider.userVehicles.length ==0?Container(child: Center(child: Text("Add Vehicle here to apply")),): ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: provider.userVehicles.length,
+        itemBuilder: (context, index) {
+          final vehicle = provider.userVehicles[index];
 
+          return  Padding(
+  padding: const EdgeInsets.only(right: 12),
+  child: GestureDetector(
+    onTap: () {
+        provider.selectUserVehicle(vehicle.recId!);
+    },
+    child: _vehicleCard(
+      selected: provider.selectedUserVehicleId == vehicle.recId,
+      title: provider.getModelName(vehicle.carModelID),
+      number: vehicle.carRegistrationNumber ?? "",
+      image: CommonImagePath.vehicle5,
+    ),
+  ),
+);
+        },
+      );
+    },
+  ),
+),
             const Spacer(),
 
             Padding(
@@ -123,33 +154,55 @@ void showMyVehiclesBottomSheet(BuildContext context) {
 
                   const SizedBox(width: 12),
 
-                  Expanded(
-                    flex: 5,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style:
-                          ElevatedButton.styleFrom(
-                        minimumSize:
-                            const Size(0, 35),
-                        backgroundColor:
-                            CommonColors.blue,
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(
-                            10,
+                  Consumer<VehicleProvider>(
+                    builder: (context,provider,child) {
+                      return provider.userVehicles.length ==0?Container():Expanded(
+                        flex: 5,
+                        child: ElevatedButton(
+                          onPressed: () async {
+                           final provider =
+      Provider.of<VehicleProvider>(context, listen: false);
+
+  final vehicle = provider.userVehicles.firstWhere(
+    (e) => e.recId == provider.selectedUserVehicleId,
+  );
+
+  final success = await provider.setDefaultVehicle(
+    context,
+    vehicle.recId!,
+  );
+
+  if (success!.success!) {
+     await provider.getUserVehicleList(context); 
+    Navigator.pop(context);
+  }
+
+                          },
+                          style:
+                              ElevatedButton.styleFrom(
+                            minimumSize:
+                                const Size(0, 35),
+                            backgroundColor:
+                                CommonColors.blue,
+                            shape:
+                                RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(
+                                10,
+                              ),
+                            ),
+                          ),
+                          child: const Text(
+                            "Apply",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight:
+                                  FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                      child: const Text(
-                        "Apply",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight:
-                              FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                      );
+                    }
                   ),
                 ],
               ),

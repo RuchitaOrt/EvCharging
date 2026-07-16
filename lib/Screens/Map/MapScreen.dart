@@ -1,6 +1,8 @@
 
+import 'package:HyCharge/Bottomsheet/showMyVehiclesBottomSheet.dart';
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
 import 'package:HyCharge/Provider/HubProvider.dart';
+import 'package:HyCharge/Provider/VehicleProvider.dart';
 import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';
 import 'package:HyCharge/Screens/Controller/map_controller.dart';
 import 'package:HyCharge/Screens/Controller/station_card_widget.dart';
@@ -71,7 +73,18 @@ Set<ChargerFilterType> selectedFilters = {};
       context
           .read<ActiveSessionProvider>()
           .fetchActiveSessions(context, "Active");
+             WidgetsBinding.instance.addPostFrameCallback((_) async {
+
+   
+   
+  context.read<VehicleProvider>().getManufacturers(context);
+  context.read<VehicleProvider>().getEvModels(context);
+  context.read<VehicleProvider>().getUserVehicleList(context);
+
+    });
     }
+
+  
   }
 
   void _showLoginSheet(BuildContext context) {
@@ -129,6 +142,75 @@ Set<ChargerFilterType> selectedFilters = {};
                 trafficEnabled: false,
                 style: mapsStyle,
               ),
+
+               Positioned(
+  top: 10,
+  left: 20,
+
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.start,
+    children: [
+      /// 🔍 SEARCH BAR (takes full remaining width)
+    Consumer<VehicleProvider>(
+  builder: (context, vehicleProvider, child) {
+   
+    if (vehicleProvider.evModels.isEmpty ||
+        vehicleProvider.userVehicles.isEmpty) {
+      return const SizedBox();
+    }
+
+    final vehicle = vehicleProvider.defaultVehicle;
+
+    if (vehicle == null) {
+      return const SizedBox();
+    }
+
+    final modelName = vehicleProvider.getModelName(
+      vehicle.carModelID,
+    );
+
+    return GestureDetector(
+      onTap: ()
+      {
+         showMyVehiclesBottomSheet(
+        routeGlobalKey.currentContext!, 
+        
+      );
+      },
+      child: Container(
+        padding: EdgeInsets.only(left: 8,right: 8),
+        decoration: BoxDecoration(color: CommonColors.greyText,
+        borderRadius: BorderRadius.all(Radius.circular(10))),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+               Text(modelName?? "",    style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),),
+             
+                Text(
+               "${vehicle?.carRegistrationNumber ?? ""} ",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            Icon(Icons.arrow_drop_down,color: CommonColors.white,)
+          ],
+          
+        ),
+      ),
+    );
+  },
+),
+    ])),
               Positioned(
   top: 10,
   left: 20,
@@ -142,7 +224,7 @@ Set<ChargerFilterType> selectedFilters = {};
 
               /// Search
               Positioned(
-  top: 30,
+  top: 60,
   left: 20,
   right: 20,
   child: Row(
@@ -162,7 +244,7 @@ Set<ChargerFilterType> selectedFilters = {};
 
               /// GPS Button
               Positioned(
-                top: 100,
+                top: 120,
                 right: 20,
                 child: _gpsButton(),
               ),
