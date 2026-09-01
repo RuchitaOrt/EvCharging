@@ -19,10 +19,14 @@ class DirectionsService {
         '&key=$apiKey';
 
     final response = await http.get(Uri.parse(url));
+    
     final data = json.decode(response.body);
 
     if (data['status'] != 'OK') {
+       print('Directions API error as: ${data['status']}');
+       print("Directions Response: ${response.body}");
       throw Exception('Directions API error: ${data['status']}');
+     
     }
     final encodedPolyline =
     data['routes'][0]['overview_polyline']['points'];

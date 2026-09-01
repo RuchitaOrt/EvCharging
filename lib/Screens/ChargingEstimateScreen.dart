@@ -17,6 +17,10 @@ import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/model/LocalStartUnifiedChargingSessionResponse.dart';
+import 'package:HyCharge/model/SessionIdResponse.dart';
+import 'package:HyCharge/model/StartUnifiedChargingSessionResponse.dart';
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
@@ -24,20 +28,21 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class ChargingEstimateScreen extends StatefulWidget {
-  Charger? selectedCharger;
+  Connector? selectedCharger;
   String? selectedStationID;
   final String? isAPPLINK;
   final String? chargerID;
   final String? selectedStationName;
  final  String? station;
   final String? chargingConnector;
+  
   ChargingEstimateScreen(
       {super.key,
       this.selectedCharger,
       this.selectedStationID,
       this.isAPPLINK = "0",
       this.chargerID,
-      this.chargingConnector,this.selectedStationName,this.station});
+      this.chargingConnector,this.selectedStationName,this.station, });
 
   @override
   State<ChargingEstimateScreen> createState() => _ChargingEstimateScreenState();
@@ -47,7 +52,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
   double currentWalletPrice = 0.0;
   String? selectedStationID;
  
-  Charger? _selectedCharger;
+  Connector? _selectedCharger;
   String? _selectedStationID;
     String? selectedStationName;
   
@@ -68,8 +73,8 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
 
     _selectedStationID = widget.selectedStationID;
 
-    selectedStationName= widget.selectedCharger?.chargePointName ??"";
-    chargingConnector= widget.selectedCharger?.connectorName ?? "";
+    selectedStationName= widget.selectedCharger?.chargerTypeName ??"";
+    chargingConnector= widget.selectedCharger?.connectorId ?? "";
     // print("CHSGE");
     // print(_selectedCharger!.recId!);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,7 +88,7 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
   
     if (widget.isAPPLINK == "1" && widget.chargerID != null) {
       
-  getChagerDetails(widget.chargerID!);
+  // getChagerDetails(widget.chargerID!);
    MyApp.pendingChargerId = null;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,25 +108,26 @@ async {
   message: "Plug the charging connector into your vehicle to begin charging.",
 );
 }
-  getChagerDetails(String chargerID) async {
-    final provider =
-        Provider.of<ChargerDetailsProvider>(context, listen: false);
+  // getChagerDetails(String chargerID) async {
+  //   final provider =
+  //       Provider.of<ChargerDetailsProvider>(context, listen: false);
 
-    final response = await provider.fetchChargerDetails(
-      context,
-      chargerID,
-    );
-    _selectedCharger = response!.charger;
-    _selectedStationID = response.charger!.chargingStationId;
-     selectedStationName=response.charger?.chargePointName ?? "";
-    chargingConnector= response.charger?.connectorName ?? "";
-    // print(response.charger?.chargerTypeName);
-    widget.selectedCharger = response.charger;
+  //   final response = await provider.fetchChargerDetails(
+  //     context,
+  //     chargerID,
+  //   );
+  //   //21julu
+  //   _selectedCharger = response!.charger;
+  //   _selectedStationID = response.charger!.chargingStationId;
+  //    selectedStationName=response.charger?.chargePointName ?? "";
+  //   chargingConnector= response.charger?.connectorName ?? "";
+  //   // print(response.charger?.chargerTypeName);
+  //   widget.selectedCharger = response.charger;
 
 
 
 
-  }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -232,6 +238,7 @@ async {
                   ):   SizedBox(
                     width: double.infinity,
                     height: 44,
+                    
                     child: Consumer<ChargingProvider>(
                       builder: (context, provider, _) => ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -258,17 +265,18 @@ async {
                                   final tabIndex = DefaultTabController.of(context).index;
 
 print("Selected Tab Index: $tabIndex");
+// print(response.data!.raw!.authorizationReference!);
                                   // ✅ start session
-                                  final response = await provider.startSession(
+                                  final response = await provider.startUnifiedSession(
                                       context: context,
                                       chargingGunId: _selectedCharger!
-                                          .recId, //widget.selectedCharger!.recId!,
+                                          .id!, //widget.selectedCharger!.recId!,
                                       chargingStationId:
                                           _selectedStationID!, //widget.selectedStationID!,
                                       userId: userId,
                                       chargeTagId: "B4A63CDF",
-                                      connectorId: int.parse(_selectedCharger!
-                                          .connectorId!), //int.parse(widget.selectedCharger!.connectorId!),
+                                      connectorId: _selectedCharger!
+                                          .connectorId!.toString(), //int.parse(widget.selectedCharger!.connectorId!),
                                       startMeterReading: "0",
                                       chargingTariff: "typeATariff",
                                       costLimit:
@@ -279,58 +287,178 @@ print("Selected Tab Index: $tabIndex");
                                       batteryIncreaseLimit:
                                           chargingEstimate.percentage.toString(),
                                           tabIndex:tabIndex.toString() );
-        
+                                          print("RUCHI");
+                                          if (response is StartUnifiedChargingSessionResponse) {
+  // Partner charging session
+       print("RUCHI ${response!}");
+           print("RUCHI ${response!.success}");
+                                  if (response != null && response.success) {
+                                    FocusScope.of(context).unfocus();
+                                    // showToast(
+                                    //     "Charging session started successfully!");
+                                    print("BEFORE STSRT");
+                                   print(response.data!.raw!.authorizationReference!);
+                                    print("Connector ID${_selectedCharger!.connectorId}");
+                        String  authorizationReference="";
+                         if(response.data!.raw!.authorizationReference!.startsWith("P"))
+                         {
+authorizationReference="${response.data!.raw!.authorizationReference!}";
+                         } else
+                         {
+                          authorizationReference="P:${response.data!.raw!.authorizationReference!}";
+                         }        
+
+final responseSessionID = await provider.pollForSessionId(
+  context: context,
+  authorizationReference: authorizationReference,
+);
+
+if (responseSessionID != null) {
+  print(responseSessionID.data!.sessionId);
+   Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => SessionChargingScreen(
+                                          args: SessionChargingArgs(
+                                              sessionId:
+                                                 responseSessionID!.data!.sessionId!,
+                                              status: response.data?.raw?.status ??
+                                                  "",
+                                              cost:
+                                              //  response.data!.raw!.result.
+                                              //         .chargingTotalFee!
+                                              //         .toString() ??
+                                                  "0",
+                                              unitConsumed: 
+                                              // response.data!
+                                              //         .session!.energyTransmitted!
+                                              //         .toString() ??
+                                                  "0",
+                                              outputPower: 
+                                              // response.data!.session!
+                                              //         .chargingGun!.powerOutput
+                                              //         .toString() ??
+                                                  "0",
+                                              batteryPercentage:
+                                                  // response.data!.batteryStateOfCharge!.startSoC == null
+                                                  //     ? "0"
+                                                  //     : response
+                                                  //             .data!
+                                                  //             .batteryStateOfCharge!
+                                                  //             .startSoC
+                                                  //             .toString() ??
+                                                          "0",
+                                              endMeterReading: 
+                                              // response.data!.session!.endMeterReading!.toString() ??
+                                               "0",
+                                              duration: 
+                                              // response.data!.session!.duration.toString() ?? 
+                                              "0",
+                                              stationName: 
+                                              // response.data!.session!.chargingStationName ?? 
+                                              "",
+                                              ConnectorGunID: response.data!.connectorId ?? ""
+                                              
+                                              ),
+                                        ),
+                                      ),
+                                    );
+  // Navigate or do whatever you want
+} else {
+  showToast("Unable to get session id. Please try again.");
+}
+//  final responseSessionID = await provider.fetchSessionID(context,authorizationReference);
+
+                                    //  print(responseSessionID!.data!.sessionId);
+                                 
+                                 
+
+                                   
+                                   
+                                  } else {
+                                    FocusScope.of(context).unfocus();
+                                    showToast("Failed to start session");
+                                  }
+}
+
+if (response is LocalStartUnifiedChargingSessionResponse) {
+  // Local charging session
+       print("RUCHI ${response!}");
+           print("RUCHI ${response!.success}");
                                   if (response != null && response.success) {
                                     FocusScope.of(context).unfocus();
                                     showToast(
                                         "Charging session started successfully!");
                                     print("BEFORE STSRT");
-                                    print(response.data!.session!.recId);
-                                    print(response
-                                        .data!.batteryStateOfCharge!.startSoC);
+                                  
+                                    print("Connector ID${_selectedCharger!.connectorId}");
+
+                                  
+                                    // authorizationReference="L:${response.data!.raw!.authorizationReference!}";
+                                      //  final responseSessionID = await provider.fetchSessionID(context,response.data!.id);
+
+                                  // print("TOM first ${ response.data!.id}");
+                                  //   print("TOM second ${ responseSessionID!.data!.sessionId}");
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => SessionChargingScreen(
                                           args: SessionChargingArgs(
                                               sessionId:
-                                                  response.data!.session!.recId!,
-                                              status: response.data!.session!.status ??
+                                             response.data!.id
+                                                ,
+                                              status: response.data?.status ??
                                                   "",
-                                              cost: response.data!.session!
-                                                      .chargingTotalFee!
-                                                      .toString() ??
+                                             cost:
+                                              //  response.data!.raw!.result.
+                                              //         .chargingTotalFee!
+                                              //         .toString() ??
                                                   "0",
-                                              unitConsumed: response.data!
-                                                      .session!.energyTransmitted!
-                                                      .toString() ??
+                                              unitConsumed: 
+                                              // response.data!
+                                              //         .session!.energyTransmitted!
+                                              //         .toString() ??
                                                   "0",
-                                              outputPower: response.data!.session!
-                                                      .chargingGun!.powerOutput
-                                                      .toString() ??
+                                              outputPower: 
+                                              // response.data!.session!
+                                              //         .chargingGun!.powerOutput
+                                              //         .toString() ??
                                                   "0",
                                               batteryPercentage:
-                                                  response.data!.batteryStateOfCharge!.startSoC == null
-                                                      ? "0"
-                                                      : response
-                                                              .data!
-                                                              .batteryStateOfCharge!
-                                                              .startSoC
-                                                              .toString() ??
+                                                  // response.data!.batteryStateOfCharge!.startSoC == null
+                                                  //     ? "0"
+                                                  //     : response
+                                                  //             .data!
+                                                  //             .batteryStateOfCharge!
+                                                  //             .startSoC
+                                                  //             .toString() ??
                                                           "0",
-                                              endMeterReading: response.data!.session!.endMeterReading!.toString() ?? "0",
-                                              duration: response.data!.session!.duration.toString() ?? "0",
-                                              stationName: response.data!.session!.chargingStationName ?? "",
-                                              ConnectorGunID: response.data!.session!.chargingGun!.connectorId ?? ""
+                                              endMeterReading: 
+                                              // response.data!.session!.endMeterReading!.toString() ??
+                                               "0",
+                                              duration: 
+                                              // response.data!.session!.duration.toString() ?? 
+                                              "0",
+                                              stationName: 
+                                              // response.data!.session!.chargingStationName ?? 
+                                              "",
+                                              ConnectorGunID: response.data!.connectorId ?? ""
                                               
                                               ),
                                         ),
                                       ),
                                     );
+                                   
+
+                                   
+                                   
                                   } else {
                                     FocusScope.of(context).unfocus();
                                     showToast("Failed to start session");
                                   }
+}
+     
+   
                                 } else {
                                   FocusScope.of(context).unfocus();
                                   showToast(
@@ -396,7 +524,7 @@ print("Selected Tab Index: $tabIndex");
                         ),
                         const SizedBox(height: 4),
                                     Text(
-                    "Connector ${chargingConnector}",
+                    "Connector ${chargingConnector} ${widget.selectedCharger!.id}",
                     style: const TextStyle(
                         fontSize: 12, color: CommonColors.white),
                                     ),
@@ -538,7 +666,7 @@ class _EstimateCard extends StatelessWidget {
 }
 
 class _TabViews extends StatelessWidget {
-  final Charger? selectedCharger;
+  final Connector? selectedCharger;
   final String? selectedStationID;
   _TabViews(this.selectedCharger, this.selectedStationID);
   Timer? _debounce;
@@ -597,9 +725,9 @@ class _TabViews extends StatelessWidget {
                   provider.isDragging = false;
                   provider.activeMode = "units";
           
-                  provider.estimateCharging(
+                  provider.unifiedestimateCharging(
                     context: context,
-                    chargingGunId: selectedCharger!.recId.toString(),
+                    chargingGunId: selectedCharger!.id.toString(),
                     chargingStationId: selectedStationID!,
                     connectorId: selectedCharger!.connectorId.toString(),
                     desiredEnergy: v,
@@ -696,9 +824,9 @@ if (provider.activeMode != "time" &&
                     provider.isDragging = false;
                     provider.activeMode = "time";
           
-                    provider.estimateCharging(
+                    provider.unifiedestimateCharging(
                       context: context,
-                      chargingGunId: selectedCharger!.recId.toString(),
+                      chargingGunId: selectedCharger!.id.toString(),
                       chargingStationId: selectedStationID!,
                       connectorId: selectedCharger!.connectorId.toString(),
                       desiredDuration: v.round(),
@@ -776,9 +904,9 @@ if (provider.activeMode != "time" &&
   provider.activeMode = "time";
   provider.setTime(v);
 
-  provider.estimateCharging(
+  provider.unifiedestimateCharging(
     context: context,
-    chargingGunId: selectedCharger!.recId.toString(),
+    chargingGunId: selectedCharger!.id.toString(),
     chargingStationId: selectedStationID!,
     connectorId: selectedCharger!.connectorId.toString(),
     desiredDuration: v.round(),
@@ -1086,7 +1214,7 @@ Widget _sliderTab({
 }
 
 class _AmountTab extends StatefulWidget {
-  final Charger? selectedCharger;
+  final Connector? selectedCharger;
   final String? selectedStationID;
 
   const _AmountTab({
@@ -1143,9 +1271,9 @@ class _AmountTabState extends State<_AmountTab> {
               if (_debounce?.isActive ?? false) _debounce!.cancel();
               provider.activeMode = "amount";
               _debounce = Timer(Duration(milliseconds: 600), () {
-                provider.estimateCharging(
+                provider.unifiedestimateCharging(
                   context: context,
-                  chargingGunId: widget.selectedCharger!.recId.toString(),
+                  chargingGunId: widget.selectedCharger!.id.toString(),
                   chargingStationId: widget.selectedStationID!,
                   connectorId: widget.selectedCharger!.connectorId.toString(),
                   desiredCost: provider.amount,

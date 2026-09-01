@@ -134,6 +134,7 @@ Future<bool> _handleForceUpdate(AppVersionProvider provider) async {
         builder: (_) => ChargingEstimateScreen(
           chargerID: MyApp.pendingChargerId,
           isAPPLINK: "1",
+       
         ),
       ),
     );
@@ -187,6 +188,7 @@ Future<void> _continueSplashFlowAndroid() async {
         builder: (_) => ChargingEstimateScreen(
           chargerID: chargerId,
           isAPPLINK: "1",
+         
         ),
       ),
     );
@@ -203,6 +205,7 @@ Future<void> _continueSplashFlowAndroid() async {
         builder: (_) => ChargingEstimateScreen(
           chargerID: MyApp.pendingChargerId,
           isAPPLINK: "1",
+         
         ),
       ),
     );
@@ -451,6 +454,7 @@ bool isUpdateAvailable(String current, String latest) {
         builder: (_) => ChargingEstimateScreen(
           chargerID: chargerId,
           isAPPLINK: "1",
+          
         ),
       ),
     );

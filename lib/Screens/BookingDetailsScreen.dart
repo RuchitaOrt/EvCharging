@@ -2,6 +2,8 @@ import 'package:HyCharge/Provider/ChargingProvider.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/model/SessionDetailResponse.dart';
+import 'package:HyCharge/model/SessionIDDetailResponse.dart';
+import 'package:HyCharge/model/UnifiedSessionDetailResponse.dart';
 
 
 import 'package:flutter/material.dart';
@@ -10,7 +12,8 @@ import 'package:provider/provider.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final String recID;
-  const BookingDetailsScreen({super.key, required this.recID});
+  final String bookingType;
+  const BookingDetailsScreen({super.key, required this.recID, required this.bookingType});
 
   @override
   State<BookingDetailsScreen> createState() => _BookingDetailsScreenState();
@@ -23,12 +26,16 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     super.initState();
    loadData();
   }
-SessionDetailResponse? response;
+SessionIDDetailResponse? response;
+
+UnifiedSessionDetailResponse? Unifiedresponse;
 bool isLoading = true;
 
 Future<void> loadData() async {
-  final res = await context.read<ChargingProvider>()
-      .fetchChargingSessionDetails(
+  if(widget.bookingType=="L")
+  {
+final res = await context.read<ChargingProvider>()
+      .fetchSessionDetails(
         context: context,
         sessionId: widget.recID,
       );
@@ -37,6 +44,19 @@ Future<void> loadData() async {
     response = res;
     isLoading = false;
   });
+  }else{
+    final res = await context.read<ChargingProvider>()
+      .fetchPartnerSessionDetails(
+        context: context,
+        sessionId: widget.recID,
+      );
+
+  setState(() {
+    Unifiedresponse = res;
+    isLoading = false;
+  });
+  }
+  
 }
   
   @override
@@ -52,15 +72,18 @@ Future<void> loadData() async {
         ),
       body: isLoading
         ? const Center(child: CircularProgressIndicator())
-        : response == null
+        : (response == null && widget.bookingType=="L" )
             ? const Center(child: Text("No data found"))
-            :  SingleChildScrollView(
+            : (Unifiedresponse == null && widget.bookingType=="P" )? const Center(child: Text("No data found")):
+            
+             SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
+        child: 
+        Column(
           children: [
             /// Amount Section
              Text(
-              "₹ ${response!.data!.costDetails!.totalCost.toString()}",
+          widget.bookingType=="L"  ?  "₹ ${response!.data!.costDetails!.totalCost.toString()}":"₹ ${Unifiedresponse!.data!.costDetails!.grandTotal.toString()}",
               style: TextStyle(
                 fontSize: 34,
                 fontWeight: FontWeight.bold,
@@ -68,18 +91,14 @@ Future<void> loadData() async {
             ),
             const SizedBox(height: 4),
              Text(
-              "${response!.data!.status}",
+            widget.bookingType=="L"  ?     "${response!.data!.status}":"${Unifiedresponse!.data!.status}",
               style: TextStyle(
                 color: Colors.green,
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 8),
-            // TextButton(
-            //   onPressed: () {},
-            //   child:  Text("View invoice",style: TextStyle(color: CommonColors.blue,),),
-            // ),
-
+         
           
             /// Booking ID Card
             _buildBookingId(),
@@ -172,9 +191,9 @@ String formatonlyTimeIST(String? timeString) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: _cardDecoration(),
-      child: Column(
+      child:widget.bookingType=="L"? Column(
         children: [
-          _item("Date & time", "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTimeIST("${response!.data!.session!.startTime}")} - ${formatonlyTimeIST("${response!.data!.session!.endTime}")}"),
+         _item("Date & time", "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTimeIST("${response!.data!.session!.startTime}")} - ${formatonlyTimeIST("${response!.data!.session!.endTime}")}"),
       //     _item("Address details",
       // (response!.data!.session!.chargingHub!.addressLine1==null)?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
           _item("Charger type", "${response!.data!.chargerDetails!.chargerType}"),
@@ -189,7 +208,7 @@ String formatonlyTimeIST(String? timeString) {
           _item("SGST (9%)",  "₹ ${response!.data!.costDetails!.sgst.toString()}"),
           _item("CGST (9%)", "₹ ${response!.data!.costDetails!.cgst.toString()}"),
          _item("Duration", "${response!.data!.timing!.duration!.formattedDuration.toString()}"),
-          // _item("Charge coins credited", "55"),
+         
 
           const Divider(height: 24),
 
@@ -205,7 +224,48 @@ String formatonlyTimeIST(String? timeString) {
               ),
               Spacer(),
               Text(
-                "₹ ${response!.data!.costDetails!.totalCost.toString()}",
+               "₹ ${response!.data!.costDetails!.totalCost.toString()}",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          )
+        ],
+      ):Column(
+        children: [
+          _item("Date & time", "${formatTime(Unifiedresponse!.data!.startDateTime!.toString())} \n${formatonlyTimeIST("${Unifiedresponse!.data!.startDateTime}")} - ${formatonlyTimeIST("${Unifiedresponse!.data!.endDateTime}")}"),
+     
+          _item("Charger type","-"),
+          _item("Price per unit", "${Unifiedresponse!.data!.costDetails!.platformFeePerKwh.toString()}"),
+          _item("Connector details", "${Unifiedresponse!.data!.location!.address}"),
+        
+          _item("Total kW used", "${Unifiedresponse!.data!.totalEnergyKwh.toString()}"),
+          _item("Total charging time", "${Unifiedresponse!.data!.timeLimit.toString()}"),
+         _item("Service charge", "₹ ${Unifiedresponse!.data!.costDetails!.taxableValue.toString()}"),
+        
+           _item("SGST (9%)",  "₹ ${Unifiedresponse!.data!.costDetails!.sgstAmount.toString()}"),
+          _item("CGST (9%)", "₹ ${Unifiedresponse!.data!.costDetails!.cgstAmount.toString()}"),
+         _item("Duration", "${Unifiedresponse!.data!.durationMinutes!.toString()}"),
+         
+
+          const Divider(height: 24),
+
+          Row(
+            children:  [
+              Text(
+                "Total Amount",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                  fontSize: 16,
+                ),
+              ),
+              Spacer(),
+              Text(
+                "₹ ${Unifiedresponse!.data!.costDetails!.grandTotal.toString()}",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: Colors.green,

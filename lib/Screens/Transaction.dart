@@ -225,7 +225,9 @@ String _formatDate(String? isoDate) {
                     _formatDate(tx.createdOn?.toString()),
                     isCredit,
                     tx.additionalInfo1 ?? "",
-                    tx.chargingSessionId ?? ""
+                    tx.recId ?? "",
+                     tx.chargingSessionId ?? ""
+                   
                   ),
                 ),
               );
@@ -349,7 +351,8 @@ class _TransactionSectionState extends State<_TransactionSection> {
                         _formatDate(tx.createdOn?.toString()),
                         isCredit,
                         tx.additionalInfo1 ?? "",
-                        tx.chargingSessionId ?? ""
+                        tx.recId ?? "",
+                         tx.chargingSessionId ??""
                       ),
                     ),
                   );
@@ -441,9 +444,10 @@ class _Tx {
   final String amount;
   final String time;
   final String sessionID;
+   final String chargingSessionID;
   final bool isCredit;
 
-  _Tx(this.title, this.amount, this.time, this.isCredit, this.orderId,  this.sessionID);
+  _Tx(this.title, this.amount, this.time, this.isCredit, this.orderId,  this.sessionID,  this.chargingSessionID);
 }
 
 class _TransactionTile extends StatelessWidget {
@@ -455,11 +459,13 @@ class _TransactionTile extends StatelessWidget {
     return GestureDetector(
       onTap: ()
       {
+        print("item.sessionID ${item.sessionID}");
          item.isCredit?null:
          Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => BookingDetailsScreen(recID: item.sessionID
+            builder: (_) => BookingDetailsScreen(recID: item.sessionID,
+            bookingType:  (item.chargingSessionID==""|| item.chargingSessionID==null)?"P": "L",
             
             ),
           ),
@@ -493,6 +499,9 @@ class _TransactionTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                    Text(item.sessionID,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.w800)),
                   Text(item.title,
                       style: const TextStyle(
                           fontSize: 12, fontWeight: FontWeight.w800)),

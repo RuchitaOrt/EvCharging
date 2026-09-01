@@ -2,6 +2,7 @@ import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/googleMap.dart';
 import 'package:HyCharge/Utils/iconresizer.dart';
 import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class MiniMapWidget extends StatefulWidget {
-  final ChargingHub hub;
+  final Location hub;
   final LatLng currentLocation;
   final LatLng hubLocation;
   final List<dynamic> nearbyHubs;
@@ -51,7 +52,8 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
     await _loadMapStyle();
     await _loadIcons();
     _setupMarkers();
-    await _getRoute();
+    ///phase2
+    // await _getRoute();
   }
 
   /// Load icons
@@ -84,7 +86,7 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
         icon: hubIcon!,
         anchor: const Offset(0.5, 1),
         infoWindow: InfoWindow(
-          title: widget.hub.chargingHubName ?? "Charging Station",
+          title: widget.hub.name ?? "Charging Station",
         ),
       ),
     );
@@ -101,7 +103,7 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
 
     /// NEARBY HUBS
     for (var station in widget.nearbyHubs) {
-      if (station.recId == widget.hub.recId) continue;
+      if (station.id == widget.hub.id) continue;
 
       if (station.latitude != null && station.longitude != null) {
         try {
@@ -110,7 +112,7 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
 
           tempMarkers.add(
             Marker(
-              markerId: MarkerId("nearby_${station.recId}"),
+              markerId: MarkerId("nearby_${station.id}"),
               position: LatLng(lat, lng),
               icon: nearbyIcon!,
             ),
@@ -139,41 +141,41 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
   }
 
   /// Get road route
-  Future<void> _getRoute() async {
-    PolylinePoints polylinePoints = PolylinePoints();
+  // Future<void> _getRoute() async {
+  //   PolylinePoints polylinePoints = PolylinePoints();
 
-    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
-      googleApiKey: googleApiKey,
-      request: PolylineRequest(
-        origin: PointLatLng(
-          widget.currentLocation.latitude,
-          widget.currentLocation.longitude,
-        ),
-        destination: PointLatLng(
-          widget.hubLocation.latitude,
-          widget.hubLocation.longitude,
-        ),
-        mode: TravelMode.driving,
-      ),
-    );
+  //   PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+  //     googleApiKey: googleApiKey,
+  //     request: PolylineRequest(
+  //       origin: PointLatLng(
+  //         widget.currentLocation.latitude,
+  //         widget.currentLocation.longitude,
+  //       ),
+  //       destination: PointLatLng(
+  //         widget.hubLocation.latitude,
+  //         widget.hubLocation.longitude,
+  //       ),
+  //       mode: TravelMode.driving,
+  //     ),
+  //   );
 
-    if (result.points.isNotEmpty) {
-      List<LatLng> routePoints = result.points
-          .map((point) => LatLng(point.latitude, point.longitude))
-          .toList();
+  //   if (result.points.isNotEmpty) {
+  //     List<LatLng> routePoints = result.points
+  //         .map((point) => LatLng(point.latitude, point.longitude))
+  //         .toList();
 
-      polylines = {
-        Polyline(
-          polylineId: const PolylineId("route"),
-          points: routePoints,
-          color: Colors.green,
-          width: 6,
-        )
-      };
+  //     polylines = {
+  //       Polyline(
+  //         polylineId: const PolylineId("route"),
+  //         points: routePoints,
+  //         color: Colors.green,
+  //         width: 6,
+  //       )
+  //     };
 
-      setState(() {});
-    }
-  }
+  //     setState(() {});
+  //   }
+  // }
 
   /// Load dark style
   Future<void> _loadMapStyle() async {

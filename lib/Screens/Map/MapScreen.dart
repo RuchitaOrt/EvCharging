@@ -36,13 +36,15 @@ class _MapScreenState extends State<MapScreen> {
   String? mapsStyle;
   bool isLoggedIn = false;
 Set<ChargerFilterType> selectedFilters = {};
+
   @override
   void initState() {
     super.initState();
     controller = MapController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<HubProvider>().listenToScroll(350);
+      context.read<HubProvider>().listenToUnifiedScroll(350);
+      // .listenToScroll(350);
       _loadData();
     });
   }
@@ -58,8 +60,8 @@ Set<ChargerFilterType> selectedFilters = {};
       mapsStyle = style;
     });
 
-    context.read<HubProvider>().loadHubs(context);
-
+    // context.read<HubProvider>().loadHubs(context);
+  
     final loggedIn = await AuthStorage.isLoggedIn();
     if (!mounted) return;
 
@@ -70,9 +72,14 @@ Set<ChargerFilterType> selectedFilters = {};
     if (!loggedIn) {
       _showLoginSheet(context);
     } else {
+      print("RUCHITA HERE FOR DATA");
+      context.read<HubProvider>().loadUnifiedHubs(context);
       context
           .read<ActiveSessionProvider>()
           .fetchActiveSessions(context, "Active");
+            context
+          .read<ActiveSessionProvider>()
+          .fetchAUnifiedctiveSessions(context, "Active");
              WidgetsBinding.instance.addPostFrameCallback((_) async {
 
    
@@ -221,10 +228,51 @@ Set<ChargerFilterType> selectedFilters = {};
       /// 🔍 SEARCH BAR (takes full remaining width)
       Text("UAT",style: TextStyle(color: CommonColors.background,fontSize: 14,fontWeight: FontWeight.bold),),
     ])),
+Positioned(
+  top: 60,
+  left: 20,
+  right: 20,
+  child: Consumer<HubProvider>(
+    builder: (_, provider, __) {
+      return Row(
+        children: [
 
+          _tab(
+            title: "All",
+            selected: provider.selectedTab == HubTab.All,
+            onTap: () {
+              provider.changeTab(HubTab.All);
+            },
+          ),
+
+          const SizedBox(width: 10),
+
+          _tab(
+            title: "HyCharge",
+            selected: provider.selectedTab == HubTab.HyCharge,
+            onTap: () {
+              provider.changeTab(HubTab.HyCharge);
+            },
+          ),
+
+          const SizedBox(width: 10),
+
+          _tab(
+            title: "Partner",
+            selected: provider.selectedTab == HubTab.Partner,
+            onTap: () {
+              provider.changeTab(HubTab.Partner);
+            },
+          ),
+        ],
+      );
+    },
+  ),
+),
               /// Search
               Positioned(
-  top: 60,
+                top: 100,
+  // top: 60,
   left: 20,
   right: 20,
   child: Row(
@@ -244,7 +292,8 @@ Set<ChargerFilterType> selectedFilters = {};
 
               /// GPS Button
               Positioned(
-                top: 120,
+                  top: 140,
+                // top: 120,
                 right: 20,
                 child: _gpsButton(),
               ),
@@ -255,11 +304,16 @@ Set<ChargerFilterType> selectedFilters = {};
                   child: CircularProgressIndicator(color: Colors.green),
                 ),
 
+     
               /// Active Session Card
               Consumer<ActiveSessionProvider>(
                 builder: (_, sessionProvider, __) {
-                  if (sessionProvider.loading ||
-                      sessionProvider.sessions.isEmpty) {
+                  if(sessionProvider.loading)
+                  {
+                    return const SizedBox.shrink();
+                  }
+                  if (
+                      sessionProvider.sessions.length==0 && sessionProvider.partnerSessions.length==0) {
                     return const SizedBox.shrink();
                   }
 
@@ -271,7 +325,10 @@ Set<ChargerFilterType> selectedFilters = {};
                         Navigator.push(
                           routeGlobalKey.currentContext!,
                           MaterialPageRoute(
-                            builder: (_) => ActiveSessionsScreen(),
+                            builder: (_) => ActiveSessionsScreen(
+                              
+                              selectedTabIndex: 
+                              sessionProvider.partnerSessions.length>0?1:0),
                           ),
                         );
                       },
@@ -285,7 +342,8 @@ Set<ChargerFilterType> selectedFilters = {};
               if (isLoggedIn)
                 hubProvider.loading
                     ? const Center(child: CircularProgressIndicator())
-                    : const Positioned(
+                    : 
+                    const Positioned(
                         bottom: 40,
                         left: 0,
                         right: 0,
@@ -316,13 +374,48 @@ Set<ChargerFilterType> selectedFilters = {};
       ),
     );
   }
-  
+  Widget _tab({
+  required String title,
+  required bool selected,
+  required VoidCallback onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: selected
+            ? CommonColors.primary:Colors.white
+            ,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: selected? Colors.white:CommonColors.primary,
+        ),
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w400,
+          fontSize: 13,
+          color: selected
+              ? 
+               Colors.white:CommonColors.primary,
+        ),
+      ),
+    ),
+  );
+}
 void _onSearchHub(String value) async {
   if (value.trim().isEmpty) return;
 
-  final result =
-      await context.read<HubProvider>().searchAndFocusHub(value);
-
+  // final result =
+  //     await context.read<HubProvider>().searchAndFocusHub(value);
+final result =
+    await context.read<HubProvider>().searchUnifiedHub(value);
   switch (result) {
     case SearchHubResult.notFound:
    
@@ -340,33 +433,5 @@ void _onSearchHub(String value) async {
       break;
   }
 }
-  // void _onSearchHub(String value) {
-  //   context.read<HubProvider>().searchAndFocusHub(value);
-  // }
-  void applyFilters() {
-  // if (selectedFilters.isEmpty) {
-  //   filteredList = originalList;
-  // } else {
-  //   filteredList = originalList.where((station) {
-  //     return selectedFilters.any((filter) {
-  //       switch (filter) {
-  //         case ChargerFilterType.ac:
-  //           return station.type == "AC";
-  //         case ChargerFilterType.dc:
-  //           return station.type == "DC";
-  //         case ChargerFilterType.car:
-  //           return station.vehicle == "Car";
-  //         case ChargerFilterType.bike:
-  //           return station.vehicle == "Bike";
-  //         case ChargerFilterType.both:
-  //           return station.vehicle == "Both";
-  //         case ChargerFilterType.fast:
-  //           return station.isFast == true;
-  //       }
-  //     });
-  //   }).toList();
-  // }
 
-  setState(() {});
-}
 }

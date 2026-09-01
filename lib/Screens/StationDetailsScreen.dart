@@ -24,8 +24,11 @@ import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
+import 'package:HyCharge/model/ChargingGunStatusResponse.dart';
 import 'package:HyCharge/model/ChargingHubReviewResponse.dart';
-import 'package:HyCharge/model/ChargingcomprehensiveHubResponse.dart';
+import 'package:HyCharge/model/LocalGunResponseModel.dart';
+
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:HyCharge/widget/LogoutConfirmationSheet.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
@@ -40,7 +43,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class StationDetailsScreen extends StatefulWidget {
-  final ChargingHub hub;
+  final Location hub;
   final Marker marker;
   final LatLng location;
   final List<dynamic> nearbyHubs;
@@ -62,15 +65,15 @@ class _StationDetailsScreenState extends State<StationDetailsScreen> {
 
   Set<Marker> markers = {};
 Map<String, bool> stationExpansionState = {};
-  Charger? _selectedCharger;
+  Connector? _selectedCharger;
   String? selectedStationID;
   Position? _currentPosition;
   Timer? _statusTimer;
   double currentWalletPrice = 0.0;
   void _startPolling() {
     final chargers =
-        (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ?? [])
-            .cast<Charger>();
+        (widget.hub.stations?.expand((s) => s.connectors ?? []).toList() ?? [])
+            .cast<Connector>();
 
     context.read<ChargingGunStatusProvider>().refreshAll(
           context: context,
@@ -92,25 +95,7 @@ Map<String, bool> stationExpansionState = {};
       },
     );
   }
-  // void _startPolling() {
-  //   _statusTimer = Timer.periodic(
-  //     const Duration(seconds: 10), // 👈 every 10 sec
-  //     (_) {
-  //       // final chargers = widget.hub.stations
-  //       //     ?.expand((s) => s.chargers ?? [])
-  //       //     .toList() ?? [];
-  //       final chargers =
-  //           (widget.hub.stations?.expand((s) => s.chargers ?? []).toList() ??
-  //                   [])
-  //               .cast<Charger>();
 
-  //       context.read<ChargingGunStatusProvider>().refreshAll(
-  //             context: context,
-  //             chargers: chargers,
-  //           );
-  //     },
-  //   );
-  // }
 
   String userId = "";
   getUserInfo() async {
@@ -129,7 +114,7 @@ Map<String, bool> stationExpansionState = {};
     print("Current BALNCE");
     
      for (var station in widget.hub.stations ?? []) {
-    stationExpansionState.putIfAbsent(station.recId!, () => false);
+    stationExpansionState.putIfAbsent(station.id!, () => false);
   }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -138,7 +123,7 @@ Map<String, bool> stationExpansionState = {};
       _startPolling();
       context.read<ChargingHubReviewProvider>().fetchReviews(
             context: context,
-            hubId: widget.hub.recId,
+            hubId: widget.hub.id!,
           );
       _fetchCurrentLocation();
     });
@@ -238,19 +223,7 @@ Map<String, bool> stationExpansionState = {};
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// 👤 Avatar
-            // CircleAvatar(
-            //   radius: 18,
-            //   backgroundColor: CommonColors.blue.withOpacity(0.15),
-            //   child: Text(
-            //     initials,
-            //     style: const TextStyle(
-            //       fontSize: 14,
-            //       fontWeight: FontWeight.w600,
-            //       color: CommonColors.blue,
-            //     ),
-            //   ),
-            // ),
+          
             CircleAvatar(
               radius: 18,
               backgroundColor: CommonColors.blue.withOpacity(0.15),
@@ -350,9 +323,9 @@ Map<String, bool> stationExpansionState = {};
                 ? MoreOptionsMenu(
                     onEdit: () {
                       _openWriteReviewBottomSheet(
-                        hubID: widget.hub.recId,
+                        hubID: widget.hub.id!,
                         stationId: review.chargingStationId!,
-                        stationName: widget.hub.chargingHubName ?? "Station",
+                        stationName: widget.hub.name ?? "Station",
                         rating: review.rating,
                         description: review.description,
                         isEdit: true,
@@ -362,14 +335,7 @@ Map<String, bool> stationExpansionState = {};
                         img3: review.reviewImage3,
                         img4: review.reviewImage4,
                       );
-                      // _openWriteReviewBottomSheet(
-                      //     hubID: widget.hub.recId,
-                      //     stationId: review.chargingStationId!,
-                      //     stationName: widget.hub.chargingHubName ?? "Station",
-                      //     rating: review.rating,
-                      //     description: review.description,
-                      //     isEdit: true,
-                      //     recId: review.recId);
+                     
                     },
                     onDelete: () async {
                       showModalBottomSheet(
@@ -509,56 +475,6 @@ Map<String, bool> stationExpansionState = {};
     );
   }
 
-  void _showImagePopup(BuildContext context, Uint8List bytes) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.8),
-      builder: (_) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: const EdgeInsets.all(10),
-          child: Stack(
-            children: [
-              // Zoomable Image
-              InteractiveViewer(
-                minScale: 1,
-                maxScale: 4,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.memory(
-                    bytes,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-
-              // Close Button
-              Positioned(
-                right: 10,
-                top: 10,
-                child: GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.black54,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   Widget _reviewImageBox(String imageId) {
     return FutureBuilder<Uint8List>(
       future: context
@@ -648,7 +564,7 @@ Map<String, bool> stationExpansionState = {};
     final reviewProvider = context.watch<ChargingHubReviewProvider>();
     final totalReviews = reviewProvider.response?.reviews?.length ?? 0;
 
-    LatLng? location = LocationConvert.getLatLngFromHub(widget.hub);
+    LatLng? location = LocationConvert.getLatLngFromUnifiedHub(widget.hub);
     print("Cuurent");
 
     print("Hub Location");
@@ -666,18 +582,6 @@ Map<String, bool> stationExpansionState = {};
 
     currentWalletPrice = walletProvider.currentBalance;
 
-    print("Current BALANCE ${walletProvider.currentBalance}");
-//    SystemChrome.setEnabledSystemUIMode(
-//   SystemUiMode.manual,
-//   overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
-// );
-
-// SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-//   statusBarColor: Colors.white,
-//   statusBarBrightness: Brightness.dark,
-//   statusBarIconBrightness: Brightness.dark,
-// ));
-    final w = MediaQuery.of(context).size.width;
     markers.add(widget.marker);
     return SafeArea(
       child: Scaffold(
@@ -741,19 +645,16 @@ Map<String, bool> stationExpansionState = {};
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // Image.asset(
-                                //   CommonImagePath.frame,
-                                //   fit: BoxFit.cover,
-                                //   height: SizeConfig.blockSizeVertical * 8,
-                                // ),
-                                widget.hub.chargingHubImage != null
-                                    ? HubImage(
-                                        imageId: widget.hub.chargingHubImage!,
-                                        height:
-                                            SizeConfig.blockSizeVertical * 5,
-                                        width: SizeConfig.blockSizeVertical * 5,
-                                      )
-                                    : Image.asset(
+                               
+                                // widget.hub.chargingHubImage != null
+                                //     ? HubImage(
+                                //         imageId: widget.hub.chargingHubImage!,
+                                //         height:
+                                //             SizeConfig.blockSizeVertical * 5,
+                                //         width: SizeConfig.blockSizeVertical * 5,
+                                //       )
+                                //     : 
+                                    Image.asset(
                                         CommonImagePath.frame,
                                         height:
                                             SizeConfig.blockSizeVertical * 6,
@@ -770,7 +671,7 @@ Map<String, bool> stationExpansionState = {};
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              widget.hub.chargingHubName ??
+                                              widget.hub.name ??
                                                   "Charging Station",
                                               style: TextStyle(
                                                   fontSize: 18,
@@ -796,10 +697,10 @@ Map<String, bool> stationExpansionState = {};
                           ),
                           GestureDetector(
                             onTap: () {
-                              print("open bottom ${widget.hub.recId!}");
+                              print("open bottom ${widget.hub.id!}");
                               _openReviewsBottomSheet(
                                 context: context,
-                                stationId: widget.hub.recId!, // fallback
+                                stationId: widget.hub.id!, // fallback
                               );
                             },
                             child: Padding(
@@ -830,19 +731,16 @@ Map<String, bool> stationExpansionState = {};
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _filterButtons(
-                        opening: widget.hub.openingTime,
-                        closing: widget.hub.closingTime,
-                        availablePorts: widget.hub.availableChargers,
-                        totalPorts: widget.hub.totalChargers),
-                    const SizedBox(height: 12),
-                    // Divider(
-                    //   color: CommonColors.neutral200,
-                    //   thickness: 2,
-                    // ),
-                    _stationsList(widget.hub.stations),
-                    // chargerDetail()
-                    // _navigateButton(),
+                    // _filterButtons(
+                    //     opening: widget.hub.openingTime,
+                    //     closing: widget.hub.closingTime,
+                    //     availablePorts: widget.hub.availableChargers,
+                    //     totalPorts: widget.hub.totalChargers
+                    //     ),
+                    // const SizedBox(height: 12),
+                    
+                    _stationsList(widget.hub.stations!),
+                   
                   ],
                 ),
               ),
@@ -927,91 +825,6 @@ Map<String, bool> stationExpansionState = {};
       },
     );
   }
-  // void _openWriteReviewBottomSheet(
-  //     {required String stationId,
-  //     required String stationName,
-  //     required String hubID,
-  //     int? rating,
-  //     String? description,
-  //     bool? isEdit,
-  //     String? recId}) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     backgroundColor: CommonColors.white,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-  //     ),
-  //     builder: (_) {
-  //       return _WriteReviewSheet(
-  //         hubId: hubID,
-  //         stationId: stationId,
-  //         stationName: stationName,
-  //         initialRating: rating,
-  //         initialDescription: description,
-  //         isEdit: isEdit!,
-  //         recId: recId,
-  //       );
-  //     },
-  //   );
-  // }
-
-  // void _openWriteReviewBottomSheet({
-  //   required String stationId,
-  //   required String stationName,
-  //   required String hubID
-  // }) {
-  //   showModalBottomSheet(
-  //     context: context,
-  //     isScrollControlled: true,
-  //     shape: const RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-  //     ),
-  //     builder: (_) {
-  //       return _WriteReviewSheet(
-  //         hubId:hubID ,
-  //         stationId: stationId,
-  //         stationName: stationName,
-  //       );
-  //     },
-  //   );
-  // }
-
-  Widget _staticAmenities() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: CommonColors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          )
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _amenity(CommonImagePath.coffee, "Cafe"),
-          _amenity(CommonImagePath.wifi, "Wi-Fi"),
-          _amenity(CommonImagePath.washroom, "Washroom"),
-        ],
-      ),
-    );
-  }
-
-  Widget _amenity(String icon, String label) {
-    return Row(
-      children: [
-        SvgPicture.asset(icon),
-        const SizedBox(width: 6),
-        Text(label,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
 
   final Map<String, int> _stationTabIndex = {};
   Widget _stationTabs({
@@ -1071,7 +884,7 @@ Map<String, bool> stationExpansionState = {};
   }
 
   Widget _chargerCard({
-    required Charger charger,
+    required Connector charger,
     required bool isSelected,
     required bool isAvailable,
     required VoidCallback onTap,
@@ -1132,7 +945,7 @@ Map<String, bool> stationExpansionState = {};
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Connector - ${charger.connectorName}" ??
+                              "Connector - ${charger.connectorId} ${charger.id}" ??
                                   "Connector",
                               style: const TextStyle(
                                   fontWeight: FontWeight.w600, fontSize: 13),
@@ -1145,7 +958,7 @@ Map<String, bool> stationExpansionState = {};
                             // ),
                             const SizedBox(height: 2),
                             Text(
-                              "₹ ${charger.chargerTariff}/kW",
+                              "₹ ${charger.tariff}/kW",
                               style: const TextStyle(
                                   fontSize: 12, color: CommonColors.blue),
                             ),
@@ -1158,11 +971,11 @@ Map<String, bool> stationExpansionState = {};
                           //         .chargers[int.parse(charger.connectorId!)] ??
                           //     charger;
                           final updatedCharger =
-                              provider.chargers[charger.recId] ?? charger;
-
+                              provider.chargers[charger.id] ?? charger;
+                           
                           final isAvailable =
-                              updatedCharger.lastStatus == "Available";
-
+                               (updatedCharger.status == "AVAILABLE" ||updatedCharger.status == "Available");
+print("Ranga ${updatedCharger.status} ${isAvailable}");
                           return Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
@@ -1173,7 +986,7 @@ Map<String, bool> stationExpansionState = {};
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              updatedCharger.lastStatus ?? "Unknown",
+                               updatedCharger.status ?? "Unknown",
                               style: TextStyle(
                                 fontSize: 12,
                                 color: isAvailable
@@ -1196,6 +1009,7 @@ Map<String, bool> stationExpansionState = {};
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        
                         Text('Charger Type',
                             style: TextStyle(
                                 fontWeight: FontWeight.w200, fontSize: 11)),
@@ -1239,25 +1053,18 @@ Map<String, bool> stationExpansionState = {};
     );
   }
 
-// String capitalizeWords(String text) {
-//   return text
-//       .split(' ')
-//       .map((word) =>
-//           word.isNotEmpty ? word[0].toUpperCase() + word.substring(1).toLowerCase() : '')
-//       .join(' ');
-// }
-Widget _stationsList(List<ChargingStation> stations) {
+Widget _stationsList(List<Station> stations) {
   print("How many station");
   print(stations.length);
   for(var sta in stations)
   {
-    print(sta.chargePointName);
+    print(sta.name);
   }
   return Column(
     children: stations.map((station) {
-      final chargers = station.chargers ?? [];
-      final selectedTab = _stationTabIndex[station.recId] ?? 0;
-      final isExpanded = stationExpansionState[station.recId] ?? false;
+      final chargers = station.connectors ?? [];
+      final selectedTab = _stationTabIndex[station.id] ?? 0;
+      final isExpanded = stationExpansionState[station.id] ?? false;
 
       return Padding(
         padding: const EdgeInsets.only(bottom: 12),
@@ -1282,7 +1089,7 @@ Widget _stationsList(List<ChargingStation> stations) {
                     });
 
                     /// toggle current
-                    stationExpansionState[station.recId!] = !isExpanded;
+                    stationExpansionState[station.id!] = !isExpanded;
                   });
                 },
                 child: Container(
@@ -1305,7 +1112,7 @@ Widget _stationsList(List<ChargingStation> stations) {
                             
                             Row(
                               children: [
-                                 station.recId==CommonStrings.strDummyBikeRecId?Row(
+                                 station.id==CommonStrings.strDummyBikeRecId?Row(
                                    children: [
                                      Icon(Icons.pedal_bike,color: CommonColors.cardWhite,),
                                      SizedBox(width: 8,)
@@ -1313,7 +1120,7 @@ Widget _stationsList(List<ChargingStation> stations) {
                                  ):Container(),
                                 Text(
                                   capitalizeWords(
-                                      station.chargePointName ?? "Station"),
+                                      station.name ?? "Station"),
                                   style: const TextStyle(
                                       color: CommonColors.white,
                                       fontSize: 15,
@@ -1323,7 +1130,7 @@ Widget _stationsList(List<ChargingStation> stations) {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "${station.availableChargers}/${station.totalChargers} Chargers Available",
+                              "${station.availableConnectors}/${station.totalConnectors} Chargers Available",
                               style: const TextStyle(
                                   fontSize: 12,
                                   color: CommonColors.white),
@@ -1351,10 +1158,10 @@ Widget _stationsList(List<ChargingStation> stations) {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: _stationTabs(
-                    stationId: station.recId!,
+                    stationId: station.id!,
                     onChanged: (index) {
                       setState(() {
-                        _stationTabIndex[station.recId!] = index;
+                        _stationTabIndex[station.id!] = index;
                       });
                     },
                   ),
@@ -1368,23 +1175,24 @@ Widget _stationsList(List<ChargingStation> stations) {
                     child: Column(
                       children: chargers.map((charger) {
                         final isAvailable =
-                            charger.lastStatus == "Available";
+                            (charger.status == "Available" ||charger.status == "AVAILABLE");
 
                         final isSelected =
                             _selectedCharger?.connectorId ==
                                     charger.connectorId &&
-                                selectedStationID == station.recId;
+                                selectedStationID == station.id;
 
-                        return _chargerCard(
+                        return
+                         _chargerCard(
                           charger: charger,
                           isSelected: isSelected,
                           isAvailable: isAvailable,
                           onTap: () {
                             setState(() {
                               _selectedCharger = charger;
-                              selectedStationID = station.recId;
+                              selectedStationID = station.id;
                               showToast(
-                                  _selectedCharger!.connectorName!);
+                                  _selectedCharger!.chargerTypeName!);
                             });
                           },
                         );
@@ -1394,9 +1202,9 @@ Widget _stationsList(List<ChargingStation> stations) {
 
                 if (selectedTab == 1)
                   _stationReviews(
-                    station.recId!,
-                    station.chargePointName!,
-                    widget.hub.recId,
+                    station.id!,
+                    station.name!,
+                    widget.hub.id!,
                   ),
 
                 const SizedBox(height: 12),
@@ -1408,121 +1216,7 @@ Widget _stationsList(List<ChargingStation> stations) {
     }).toList(),
   );
 }
-  // Widget _stationsList(List<ChargingStation> stations) {
-  //   return Column(
-  //     children: stations.map((station) {
-  //       final chargers = station.chargers ?? [];
-  //       final selectedTab = _stationTabIndex[station.recId] ?? 0;
-
-  //       return Padding(
-  //         padding: const EdgeInsets.only(bottom: 12),
-  //         child: Container(
-          
-  //           decoration: BoxDecoration(
-  //             color: CommonColors.white,
-  //             borderRadius: BorderRadius.circular(12),
-  //             border: Border.all(
-  //     color: CommonColors.blue, // 👈 your border color
-  //     width: 2,         // 👈 thickness
-  //   ),
-  //             boxShadow: const [
-  //               BoxShadow(
-  //                 color: Colors.black12,
-  //                 blurRadius: 6,
-  //                 offset: Offset(0, 2),
-  //               )
-  //             ],
-  //           ),
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Container(
-  //                 width: SizeConfig.blockSizeHorizontal *100,
-  //                  decoration: BoxDecoration(
-  //                    borderRadius: BorderRadius.only(topLeft: Radius.circular(10),topRight: Radius.circular(10)),
-  //             color: CommonColors.blue,
-             
-  //           ),
-  //                 child: Padding(
-  //                   padding: const EdgeInsets.only(left: 12,top: 8,bottom: 8),
-  //                   child: Column(
-  //                      crossAxisAlignment: CrossAxisAlignment.start,
-  //                     children: [
-  //                       Text(
-  //                         capitalizeWords(station.chargePointName ?? "Station"),
-  //                         style: const TextStyle(color: CommonColors.white,
-  //                             fontSize: 15, fontWeight: FontWeight.w600),
-  //                       ),
-  //                       const SizedBox(height: 4),
-  //                                   Text(
-  //                   "${station.availableChargers}/${station.totalChargers} Chargers Available",
-  //                   style: const TextStyle(
-  //                       fontSize: 12, color: CommonColors.white),
-  //                                   ),
-  //                                   const SizedBox(height: 12),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               ),
-                
-  //               Padding(
-  //                padding: const EdgeInsets.only(left: 12,right: 12),
-  //                 child: _stationTabs(
-  //                   stationId: station.recId!,
-  //                   onChanged: (index) {
-  //                     setState(() {
-  //                       _stationTabIndex[station.recId!] = index;
-  //                     });
-  //                   },
-  //                 ),
-  //               ),
-  //               const SizedBox(height: 12),
-  //               if (selectedTab == 0)
-  //                 Padding(
-  //                   padding: const EdgeInsets.only(left: 12,right: 12),
-  //                   child: Column(
-  //                     children: chargers.map((charger) {
-  //                       final isAvailable = charger.lastStatus == "Available";
-                    
-  //                       final isSelected = _selectedCharger?.connectorId ==
-  //                               charger.connectorId &&
-  //                           selectedStationID == station.recId;
-                    
-  //                       return _chargerCard(
-  //                         charger: charger,
-  //                         isSelected: isSelected,
-  //                         isAvailable: isAvailable,
-  //                         onTap: () {
-  //                           setState(() {
-  //                             print("is Availabe ${isAvailable}");
-  //                             //  showToast("Last Availabe Status${isAvailable}");
-  //                             try {
-  //                               _selectedCharger = charger;
-  //                               selectedStationID = station.recId;
-  //                               FocusScope.of(context).unfocus();
-  //                               showToast(_selectedCharger!.connectorName!);
-  //                             } catch (e) {
-  //                               FocusScope.of(context).unfocus();
-  //                               showToast(e.toString());
-  //                             }
-  //                           });
-  //                         },
-  //                       );
-  //                     }).toList(),
-  //                   ),
-  //                 ),
-  //               if (selectedTab == 1)
-  //                 _stationReviews(station.recId!, station.chargePointName!,
-  //                     widget.hub.recId),
-  //               const SizedBox(height: 12),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     }).toList(),
-  //   );
-  // }
-
+  
   Widget _navigateButton() {
     final provider = context.watch<ChargingGunStatusProvider>();
 
@@ -1546,14 +1240,31 @@ Widget _stationsList(List<ChargingStation> stations) {
                     );
 
                 // 2️⃣ Check the status
-                if (statusAvailable!.data!.isAvailable == true) {
+               if (statusAvailable == null) {
+  showToast("Unable to fetch charging gun status.");
+  return;
+}
+
+String? status;
+
+if (statusAvailable is ChargingGunStatusResponse) {
+  status = statusAvailable.data?.status;
+} else if (statusAvailable is LocalGunResponseModel) {
+  status = statusAvailable.data?.status?.status;
+}
+
+print("STATUS = $status");
+                if (status == "Available" || status=="AVAILABLE") {
                   // ✅ Status is available, navigate
                   bool? confirmed = await gunConnectorDialog(
   context,
   message: "Plug the charging connector into your vehicle to begin charging.",
 );
-
+    print("CHARGE NOW confirmed ${confirmed}");
 if (confirmed == true) {
+  //18july
+  print("23jult");
+  print(_selectedCharger!.connectorId!);
  _statusTimer?.cancel();
                   Navigator.push(
                     context,
@@ -1563,6 +1274,7 @@ if (confirmed == true) {
                         child: ChargingEstimateScreen(
                           selectedCharger: _selectedCharger,
                           selectedStationID: selectedStationID,
+                          
                    
                         ),
                       ),
@@ -1601,39 +1313,7 @@ if (confirmed == true) {
     );
   }
 
-  Widget _filterButtons({
-    double? distance,
-    String? opening,
-    String? closing,
-    int? availablePorts,
-    int? totalPorts,
-  }) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _currentPosition != null
-              ? _filterChip(distanceInKm != null
-                  ? "${distanceInKm.toStringAsFixed(2)} km"
-                  : "Distance N/A")
-              : Container(),
-          const SizedBox(width: 10),
-          // _filterChip(
-          //   opening != null && closing != null
-          //       ? "$opening - $closing"
-          //       : "Timing N/A",
-          // ),
-          _filter24hourChip(),
-          const SizedBox(width: 10),
-          _filterChip(
-            availablePorts != null && totalPorts != null
-                ? "$availablePorts/$totalPorts Ports Available"
-                : "Ports N/A",
-          ),
-        ],
-      ),
-    );
-  }
+ 
 
   Widget _reviewPlaceholder() {
     return Container(
@@ -1653,77 +1333,6 @@ if (confirmed == true) {
     );
   }
 
-  //  Widget _filterButtons() {
-  Widget _filterChip(String label) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: CommonColors.neutral200, // choose your color here
-          width: 1.5,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _filter24hourChip() {
-    return   (widget.hub.recId==CommonStrings.strDummyRecID ||  widget.hub.recId ==CommonStrings.strDummyRecID1)?
-     Container(
-      
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-         color: CommonColors.red.withOpacity(0.15),
-        border: Border.all(
-          color: CommonColors.brownRed.withOpacity(0.15), // choose your color here
-          width: 1.5,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "Restricted",
-            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400,color: CommonColors.brownRed),
-          ),
-        ],
-      ),
-     )
-    :Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: CommonColors.darkgreen.withOpacity(0.15),
-        border: Border.all(
-          color: CommonColors.darkgreen
-              .withOpacity(0.15), // choose your color here
-          width: 1.5,
-        ),
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "24 hrs Available",
-            style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: CommonColors.darkgreen),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _WriteReviewSheet extends StatefulWidget {

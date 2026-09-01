@@ -37,3 +37,9 @@ enum SearchHubResult {
   notFound,
   sameLocation,
 }
+
+enum HubTab {
+  All,
+  HyCharge,
+  Partner, 
+}

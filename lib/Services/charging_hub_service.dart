@@ -1,4 +1,5 @@
 import 'package:HyCharge/Utils/APIManager.dart';
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:flutter/material.dart';
 
 class ChargingHubService {
@@ -9,14 +10,17 @@ class ChargingHubService {
     int pageNumber = 1,
     int pageSize = 100,
   }) async {
+    print("CALL ${pageNumber} ${pageSize}");
     return await _apiManager.apiRequest(
       context,
-      API.comprehensivelist,
+      API.unifiedComprehensiveList,
     
       jsonval: {
-        "pageNumber": pageNumber,
+        "page": pageNumber,
         "pageSize": pageSize,
       },
     );
   }
+
+
 }

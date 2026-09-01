@@ -1,4 +1,5 @@
 import 'package:HyCharge/Services/ChargingService.dart';
+import 'package:HyCharge/model/EstimationModel.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:flutter/material.dart';
 
@@ -112,6 +113,56 @@ if (activeMode != "amount") {
     notifyListeners(); // ✅ ONLY ONE NOTIFY HERE
   }
 }
+ EstimationModel? _estimateUniResponse;
+  EstimationModel? get estimateUniResponse => _estimateUniResponse;
+ Future<void> unifiedestimateCharging({
+  required BuildContext context,
+  required String chargingGunId,
+  required String chargingStationId,
+  required String connectorId,
+  double? desiredEnergy,
+  int? desiredDuration,
+  double? desiredCost,
+  double? currentBatteryPercentage,
+}) async {
+  try {
+    _loading = true;
 
+    _estimateUniResponse = await _service.UnifiedestimateCharging(
+      context: context,
+      chargingGunId: chargingGunId,
+      chargingStationId: chargingStationId,
+      connectorId: connectorId,
+      batteryCapacity: batteryCapacity,
+      desiredEnergy: desiredEnergy,
+      desiredDuration: desiredDuration,
+      currentBatteryPercentage: currentBatteryPercentage,
+      desiredCost: desiredCost,
+    );
 
+    if (_estimateUniResponse != null && _estimateUniResponse!.success!) {
+
+if (activeMode != "units") {
+  units = _estimateUniResponse!.data!.raw!.estimatedEnergy!;
+}
+
+if (activeMode != "time") {
+  time = _estimateUniResponse!.data!.raw!.estimatedTimeMinutes!;
+}
+
+if (activeMode != "amount") {
+  amount = _estimateUniResponse!.data!.raw!.estimatedCost!;
+  controller.text = amount.toString();
+  //.toStringAsFixed(0);
+}
+      percentage = _estimateUniResponse!.data!.raw!.estimatedBatteryIncrease!;
+    }
+
+  } catch (e) {
+    debugPrint("Estimate Charging Error: $e");
+  } finally {
+    _loading = false;
+    notifyListeners(); // ✅ ONLY ONE NOTIFY HERE
+  }
+}
 }

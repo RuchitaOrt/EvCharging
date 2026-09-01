@@ -1,3 +1,4 @@
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../model/ChargingcomprehensiveHubResponse.dart';
@@ -5,6 +6,15 @@ import '../model/ChargingcomprehensiveHubResponse.dart';
 // import '../model/ChargingHubResponse.dart';
 
 class LocationConvert{
+  static LatLng? getLatLngFromUnifiedHub(Location hub) {
+    if (hub.latitude == null ||
+        hub.longitude == null ||
+        hub.latitude!.isEmpty ||
+        hub.longitude!.isEmpty) {
+      return null;
+    }
+    return convertToLatLng(hub.latitude!, hub.longitude!);
+  }
  static LatLng? getLatLngFromHub(ChargingHub hub) {
     if (hub.latitude == null ||
         hub.longitude == null ||

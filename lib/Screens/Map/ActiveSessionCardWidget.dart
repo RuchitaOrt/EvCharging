@@ -10,9 +10,9 @@ class ActiveSessionCardWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ActiveSessionProvider>(
       builder: (_, provider, __) {
-        if (provider.loading || provider.sessions.isEmpty) {
-          return const SizedBox();
-        }
+        // if (provider.loading || provider.sessions.isEmpty ||provider.partnerSessions.isEmpty) {
+        //   return const SizedBox();
+        // }
 
         return Container(
           height: 90,

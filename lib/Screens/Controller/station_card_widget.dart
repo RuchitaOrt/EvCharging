@@ -1,3 +1,5 @@
+
+
 import 'dart:typed_data';
 
 import 'package:HyCharge/Screens/Controller/map_controller.dart';
@@ -7,6 +9,7 @@ import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/googleMap.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
@@ -18,7 +21,7 @@ import '../../Provider/HubProvider.dart';
 import '../../Utils/LocationConvert.dart';
 import '../../Utils/iconresizer.dart';
 import '../../main.dart';
-import '../../model/ChargingcomprehensiveHubResponse.dart';
+
 import '../StationDetailsScreen.dart';
 // import '../../model/ChargingHubResponse.dart';
 
@@ -34,17 +37,19 @@ class StationCardWidget extends StatelessWidget {
       height: 145,
       child: Consumer<HubProvider>(
         builder: (context, value, _) {
+          print("16july Ruchita ${value.locations.length}");
           return ListView.separated(
             controller: value.scrollController,
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             itemCount:
-            value.recordsStation.length +
+            value.locations.length +
+            // value.recordsStation.length +
     (value.isMoreLoading ? 1 : 0),
             //  value.recordsStation.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
-  if (index >= value.recordsStation.length) {
+  if (index >= value.locations.length) {
     return const SizedBox(
       width: 80,
       child: Center(
@@ -54,14 +59,14 @@ class StationCardWidget extends StatelessWidget {
   }
 
   final isSelected = value.currentVisibleIndex == index;
-
+ 
   return Padding(
     padding: const EdgeInsets.only(left: 2),
     child: _StationCard(
-      chargingHub: value.recordsStation[index],
+      chargingHub: value.locations[index],
       isSelected: isSelected,
       cardWidth: screenWidth *0.87,
-      nearbyHubs: value.recordsStation,
+      nearbyHubs: value.locations,
     ),
   );
 },
@@ -75,7 +80,7 @@ class StationCardWidget extends StatelessWidget {
 }
 
 class _StationCard extends StatefulWidget {
-  final ChargingHub chargingHub;
+  final Location chargingHub;
   final bool isSelected;
   final double cardWidth;
   final List<dynamic> nearbyHubs;
@@ -112,7 +117,7 @@ class _StationCardState extends State<_StationCard> {
     _fetchCurrentLocation();
   }
    Widget _filter24hourChip() {
-    return (widget.chargingHub!.recId==CommonStrings.strDummyRecID ||  widget.chargingHub!.recId ==CommonStrings.strDummyRecID1)?
+    return (widget.chargingHub!.id==CommonStrings.strDummyRecID ||  widget.chargingHub!.id ==CommonStrings.strDummyRecID1)?
      Container(
       
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
@@ -159,15 +164,17 @@ class _StationCardState extends State<_StationCard> {
   }
   @override
   Widget build(BuildContext context) {
-    final openingTime = _formatTime(widget.chargingHub.openingTime);
-    final closingTime = _formatTime(widget.chargingHub.closingTime);
+    final openingTime ="";
+    //  _formatTime(widget.chargingHub.openingTime);
+    final closingTime="";
+    // _formatTime(widget.chargingHub.closingTime);
     final hours = '$openingTime - $closingTime';
 
     // final distance =
     //     widget.chargingHub.distanceKm != null ? '${widget.chargingHub.distanceKm} KM' : 'N/A';
      double distance=0.0;
 
-    LatLng? location = LocationConvert.getLatLngFromHub(widget.chargingHub);
+    LatLng? location = LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
  if (_currentPosition != null) {
        distance  = Geolocator.distanceBetween(
               _currentPosition!.latitude,
@@ -179,17 +186,21 @@ class _StationCardState extends State<_StationCard> {
     print("DISTANCE");
     print(distance);
     // print(widget.chargingHub.stations[0].chargers[0].chargerTariff);
-    final typeAPrice = widget.chargingHub.typeATariff?.isNotEmpty == true
-        ? '₹${widget.chargingHub.typeATariff} / kWh'
-        : '₹ 0 / kWh';
+    final typeAPrice =
+    //  widget.chargingHub.typeATariff?.isNotEmpty == true
+    //     ? '₹${widget.chargingHub.typeATariff} / kWh'
+    //     : 
+        '₹ 0 / kWh';
 
-    final typeBPrice = widget.chargingHub.typeBTariff?.isNotEmpty == true
-        ? '₹${widget.chargingHub.typeBTariff} / kWh'
-        : '₹ 0 / kWh';
+    final typeBPrice =
+    //  widget.chargingHub.typeBTariff?.isNotEmpty == true
+    //     ? '₹${widget.chargingHub.typeBTariff} / kWh'
+    //     : 
+        '₹ 0 / kWh';
 
     return GestureDetector(
       onTap: () async {
-        LatLng? location = LocationConvert.getLatLngFromHub(widget.chargingHub);
+        LatLng? location = LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
         if (location != null) {
           BitmapDescriptor icon = await getResizedMarker(
             'assets/images/targetMarker.png',
@@ -202,7 +213,7 @@ class _StationCardState extends State<_StationCard> {
                 nearbyHubs: widget.nearbyHubs,
                 hub: widget.chargingHub,
                 marker: Marker(
-                  markerId: MarkerId(widget.chargingHub.recId!),
+                  markerId: MarkerId(widget.chargingHub.id!),
                   position: location,
                   icon: icon,
                 ),
@@ -230,17 +241,15 @@ class _StationCardState extends State<_StationCard> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-              // widget.chargingHub.chargingHubImage!=null?Text("data"):    Image.asset(
-              //       CommonImagePath.frame,
-              //       height: SizeConfig.blockSizeVertical * 6,
-              //     ),
-              widget.chargingHub.chargingHubImage != null
-    ? HubImage(
-        imageId: widget.chargingHub.chargingHubImage!,
-        height: SizeConfig.blockSizeVertical * 5,
-        width: SizeConfig.blockSizeVertical * 5,
-      )
-    : Image.asset(
+             
+    //           widget.chargingHub.chargingHubImage != null
+    // ? HubImage(
+    //     imageId: widget.chargingHub.chargingHubImage!,
+    //     height: SizeConfig.blockSizeVertical * 5,
+    //     width: SizeConfig.blockSizeVertical * 5,
+    //   )
+    // : 
+    Image.asset(
         CommonImagePath.frame,
         height: SizeConfig.blockSizeVertical * 6,
       ),
@@ -256,7 +265,7 @@ class _StationCardState extends State<_StationCard> {
                           children: [
                             Expanded(
                               child: Text(
-                                widget.chargingHub.chargingHubName ?? 'Station Name',
+                                "${widget.chargingHub.name}" ?? 'Station Name',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -275,12 +284,13 @@ class _StationCardState extends State<_StationCard> {
                           spacing: 4,
                           runSpacing: 4,
                           children: [
-                            _InfoTag(
+                          _InfoTag(
                                 icon: CommonImagePath.redpin, text: "${distance.toStringAsFixed(2)} km"),
+                                widget.chargingHub!.averageRating==null?Container():
 _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!.toStringAsFixed(0)}",),
                             //  _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!.toString()}"),
                             //  _InfoTag(icon: CommonImagePath.clock, text: hours),
-                            _filter24hourChip()
+                            // _filter24hourChip()
                           ],
                         ),
                       ],
@@ -300,9 +310,10 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                       spacing: 16,
                       runSpacing: 6,
                       children:
-                    (   widget.chargingHub!.recId==CommonStrings.strDummyRecID||  widget.chargingHub!.recId ==CommonStrings.strDummyRecID1)
+                    (   widget.chargingHub!.id==CommonStrings.strDummyRecID||  widget.chargingHub!.id ==CommonStrings.strDummyRecID1)
                     ?
-                       [ _TypeInfo(type: 'AC Station', price:typeAPrice)]: [
+                       [ _TypeInfo(type: 'AC Station', price:typeAPrice)]: 
+                       [
                         _TypeInfo(type: 'Station 1', price: typeAPrice),
                         _TypeInfo(type: 'Station 2', price: typeBPrice),
                       ],
@@ -312,7 +323,7 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                     onTap: ()
                     {
                        LatLng? location =
-                              LocationConvert.getLatLngFromHub(widget.chargingHub);
+                              LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
                           print(location!.latitude);
                           print(location!.longitude);
                           openMaps(
@@ -321,49 +332,7 @@ _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!
                           );
                     },
                     child: SvgPicture.asset(CommonImagePath.direction))
-                  // Expanded(
-                  //   flex: 2,
-                  //   child: SizedBox(
-                  //     height: 36,
-                  //     child: ElevatedButton(
-                  //       onPressed: () async {
-                  //         LatLng? location =
-                  //             LocationConvert.getLatLngFromHub(widget.chargingHub);
-                  //         print(location!.latitude);
-                  //         print(location!.longitude);
-                  //         openMaps(
-                  //           latitude: location.latitude,
-                  //           longitude: location.longitude,
-                  //         );
-                         
-                  //       },
-                  //       style: ElevatedButton.styleFrom(
-                  //         backgroundColor:
-                  //             // widget.isSelected ? Colors.lightGreen :
-                  //              Colors.white,
-                  //         foregroundColor: CommonColors.blue,
-                  //         shape: RoundedRectangleBorder(
-                  //           borderRadius: BorderRadius.circular(12),
-                  //           side: BorderSide(
-                  //             color:
-                  //                 CommonColors.blue.withOpacity(0.4),
-                  //           ),
-                  //         ),
-                  //       ),
-                  //       child: const FittedBox(
-                  //         child: 
-                  //         Text(
-                  //           'Get Directions',
-                  //           style: TextStyle(
-                  //             fontSize: 12,
-                  //             color: CommonColors.blue,
-                  //             fontWeight: FontWeight.w600,
-                  //           ),
-                  //         ),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
+                
                 ],
               ),
             ],

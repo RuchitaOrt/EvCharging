@@ -81,6 +81,7 @@ else if (code.startsWith("http://") || code.startsWith("https://")) {
         builder: (_) => ChargingEstimateScreen(
           chargerID: chargerId,
           isAPPLINK: "1",
+        
         ),
       ),
     );

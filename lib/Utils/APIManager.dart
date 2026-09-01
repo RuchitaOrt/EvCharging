@@ -2,9 +2,20 @@ import 'dart:convert';
 
 import 'package:HyCharge/model/AppVersionResponse.dart';
 import 'package:HyCharge/model/CarManufacturerResponse.dart';
+import 'package:HyCharge/model/EndUnifiedChargingSessionResponse.dart';
+import 'package:HyCharge/model/EstimationModel.dart';
 import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/ForgetPasswordResponse.dart';
+import 'package:HyCharge/model/LocalStartUnifiedChargingSessionResponse.dart';
+import 'package:HyCharge/model/SessionIDDetailResponse.dart';
+import 'package:HyCharge/model/SessionIdResponse.dart';
 import 'package:HyCharge/model/SetDefaultVehicleResponse.dart';
+import 'package:HyCharge/model/StartUnifiedChargingSessionResponse.dart';
+import 'package:HyCharge/model/UnifiedActiveSessionResponse.dart';
+
+import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
+import 'package:HyCharge/model/UnifiedGunStatusResponse.dart';
+import 'package:HyCharge/model/UnifiedSessionDetailResponse.dart';
 import 'package:HyCharge/model/estimate_charging_response.dart';
 import 'package:HyCharge/model/resend_otp_response.dart';
 import 'package:HyCharge/model/send_otp_response.dart';
@@ -97,9 +108,17 @@ enum API {
   estimateCharging,
   forgetPassword,
   chargerDetails,
-   appVersionInfo,
+  appVersionInfo,
   setDefaultVehicle,
+  
 
+  //unified
+  unifiedComprehensiveList,
+  partnersessionsbyreference,
+  partnerchargingsessions,
+  ocpipartnerhubsessionDetail,
+  chargingsessioIDdetails,
+  unifiedestimatecharging
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -202,16 +221,16 @@ class APIManager {
             //   );
             //   return handler.reject(e);
             // }
-if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
-    await clearCookies();
+            if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
+              await clearCookies();
 
-    unAthorizedTokenErrorDialog(
-      routeGlobalKey.currentContext!,
-      message: "Your Session has Expired. Please Login Again",
-    );
+              unAthorizedTokenErrorDialog(
+                routeGlobalKey.currentContext!,
+                message: "Your Session has Expired. Please Login Again",
+              );
 
-    return handler.reject(e);
-  }
+              return handler.reject(e);
+            }
             final refreshed = await _refreshToken();
 
             if (refreshed) {
@@ -229,7 +248,7 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
                 );
                 print(requestOptions.path);
                 print(requestOptions.data);
-             print(requestOptions.queryParameters);
+                print(requestOptions.queryParameters);
                 return handler.resolve(retryResponse);
               } catch (_) {
                 return handler.reject(e);
@@ -585,23 +604,36 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.userVehicleUpdate:
         return "/User/user-vehicle-update";
 
+      // case API.startChargingSession:
+      //   return "/ChargingSession/start-charging-session";
       case API.startChargingSession:
-        return "/ChargingSession/start-charging-session";
+         return "/UnifiedCharging/start-session";
+      // case API.endChargingSession:
+      //   return "/ChargingSession/end-charging-session";
 
       case API.endChargingSession:
-        return "/ChargingSession/end-charging-session";
-
-      case API.unlockConnector:
-        return "/ChargingSession/unlock-connector";
+        return "/UnifiedCharging/stop-session";
+      // case API.unlockConnector:
+      //   return "/ChargingSession/unlock-connector";
+        case API.unlockConnector:
+        return "/UnifiedCharging/unlock-connector";
       case API.comprehensivelist:
         return "/ChargingHub/comprehensive-list";
+      // case API.charginggunstatus:
+      //   return "/ChargingSession/charging-gun-status";
       case API.charginggunstatus:
-        return "/ChargingSession/charging-gun-status";
+        return "/UnifiedCharging/connector-status";
       case API.chargingsessiondetails:
-        return "/ChargingSession/charging-session-details";
+        // return "/ChargingSession/charging-session-details";
+        return "/UnifiedCharging/session-details";
+      case API.chargingsessioIDdetails:
+       return "/ChargingSession/charging-session-details";
+        
+        case API.ocpipartnerhubsessionDetail:
+        return "/ocpipartnerhub/admin/sessions";
       case API.chargingsessions:
-        return "/ChargingSession/charging-sessions";
-
+         return "/ChargingSession/charging-sessions";
+//  return "/UnifiedCharging/sessions";
       case API.chargingHubReviewList:
         return "/ChargingHub/charging-hub-review-list";
       case API.chargingHubReviewAdd:
@@ -635,12 +667,23 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
         return "/ChargingSession/estimate-charging";
       case API.forgetPassword:
         return "/User/forgot-password";
-        case API.chargerDetails:
-  return "/ChargingHub/charger-details";
-  case API.appVersionInfo:
-  return "/AppVersionInfo";
-  case API.setDefaultVehicle:
-  return "/User/set-default-vehicle";
+      case API.chargerDetails:
+        // return "/ChargingHub/charger-details";
+         return "/UnifiedCharging/session-details/{id}";
+      case API.appVersionInfo:
+        return "/AppVersionInfo";
+      case API.setDefaultVehicle:
+        return "/User/set-default-vehicle";
+
+      case API.unifiedComprehensiveList:
+        return "/UnifiedCharging/comprehensive-list";
+  case API.partnersessionsbyreference:
+        return "/unifiedcharging/by-reference";
+  case API.partnerchargingsessions:
+        return "/OcpiPartnerHub/admin/sessions";
+          case API.unifiedestimatecharging:
+        return 
+        "/unifiedcharging/estimate-charging";
     }
   }
 
@@ -665,6 +708,10 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.razorpayKey:
       case API.chargerDetails:
       case API.appVersionInfo:
+           case API.partnersessionsbyreference:
+           case API.partnerchargingsessions:
+            case API.ocpipartnerhubsessionDetail:
+            case API.chargingsessioIDdetails:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:
@@ -675,8 +722,8 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.charginghubreviewdelete:
       case API.deleteAccount:
         return HTTPMethod.DELETE;
-        case API.setDefaultVehicle:
-  return HTTPMethod.PUT;
+      case API.setDefaultVehicle:
+        return HTTPMethod.PUT;
       default:
         return HTTPMethod.POST;
     }
@@ -704,15 +751,29 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
         return WalletResponse.fromJson(json);
       case API.walletDetails:
         return WalletListResponse.fromJson(json);
-     
+
       case API.userVehicleDelete:
         return DeleteVehicleResponse.fromJson(json);
       case API.userVehicleUpdate:
         return UserVehicleUpdateResponse.fromJson(json);
+
+         case API.ocpipartnerhubsessionDetail:
+            return UnifiedSessionDetailResponse.fromJson(json);
+
       case API.startChargingSession:
-        return StartChargingSessionResponse.fromJson(json);
+        // return StartChargingSessionResponse.fromJson(json);
+        // return StartUnifiedChargingSessionResponse.fromJson(json);
+        final id = json['data']?['id']?.toString() ?? '';
+
+  if (id.startsWith('L:')) {
+    return LocalStartUnifiedChargingSessionResponse.fromJson(json);
+  } else {
+    return StartUnifiedChargingSessionResponse.fromJson(json);
+  }
       case API.endChargingSession:
-        return EndChargingSessionResponse.fromJson(json);
+      
+      return EndUnifiedChargingSessionResponse.fromJson(json);
+        // return EndChargingSessionResponse.fromJson(json);
       case API.unlockConnector:
         return UnlockResponse.fromJson(json);
       case API.comprehensivelist:
@@ -722,10 +783,16 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.chargingHubReviewList:
         return ChargingHubReviewResponse.fromJson(json);
       case API.charginggunstatus:
-        return ChargingGunStatusResponse.fromJson(json);
+        // return UnifiedGunStatusResponse.fromJson(json);
+       return json;
+      //  ChargingGunStatusResponse.fromJson(json);
 
       case API.chargingsessions:
-        return ActiveSessionResponse.fromJson(json);
+        // return UnifiedActiveSessionResponse.fromJson(json);
+        return  ActiveSessionResponse.fromJson(json);
+         case API.partnerchargingsessions:
+        return UnifiedActiveSessionResponse.fromJson(json);
+        // return  ActiveSessionResponse.fromJson(json);
       case API.chargingHubReviewAdd:
       case API.charginghubreviewupdate:
         return AddReviewResponse.fromJson(json);
@@ -757,21 +824,29 @@ if (e.requestOptions.path == apiEndPoint(API.refreshToken)) {
       case API.estimateCharging:
         return EstimateChargingResponse.fromJson(json);
       case API.appVersionInfo:
-  return AppVersionResponse.fromJson(json);
+        return AppVersionResponse.fromJson(json);
 
-case API.carManufacturerList:
-  return CarManufacturerResponse.fromJson(json);
+      case API.carManufacturerList:
+        return CarManufacturerResponse.fromJson(json);
 
-case API.evModelList:
-  return EvModelResponse.fromJson(json);
+      case API.evModelList:
+        return EvModelResponse.fromJson(json);
 
-
-   case API.userVehicleList:
+      case API.userVehicleList:
         return VehicleListResponse.fromJson(json);
       case API.userVehicleAdd:
         return UserVehicleResponse.fromJson(json);
-        case API.setDefaultVehicle:
-  return SetDefaultVehicleResponse.fromJson(json);
+      case API.setDefaultVehicle:
+        return SetDefaultVehicleResponse.fromJson(json);
+      case API.unifiedComprehensiveList:
+        return UnifiedComprehensiveResponse.fromJson(json);
+          case API.partnersessionsbyreference:
+        return SessionIdResponse.fromJson(json);
+ case API.chargingsessioIDdetails:
+        return SessionIDDetailResponse.fromJson(json);
+        case API.unifiedestimatecharging:
+        return EstimationModel.fromJson(json);
+
       default:
         return json;
     }
@@ -795,8 +870,9 @@ case API.evModelList:
           // validateStatus: (_) => true,
         ),
       );
+
       print('Response code: ${response.statusCode}');
-       print('Response code: ${response}');
+      print('Response code: ${response}');
       if (response.statusCode == 200) {
         return parseResponse(api, response.data);
       }

@@ -58,57 +58,39 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
   DateTime? _sessionStartTime;
   String duration = "00:00";
   final String recId = "";
-  session()
-  async {
-      final res = await context
-        .read<ChargingProvider>()
-        .fetchChargingSessionDetails(
-          context: context,
-          sessionId: widget.args.sessionId!,
-        );
-         duration = formatBackendDuration(res!.data!.session!.duration);
+  session() async {
+    final res =
+        await context.read<ChargingProvider>().fetchChargingSessionDetails(
+              context: context,
+              sessionId: widget.args.sessionId!,
+            );
+    duration =
+        formatBackendDuration(res!.data!.raw!.durationMinutes!.toString());
   }
+
   @override
   void initState() {
     super.initState();
-    // Example: if you pass startTime in args
-// _sessionStartTime = DateTime.parse(widget.args.startTime);
 
-// If not available, start from now
-    // 1️⃣ Get backend duration
-    
-     duration = formatBackendDuration(widget.args.duration);
-// session();
-    // 2️⃣ Convert to seconds
     _elapsedSeconds = durationToSeconds(duration);
 
     // 3️⃣ Start timer from backend value
     _startDurationTimer();
-// _sessionStartTime = DateTime.now();
-
-// _startDurationTimer();
-
-    // status = widget.intitalResponse.data!.session!.status!;
-    // cost = widget.intitalResponse.data!.session!.chargingTotalFee!;
-    // unitConsumed = widget.intitalResponse.data!.session!.chargingSpeed!;
-    // outputPower = widget.intitalResponse.data!.session!.energyTransmitted!;
-    // batteryPercentage ==
-    //      widget.intitalResponse.data!.batteryStateOfCharge!.currentSoC;
-    // endMeterReading = widget.intitalResponse.data!.session!.endMeterReading;
 
     status = widget.args.status!;
+    duration = formatBackendDuration("00:00:00"); //widget.args.duration
     cost = widget.args.cost;
-    unitConsumed = widget.args.unitConsumed;
+    unitConsumed =  widget.args.unitConsumed;
     outputPower = widget.args.outputPower;
     batteryPercentage = widget.args.batteryPercentage;
-    stationName=widget.args.stationName;
-    ConnectorGunID=widget.args.ConnectorGunID;
+    stationName =widget.args.stationName;
+    endMeterReading = widget.args.endMeterReading;
+    ConnectorGunID = widget.args.ConnectorGunID;
     print("BATTERY");
     print(outputPower);
     print("BATTERY");
     print(batteryPercentage);
 
-    endMeterReading = widget.args.endMeterReading;
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -191,58 +173,57 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
 
   void _startPolling() {
     _refreshTimer = Timer.periodic(
-  const Duration(seconds: 10),
-  (_) async {
-    final res = await context
-        .read<ChargingProvider>()
-        .fetchChargingSessionDetails(
-          context: context,
-          sessionId: widget.args.sessionId!,
-        );
+      const Duration(seconds: 10),
+      (_) async {
+        
+        final res =
+            await context.read<ChargingProvider>().fetchChargingSessionDetails(
+                  context: context,
+                  sessionId: widget.args.sessionId!,
+                );
+        print(res);
+        // Extract all values first (outside setState)
+        final newStatus =
+            res!.data!.raw!.status == null ? "" : res!.data!.raw!.status ?? "";
+        final newCost = "${res.data!.raw!.totalCost.toString()}";
+        final newUnitConsumed = "${res.data!.energyDelivered.toString()}";
+        final newOutputPower = "${res.data!.raw!.totalEnergyKwh} KW";
+        final isActive = res.data!.isActive == 1;
+        final newBatteryPercentage = isActive
+            ? res.data!.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+            : res.data!.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+        final newEndMeterReading = res.data!.meterCurrent.toString();
+        final newStationName = res.data!.locationName;
+        // final newConnectorGunID = res.data!.session!.connectorName;
 
-    // Extract all values first (outside setState)
-    final newStatus = res!.data!.session!.status ?? "";
-    final newCost = "${res.data!.costDetails!.totalCost}";
-    final newUnitConsumed = "${res.data!.energyConsumption!.totalEnergy}";
-    final newOutputPower = "${res.data!.chargingPerformance!.averageChargingSpeed} KW";
-    final isActive = res.data!.session!.active == 1;
-    final newBatteryPercentage = isActive
-        ? res.data!.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
-        : res.data!.batteryStateOfCharge?.endSoC?.toString() ?? "0";
-    final newEndMeterReading = res.data!.session!.endMeterReading.toString();
-    final newStationName = res.data!.session!.chargingStationName;
-    // final newConnectorGunID = res.data!.session!.connectorName;
+        // Stop timers and vibrate if session completed
+        if (res.data!.isActive == false) {
+          _refreshTimer?.cancel();
+          _durationTimer?.cancel();
 
-    // Stop timers and vibrate if session completed
-    if (res.data!.isActive == false) {
-      _refreshTimer?.cancel();
-      _durationTimer?.cancel();
+          if (await Vibration.hasVibrator() ?? false) {
+            Vibration.vibrate(duration: 800);
+          }
+          showToast("Charging session completed");
+          Navigator.push(
+            routeGlobalKey.currentContext!,
+            MaterialPageRoute(builder: (context) => ChargingHistoryScreen()),
+          );
+        }
 
-      if (await Vibration.hasVibrator() ?? false) {
-        Vibration.vibrate(duration: 800);
-      }
-showToast("Charging session completed");
-   Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                              builder: (context) => ChargingHistoryScreen()),
-                        );
-     
-    }
-
-    // Update UI synchronously
-    setState(() {
-      status = newStatus;
-      cost = newCost;
-      unitConsumed = newUnitConsumed;
-      outputPower = newOutputPower;
-      batteryPercentage = newBatteryPercentage;
-      endMeterReading = newEndMeterReading;
-      stationName = newStationName;
-      // ConnectorGunID = newConnectorGunID;
-    });
-  },
-);
+        // Update UI synchronously
+        setState(() {
+          status = newStatus;
+          cost = newCost;
+          unitConsumed = newUnitConsumed;
+          outputPower = newOutputPower;
+          batteryPercentage = newBatteryPercentage;
+          endMeterReading = newEndMeterReading;
+          stationName = newStationName;
+          // ConnectorGunID = newConnectorGunID;
+        });
+      },
+    );
     // _refreshTimer = Timer.periodic(
     //   const Duration(seconds: 10),
     //   (_) async {
@@ -300,8 +281,8 @@ showToast("Charging session completed");
   void dispose() {
     _controller.dispose();
     _refreshTimer?.cancel();
-     
-      _durationTimer?.cancel();
+
+    _durationTimer?.cancel();
     super.dispose();
   }
 
@@ -312,27 +293,25 @@ showToast("Charging session completed");
 
     return WillPopScope(
       onWillPop: () async {
-         if(widget.args!.isActive!)
-
-{
-  Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                            builder: (_) => ActiveSessionsScreen(),
-                          ),
-                        );
-}  else{
- Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MainTab(
-                  isLoggedIn: GlobalLists.islLogin,
-                  currentIndex: 1,
-                ),
+        if (widget.args!.isActive!) {
+          Navigator.push(
+            routeGlobalKey.currentContext!,
+            MaterialPageRoute(
+              builder: (_) => ActiveSessionsScreen(selectedTabIndex: 0,),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MainTab(
+                isLoggedIn: GlobalLists.islLogin,
+                currentIndex: 1,
               ),
-            );
-}         
-          
+            ),
+          );
+        }
+
         // Navigator.push(
         //   context,
         //   MaterialPageRoute(
@@ -349,26 +328,24 @@ showToast("Charging session completed");
         appBar: CommonAppBar(
           title: "Charging Session",
           onBack: () {
-            if(widget.args!.isActive!)
-
-{
-  Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                            builder: (_) => ActiveSessionsScreen(),
-                          ),
-                        );
-}  else{
- Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => MainTab(
-                  isLoggedIn: GlobalLists.islLogin,
-                  currentIndex: 1,
+            if (widget.args!.isActive!) {
+              Navigator.push(
+                routeGlobalKey.currentContext!,
+                MaterialPageRoute(
+                  builder: (_) => ActiveSessionsScreen(selectedTabIndex: 0,),
                 ),
-              ),
-            );
-}         
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MainTab(
+                    isLoggedIn: GlobalLists.islLogin,
+                    currentIndex: 1,
+                  ),
+                ),
+              );
+            }
           },
         ),
         bottomNavigationBar: Padding(
@@ -382,51 +359,51 @@ showToast("Charging session completed");
                       : () async {
                           // print("Charging session ID ${data!.session!.recId!}");
 
-                          bool? result = await stopSessionDialog(context,amount:cost,units: unitConsumed);
+                          bool? result = await stopSessionDialog(context,
+                              amount: cost, units: unitConsumed);
                           if (result == true) {
-  // ✅ User clicked YES
-   final response = await provider.endSession(
-                              context: context,
-                              sessionId:
-                                  widget.args.sessionId!, // 🔑 station id
-                              endMeterReading: endMeterReading!);
+                            // ✅ User clicked YES
+                            final response = await provider.endUnifiedSession(
+                                context: context,
+                                sessionId:
+                                    widget.args.sessionId!, // 🔑 station id
+                                endMeterReading: endMeterReading!);
 
-                          setState(() async {
-                            _durationTimer?.cancel();
-                            if (await Vibration.hasVibrator() ?? false) {
-                              Vibration.vibrate(pattern: [0, 500, 200, 500]);
-                            }
-showToast("charging session stopped");
-                            Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                              builder: (context) => ChargingHistoryScreen()),
-                        );
-                            status = response!.data!.session!.status;
+                            setState(() async {
+                              _durationTimer?.cancel();
+                              if (await Vibration.hasVibrator() ?? false) {
+                                Vibration.vibrate(pattern: [0, 500, 200, 500]);
+                              }
+                              showToast("charging session stopped");
+                              Navigator.push(
+                                routeGlobalKey.currentContext!,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        ChargingHistoryScreen()),
+                              );
+                              // status ="";
 
-                            cost = response.data!.cost!.toString();
-                            unitConsumed =
-                                response.data!.energyConsumed.toString();
-                            outputPower = response
-                                .data!.session!.chargingGun!.powerOutput
-                                .toString();
-                            batteryPercentage = response
-                                        .data!.batteryStateOfCharge!.endSoC ==
-                                    null
-                                ? "0"
-                                : response.data!.batteryStateOfCharge!.endSoC
-                                    .toString();
-                            endMeterReading =
-                                response.data!.meterStop.toString();
-                                stationName=response.data!.session!.chargingStationName;
-                                // ConnectorGunID=response.data!.session!.connectorName;
-                          });
-                        
-} else {
-  // ❌ User clicked NO or closed dialog
-  print("User cancelled");
-}
-                        
+                              // cost = response.data!.cost!.toString();
+                              // unitConsumed =
+                              //     response.data!.energyConsumed.toString();
+                              // outputPower = response
+                              //     .data!.session!.chargingGun!.powerOutput
+                              //     .toString();
+                              // batteryPercentage = response
+                              //             .data!.batteryStateOfCharge!.endSoC ==
+                              //         null
+                              //     ? "0"
+                              //     : response.data!.batteryStateOfCharge!.endSoC
+                              //         .toString();
+                              // endMeterReading =
+                              //     response.data!.meterStop.toString();
+                              //     stationName=response.data!.session!.chargingStationName;
+                              //     // ConnectorGunID=response.data!.session!.connectorName;
+                            });
+                          } else {
+                            // ❌ User clicked NO or closed dialog
+                            print("User cancelled");
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.blue,
@@ -451,15 +428,12 @@ showToast("charging session stopped");
                         if (result == true) {
   _durationTimer?.cancel();
 
-                          print(
-                              "Charging STATION ID ${data!.session!.chargingStationId!}");
-                          print(
-                              "Charging gun ID ${data.session!.chargingGunId}");
-                          final response = await provider.unlockConnector(
+                         
+                          final response = await provider.unlockUnifiedConnector(
                               context: context,
                               chargingStationId: data!
-                                  .session!.chargingStationId!, // 🔑 station id
-                              connectorId:data.chargerDetails!.connectorId!
+                                  .stationId!, // 🔑 station id
+                              connectorId:data.connectorId!
                                   // int.parse(data.session!.chargingGunId!)
                                   );
                           status = response!.data!.status;
@@ -467,8 +441,6 @@ showToast("charging session stopped");
   // ❌ User clicked NO or closed dialog
   print("User cancelled");
 }
-                       
-
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: CommonColors.white,
@@ -495,10 +467,9 @@ showToast("charging session stopped");
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-               status == ""
+              status == ""
                   ? Container()
                   : Row(
-                    
                       children: [
                         Expanded(
                           child: Center(
@@ -524,26 +495,24 @@ showToast("charging session stopped");
                                     .read<ChargingProvider>()
                                     .fetchChargingSessionDetails(
                                       context: context,
-                                      sessionId: widget.args.sessionId!,
+                                      sessionId: widget.args.sessionId,
                                     );
                                 setState(() {
-                                  status = res!.data!.session!.status == null
+                                  status = res!.data!.raw!.status == null
                                       ? ""
-                                      : res!.data!.session!.status;
+                                      : res!.data!.raw!.status;
                                   cost =
-                                      "${res.data!.costDetails!.totalCost!.toString()!}";
+                                      "${res.data!.raw!.totalCost!.toString()!}";
                                   unitConsumed =
-                                      "${res.data!.energyConsumption!.totalEnergy!.toString()} ";
+                                      "${res.data!.raw!.energyLimit!.toString()} ";
                                   outputPower =
-                                      "${res.data!.chargerDetails!.powerOutput} KW";
-                                  print(
-                                      "outputPower ${res.data!.chargerDetails!.powerOutput} KW");
-                                           stationName="${res.data!.session!.chargingStationName}";
-                                          //  ConnectorGunID="${res.data!.session!.connectorName}";
-                                  // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
-                                  final isActive =
-                                      res?.data?.session?.active == 1;
-                          
+                                      "${res.data!.raw!.totalEnergyKwh} KW";
+
+                                  stationName = "${res.data!.locationName}";
+                                  //  ConnectorGunID="${res.data!.session!.connectorName}";
+                                  batteryPercentage = res!.data!.isActive==1? res.data!.batteryStateOfCharge!.currentSoC.toString():res.data!.batteryStateOfCharge!.endSoC.toString();
+                                  final isActive = res?.data?.isActive == 1;
+
                                   batteryPercentage = isActive
                                       ? res?.data?.batteryStateOfCharge
                                               ?.currentSoC
@@ -553,23 +522,25 @@ showToast("charging session stopped");
                                               ?.toString() ??
                                           "0";
                                   print("AFTER 15 sec batteryStateOfCharge");
-                                  print(res.data!.batteryStateOfCharge!.currentSoC
+                                  print(res
+                                      .data!.batteryStateOfCharge!.currentSoC
                                       .toString());
-                          
-                                  endMeterReading = res
-                                      .data!.session!.endMeterReading
-                                      .toString();
+
+                                  endMeterReading =
+                                      res.data!.meterCurrent.toString();
                                 });
                               },
-                              child:provider.loading?CircularProgressIndicator(color: CommonColors.blue,): Icon(Icons.refresh)),
+                              child: provider.loading
+                                  ? CircularProgressIndicator(
+                                      color: CommonColors.blue,
+                                    )
+                                  : Icon(Icons.refresh)),
                         ),
                       ],
                     ),
               ChargerAnimation(
                 status: status!, // "Active" or "Complete"
               ),
-
-            
 
 // Row(
 //   children: [
@@ -595,8 +566,8 @@ showToast("charging session stopped");
               SizedBox(
                 height: 10,
               ),
-               Padding(
-                padding: const EdgeInsets.only(left: 20,bottom: 10),
+              Padding(
+                padding: const EdgeInsets.only(left: 20, bottom: 10),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -604,13 +575,13 @@ showToast("charging session stopped");
                     Row(
                       children: [
                         Text(
-                      "Station Name: ",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
+                          "Station Name: ",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
                         Text(
                           "${stationName!.toUpperCase()}",
                           style: TextStyle(
@@ -620,17 +591,17 @@ showToast("charging session stopped");
                         ),
                       ],
                     ),
-                     Text(
-                       "(Connector ${ConnectorGunID})",
-                       style: TextStyle(
-                         color: Colors.black,
-                         fontSize: 12,
-                       ),
-                     ),
+                    Text(
+                      "(Connector ${ConnectorGunID})",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
               ),
-             
+
               _batteryProgress(),
               _infoGrid(),
 
@@ -814,8 +785,7 @@ showToast("charging session stopped");
       mainAxisSpacing: 12,
       childAspectRatio: 1.8,
       children: [
-        _infoCard(
-            "Amount", "₹ ${"${cost}" ?? 0}", CommonImagePath.current),
+        _infoCard("Amount", "₹ ${"${cost}" ?? 0}", CommonImagePath.current),
         // _infoCard(
         //   "Battery",
         //   "${25.0 ?? 0} km",
@@ -1081,17 +1051,16 @@ class SessionChargingArgs {
   final String? ConnectorGunID;
   final bool? isActive; //1 for Active otherwise 0
 
-  SessionChargingArgs({
-    required this.sessionId,
-    required this.status,
-    required this.cost,
-    required this.unitConsumed,
-    required this.outputPower,
-    required this.batteryPercentage,
-    required this.endMeterReading,
-    required this.duration,
-    required this.stationName,
-    required this.ConnectorGunID, 
-    this.isActive =false
-  });
+  SessionChargingArgs(
+      {required this.sessionId,
+      required this.status,
+      required this.cost,
+      required this.unitConsumed,
+      required this.outputPower,
+      required this.batteryPercentage,
+      required this.endMeterReading,
+      required this.duration,
+      required this.stationName,
+      required this.ConnectorGunID,
+      this.isActive = false});
 }
