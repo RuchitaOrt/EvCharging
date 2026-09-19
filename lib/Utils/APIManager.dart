@@ -118,7 +118,8 @@ enum API {
   partnerchargingsessions,
   ocpipartnerhubsessionDetail,
   chargingsessioIDdetails,
-  unifiedestimatecharging
+  unifiedestimatecharging,
+  downloadInvoice
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -684,6 +685,9 @@ class APIManager {
           case API.unifiedestimatecharging:
         return 
         "/unifiedcharging/estimate-charging";
+ case API.downloadInvoice:
+        return 
+        "/Invoice";
     }
   }
 
@@ -712,6 +716,7 @@ class APIManager {
            case API.partnerchargingsessions:
             case API.ocpipartnerhubsessionDetail:
             case API.chargingsessioIDdetails:
+            case API.downloadInvoice:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:
@@ -867,6 +872,10 @@ class APIManager {
         queryParameters: queryParams,
         options: Options(
           method: apiHTTPMethod(api).name,
+           responseType:
+      api == API.downloadInvoice
+          ? ResponseType.bytes
+          : ResponseType.json,
           // validateStatus: (_) => true,
         ),
       );
@@ -874,6 +883,9 @@ class APIManager {
       print('Response code: ${response.statusCode}');
       print('Response code: ${response}');
       if (response.statusCode == 200) {
+         if (api == API.downloadInvoice) {
+    return response.data;
+  }
         return parseResponse(api, response.data);
       }
 

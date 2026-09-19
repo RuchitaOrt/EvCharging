@@ -71,17 +71,29 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
     _tabController.dispose();
     super.dispose();
   }
+void _onScroll() {
+  if (!_scrollController.hasClients) return;
 
-  void _onScroll() {
-    final provider = context.read<ActiveSessionProvider>();
+  final provider = context.read<ActiveSessionProvider>();
 
-    if (_scrollController.position.pixels >=
-            _scrollController.position.maxScrollExtent - 200 &&
-        provider.hasMore &&
-        !provider.loadingMore) {
-      provider.loadMore(context, "");
-    }
+  if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200 &&
+      provider.selectedMainTab == 1 &&
+      provider.hasMore &&
+      !provider.loadingMore) {
+    provider.loadMoreUnifiedData(context, "");
   }
+}
+  // void _onScroll() {
+  //   final provider = context.read<ActiveSessionProvider>();
+
+  //   if (_scrollController.position.pixels >=
+  //           _scrollController.position.maxScrollExtent - 200 &&
+  //       provider.hasMore &&
+  //       !provider.loadingMore) {
+  //     provider.loadMore(context, "");
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -256,7 +268,66 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
   //     ],
   //   );
   // }
+Widget _invoiceButton({
+  required String sessionId,
+}) {
+  return Consumer<ActiveSessionProvider>(
+    builder: (context, provider, _) {
+      return FutureBuilder<bool>(
+        future: provider.isInvoiceDownloaded(sessionId),
+        builder: (context, snapshot) {
+          final isDownloaded = snapshot.data ?? false;
 
+          return Expanded(
+            child: ElevatedButton(
+              onPressed: () async {
+                if (isDownloaded) {
+                  await provider.openInvoice(sessionId);
+                } else {
+                  final success = await provider.downloadInvoice(
+                    context,
+                    sessionId,
+                  );
+
+                  if (success && mounted) {
+                    setState(() {});
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: CommonColors.white,
+                foregroundColor: CommonColors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: CommonColors.blue.withOpacity(0.4),
+                    width: 0.8,
+                  ),
+                ),
+              ),
+              child: snapshot.connectionState == ConnectionState.waiting
+                  ? const SizedBox(
+                      height: 16,
+                      width: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      isDownloaded ? "View Download" : "Download",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: CommonColors.blue,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
   Widget _summaryBox(String value, String label) {
     return Padding(
       padding: const EdgeInsets.all(4),
@@ -565,43 +636,87 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
                               ),
                             ),
                           )
-                        : Container(
-                            width: SizeConfig.blockSizeHorizontal * 90,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                data.status == "Active"
-                                    ? null
-                                    : Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => BookingDetailsScreen(
-                                            recID: data.sessionId!,
-                                            bookingType: "P",
-                                          ),
-                                        ),
-                                      );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CommonColors.white,
-                                foregroundColor: CommonColors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color: CommonColors.blue.withOpacity(0.4),
-                                    width: 0.8,
-                                  ),
-                                ),
-                              ),
-                              child: const Text(
-                                //Download
-                                "View Receipt",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: CommonColors.blue,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
+                          : Row(
+    children: [
+      Expanded(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BookingDetailsScreen(
+                  recID:data.sessionId!,
+                  bookingType: "P",
+                ),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: CommonColors.white,
+            foregroundColor: CommonColors.blue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: CommonColors.blue.withOpacity(0.4),
+                width: 0.8,
+              ),
+            ),
+          ),
+          child: const Text(
+            "View Receipt",
+            style: TextStyle(
+              fontSize: 12,
+              color: CommonColors.blue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+
+      const SizedBox(width: 10),
+
+      _invoiceButton(
+        sessionId: data.sessionId!,
+      ),
+    ],
+  ),
+                        // : Container(
+                        //     width: SizeConfig.blockSizeHorizontal * 90,
+                        //     child: ElevatedButton(
+                        //       onPressed: () {
+                        //         data.status == "Active"
+                        //             ? null
+                        //             : Navigator.push(
+                        //                 context,
+                        //                 MaterialPageRoute(
+                        //                   builder: (_) => BookingDetailsScreen(
+                        //                     recID: data.sessionId!,
+                        //                     bookingType: "P",
+                        //                   ),
+                        //                 ),
+                        //               );
+                        //       },
+                        //       style: ElevatedButton.styleFrom(
+                        //         backgroundColor: CommonColors.white,
+                        //         foregroundColor: CommonColors.blue,
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius: BorderRadius.circular(12),
+                        //           side: BorderSide(
+                        //             color: CommonColors.blue.withOpacity(0.4),
+                        //             width: 0.8,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //       child: const Text(
+                        //         //Download
+                        //         "View Receipt",
+                        //         style: TextStyle(
+                        //             fontSize: 12,
+                        //             color: CommonColors.blue,
+                        //             fontWeight: FontWeight.w600),
+                        //       ),
+                        //     ),
+                        //   ),
                   ],
                 ),
               ),
@@ -985,43 +1100,87 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
                               ),
                             ),
                           )
-                        : Container(
-                            width: SizeConfig.blockSizeHorizontal * 90,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                data.status == "Active"
-                                    ? null
-                                    : Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (_) => BookingDetailsScreen(
-                                            recID: data.recId!,
-                                            bookingType: "L",
-                                          ),
-                                        ),
-                                      );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CommonColors.white,
-                                foregroundColor: CommonColors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color: CommonColors.blue.withOpacity(0.4),
-                                    width: 0.8,
-                                  ),
-                                ),
-                              ),
-                              child: const Text(
-                                //Download
-                                "View Receipt",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: CommonColors.blue,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          ),
+                          : Row(
+    children: [
+      Expanded(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => BookingDetailsScreen(
+                  recID: data.recId!,
+                  bookingType: "L",
+                ),
+              ),
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: CommonColors.white,
+            foregroundColor: CommonColors.blue,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: BorderSide(
+                color: CommonColors.blue.withOpacity(0.4),
+                width: 0.8,
+              ),
+            ),
+          ),
+          child: const Text(
+            "View Receipt",
+            style: TextStyle(
+              fontSize: 12,
+              color: CommonColors.blue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+
+      const SizedBox(width: 10),
+
+      _invoiceButton(
+        sessionId: data.recId!,
+      ),
+    ],
+  ),
+                        // : Container(
+                        //     width: SizeConfig.blockSizeHorizontal * 90,
+                        //     child: ElevatedButton(
+                        //       onPressed: () {
+                        //         data.status == "Active"
+                        //             ? null
+                        //             : Navigator.push(
+                        //                 context,
+                        //                 MaterialPageRoute(
+                        //                   builder: (_) => BookingDetailsScreen(
+                        //                     recID: data.recId!,
+                        //                     bookingType: "L",
+                        //                   ),
+                        //                 ),
+                        //               );
+                        //       },
+                        //       style: ElevatedButton.styleFrom(
+                        //         backgroundColor: CommonColors.white,
+                        //         foregroundColor: CommonColors.blue,
+                        //         shape: RoundedRectangleBorder(
+                        //           borderRadius: BorderRadius.circular(12),
+                        //           side: BorderSide(
+                        //             color: CommonColors.blue.withOpacity(0.4),
+                        //             width: 0.8,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //       child: const Text(
+                        //         //Download
+                        //         "View Receipt",
+                        //         style: TextStyle(
+                        //             fontSize: 12,
+                        //             color: CommonColors.blue,
+                        //             fontWeight: FontWeight.w600),
+                        //       ),
+                        //     ),
+                        //   ),
                   ],
                 ),
               ),
@@ -1100,6 +1259,7 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
       ),
     );
   }
+  
 }
 
 class FilterTabsWidget extends StatefulWidget {

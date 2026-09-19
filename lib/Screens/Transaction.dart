@@ -459,17 +459,17 @@ class _TransactionTile extends StatelessWidget {
     return GestureDetector(
       onTap: ()
       {
-        print("item.sessionID ${item.sessionID}");
-         item.isCredit?null:
-         Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BookingDetailsScreen(recID: item.sessionID,
-            bookingType:  (item.chargingSessionID==""|| item.chargingSessionID==null)?"P": "L",
+        // print("item.sessionID ${item.sessionID}");
+        //  item.isCredit?null:
+        //  Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (_) => BookingDetailsScreen(recID: item.sessionID,
+        //     bookingType:  (item.chargingSessionID==""|| item.chargingSessionID==null)?"P": "L",
             
-            ),
-          ),
-        );
+        //     ),
+        //   ),
+        // );
       },
       child: Container(
         padding: const EdgeInsets.all(14),

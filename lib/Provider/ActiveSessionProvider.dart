@@ -141,11 +141,17 @@
 //     }
 //   }
 // }
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:HyCharge/Services/ChargingService.dart';
+import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:HyCharge/model/UnifiedActiveSessionResponse.dart' as uni;
 import 'package:flutter/material.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:path_provider/path_provider.dart';
 
 enum SessionFilter { thisMonth, last7Days, all,Debit,Credit }
 
@@ -157,7 +163,7 @@ class ActiveSessionProvider extends ChangeNotifier {
   bool _hasMore = true;
 
   int _page = 1;
-  final int _pageSize = 100; // ✅ LOAD 3 AT A TIME
+  final int _pageSize = 10; // ✅ LOAD 3 AT A TIME
 
   final List<ChargingSession> _sessions = [];
   List<ChargingSession> _filteredSessions = [];
@@ -184,6 +190,57 @@ List<uni.Session> get unifiedSessions => _filteredUnifedSessions;
 int _selectedMainTab = 0;
 
 int get selectedMainTab => _selectedMainTab;
+Future<String> getInvoicePath(String sessionId) async {
+  final directory = await getApplicationDocumentsDirectory();
+
+  return '${directory.path}/invoice_$sessionId.pdf';
+}
+
+Future<bool> isInvoiceDownloaded(String sessionId) async {
+  final filePath = await getInvoicePath(sessionId);
+  return File(filePath).exists();
+}
+
+Future<bool> downloadInvoice(
+  BuildContext context,
+  String sessionId,
+) async {
+  try {
+    final bytes = await _service.downloadInvoice(
+      context,
+      sessionId,
+    );
+
+    final filePath = await getInvoicePath(sessionId);
+
+    final file = File(filePath);
+
+    await file.writeAsBytes(bytes, flush: true);
+
+    debugPrint("Invoice downloaded: $filePath");
+
+    notifyListeners();
+
+    return true;
+  } catch (e) {
+    debugPrint("Invoice download error: $e");
+    return false;
+  }
+}
+
+Future<void> openInvoice(String sessionId) async {
+  try {
+    final filePath = await getInvoicePath(sessionId);
+
+    final file = File(filePath);
+
+    if (await file.exists()) {
+      await OpenFilex.open(filePath);
+    }
+  } catch (e) {
+    debugPrint("Open invoice error: $e");
+  }
+}
 
 void changeMainTab(int index) {
   _selectedMainTab = index;
@@ -260,7 +317,8 @@ void changeMainTab(int index) {
 
         partnerSessions.addAll(response!.data!.sessions!);
         _hasMore = response.data!.sessions!.length == _pageSize;
-        _applyFilter();
+        // _applyFilter();
+        _applyUnifiedFilter();
       }
     } catch (e) {
       debugPrint("Fetch error: $e");
@@ -321,7 +379,8 @@ void changeMainTab(int index) {
         final newItems = response.data!.sessions;
         partnerSessions.addAll(newItems!);
         _hasMore = newItems.length == _pageSize;
-        _applyFilter();
+        // _applyFilter();
+        _applyUnifiedFilter();
       }
     } catch (e) {
       debugPrint("Load more error: $e");

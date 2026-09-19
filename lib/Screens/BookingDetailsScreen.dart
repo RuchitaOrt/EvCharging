@@ -30,7 +30,7 @@ SessionIDDetailResponse? response;
 
 UnifiedSessionDetailResponse? Unifiedresponse;
 bool isLoading = true;
-
+late ScrollController _scrollController;
 Future<void> loadData() async {
   if(widget.bookingType=="L")
   {

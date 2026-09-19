@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/model/ActiveSessionResponse.dart';
 import 'package:HyCharge/model/ChargerDetailsResponse.dart';
@@ -31,6 +33,21 @@ class ChargingService {
 
     return response as StartChargingSessionResponse;
   }
+
+  Future<Uint8List> downloadInvoice(
+  BuildContext context,
+  String sessionId,
+) async {
+  print("Download invoice API called for sessionId: $sessionId");
+
+  final res = await APIManager().apiRequest(
+    context,
+    API.downloadInvoice,
+    path: "/partner-session/$sessionId/download",
+  );
+
+  return res as Uint8List;
+}
   // Future<StartUnifiedChargingSessionResponse> startUnifiedChargingSession(
   //     BuildContext context, Map<String, dynamic> payload) async {
   //   final response = await APIManager().apiRequest(
@@ -128,6 +145,7 @@ Future<dynamic> startUnifiedChargingSession(
     BuildContext context,
     String sessionId,
   ) async {
+    print("These API called");
     final res = await APIManager().apiRequest(
       context,
       API.ocpipartnerhubsessionDetail,
@@ -136,6 +154,8 @@ Future<dynamic> startUnifiedChargingSession(
 
     return res as UnifiedSessionDetailResponse;
   }
+
+  
 // Future<ChargingGunStatusResponse> getChargingGunStatus({
 //   required BuildContext context,
 //   required String chargingGunId,
@@ -204,6 +224,7 @@ Future<dynamic> getChargingGunStatus({
     int pageSize = 50,
     String status="",
   }) async {
+     print("These API called getActiveUNifiedSessions");
     final res = await APIManager().apiRequest(
       context,
       API.partnerchargingsessions, // same endpoint as all sessions

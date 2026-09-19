@@ -74,6 +74,7 @@ dependencies:
   app_links: ^6.0.0
   vibration: 
   package_info_plus: ^8.0.0
+  open_filex: ^4.7.0
 
   
   # 4.0.1
