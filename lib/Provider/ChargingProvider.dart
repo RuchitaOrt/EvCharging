@@ -341,7 +341,7 @@ print("payload stop ${payload}");
     try {
       final res = await _service.endUNifiedChargingSession(context, payload);
       endSessionResponse = res;
-
+ 
       if (res.success == true) {
         FocusScope.of(context).unfocus();
         showToast(res.message ?? "Session ended successfully");
@@ -402,31 +402,31 @@ print("payload stop ${payload}");
     }
   }
 
-  Future<session.SessionDetailResponse?> fetchUNifiedChargingSessionDetails({
-    required BuildContext context,
-    required String sessionId,
-  }) async {
-    loading = true;
-    notifyListeners();
+  // Future<session.SessionDetailResponse?> fetchUNifiedChargingSessionDetails({
+  //   required BuildContext context,
+  //   required String sessionId,
+  // }) async {
+  //   loading = true;
+  //   notifyListeners();
 
-    try {
-      final res = await _service.getChargingSessionDetails(
-        context,
-        sessionId,
-      );
-      loading = false;
-      sessionDetails = res;
-      return res; // ✅ return response
-    } catch (e) {
-      loading = false;
-      FocusScope.of(context).unfocus();
-      showToast(e.toString());
-      return null;
-    } finally {
-      loading = false;
-      notifyListeners();
-    }
-  }
+  //   try {
+  //     final res = await _service.getChargingSessionDetails(
+  //       context,
+  //       sessionId,
+  //     );
+  //     loading = false;
+  //     sessionDetails = res;
+  //     return res; // ✅ return response
+  //   } catch (e) {
+  //     loading = false;
+  //     FocusScope.of(context).unfocus();
+  //     showToast(e.toString());
+  //     return null;
+  //   } finally {
+  //     loading = false;
+  //     notifyListeners();
+  //   }
+  // }
 
   ///
   ///

@@ -1118,13 +1118,34 @@ Widget _stationsList(List<Station> stations) {
                                      SizedBox(width: 8,)
                                    ],
                                  ):Container(),
-                                Text(
-                                  capitalizeWords(
-                                      station.name ?? "Station"),
-                                  style: const TextStyle(
-                                      color: CommonColors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600),
+                                Row(
+                                  children: [
+                                    Text(
+                                      capitalizeWords(
+                                          station.name ?? "Station"),
+                                      style: const TextStyle(
+                                          color: CommonColors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    SizedBox(width: 20,),
+                                    
+                                  GestureDetector(
+  onTap: () async {
+    await Provider.of<ChargingGunStatusProvider>(
+      context,
+      listen: false,
+    ).getLocations(
+      context,
+      widget.hub.id!,
+    );
+  },
+  child: const Icon(
+    Icons.refresh,
+    color: CommonColors.white,
+  ),
+),
+                                  ],
                                 ),
                               ],
                             ),

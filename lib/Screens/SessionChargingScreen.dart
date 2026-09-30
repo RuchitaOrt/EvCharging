@@ -182,20 +182,25 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
                   sessionId: widget.args.sessionId!,
                 );
         print(res);
+        //  print(res!.data!.batteryStateOfCharge!);
+        print(res!.data!.batteryStateOfCharge!.currentSoC);
+        print("RANE REFRESH EVEYR");
         // Extract all values first (outside setState)
         final newStatus =
             res!.data!.raw!.status == null ? "" : res!.data!.raw!.status ?? "";
         final newCost = "${res.data!.raw!.totalCost.toString()}";
         final newUnitConsumed = "${res.data!.energyDelivered.toString()}";
         final newOutputPower = "${res.data!.raw!.totalEnergyKwh} KW";
-        final isActive = res.data!.isActive == 1;
+        final isActive = res.data!.isActive == true;
         final newBatteryPercentage = isActive
-            ? res.data!.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
+            ? res!.data!.batteryStateOfCharge!.currentSoC.toString() ?? "0"
             : res.data!.batteryStateOfCharge?.endSoC?.toString() ?? "0";
         final newEndMeterReading = res.data!.meterCurrent.toString();
         final newStationName = res.data!.locationName;
         // final newConnectorGunID = res.data!.session!.connectorName;
-
+print(
+  "RANE newBatteryPercentage $newBatteryPercentage"
+);
         // Stop timers and vibrate if session completed
         if (res.data!.isActive == false) {
           _refreshTimer?.cancel();
@@ -218,6 +223,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
           unitConsumed = newUnitConsumed;
           outputPower = newOutputPower;
           batteryPercentage = newBatteryPercentage;
+          print("RANE ${batteryPercentage}");
           endMeterReading = newEndMeterReading;
           stationName = newStationName;
           // ConnectorGunID = newConnectorGunID;

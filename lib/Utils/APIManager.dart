@@ -7,6 +7,7 @@ import 'package:HyCharge/model/EstimationModel.dart';
 import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/ForgetPasswordResponse.dart';
 import 'package:HyCharge/model/LocalStartUnifiedChargingSessionResponse.dart';
+import 'package:HyCharge/model/LocationStatusModel.dart';
 import 'package:HyCharge/model/SessionIDDetailResponse.dart';
 import 'package:HyCharge/model/SessionIdResponse.dart';
 import 'package:HyCharge/model/SetDefaultVehicleResponse.dart';
@@ -119,7 +120,8 @@ enum API {
   ocpipartnerhubsessionDetail,
   chargingsessioIDdetails,
   unifiedestimatecharging,
-  downloadInvoice
+  downloadInvoice,
+  locationStatus,
 }
 
 enum HTTPMethod { GET, POST, PUT, DELETE }
@@ -688,6 +690,8 @@ class APIManager {
  case API.downloadInvoice:
         return 
         "/Invoice";
+        case API.locationStatus:
+  return "/UnifiedCharging/location-live-status";
     }
   }
 
@@ -717,6 +721,7 @@ class APIManager {
             case API.ocpipartnerhubsessionDetail:
             case API.chargingsessioIDdetails:
             case API.downloadInvoice:
+            case API.locationStatus:
         return HTTPMethod.GET;
       case API.profileUpdate:
       case API.userVehicleUpdate:
@@ -851,7 +856,8 @@ class APIManager {
         return SessionIDDetailResponse.fromJson(json);
         case API.unifiedestimatecharging:
         return EstimationModel.fromJson(json);
-
+case API.locationStatus:
+  return LocationStatusModel.fromJson(json);
       default:
         return json;
     }
