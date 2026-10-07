@@ -306,13 +306,13 @@ void changeMainTab(int index) {
       if (response.success! && response.data != null) {
         _totalSessions = response.data!.totalCount.toString();
         _totalEnergy =
-            // response.data!.summary?.totalEnergyTransmitted?.toString() ??
+             response.data!.summary?.totalEnergyTransmitted?.toString() ??
              "0";
         _totalSpent =
-            // response.data!.summary?.totalChargingTotalFee?.toString() ?? 
+             response.data!.summary?.totalChargingTotalFee?.toString() ?? 
             "0";
         _totalTime =
-            // response.data!.summary?.totalChargingTime!.formattedDuration! ??
+             response.data!.summary?.totalChargingTime!.formattedDuration! ??
              "0";
 
         partnerSessions.addAll(response!.data!.sessions!);

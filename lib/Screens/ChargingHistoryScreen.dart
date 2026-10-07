@@ -344,11 +344,14 @@ Widget _invoiceButton({
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(value,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: CommonColors.blue)),
+             Text(value,
+                
+                    style: TextStyle(
+                        fontSize: 20,
+                        
+                        fontWeight: FontWeight.bold,
+                        color: CommonColors.blue)),
+              
               const SizedBox(height: 4),
               Text(label, style: TextStyle(fontSize: 14, color: Colors.grey)),
             ],
@@ -547,10 +550,10 @@ Widget _invoiceButton({
                                     color: CommonColors.neutral500,
                                     fontSize: 12)),
                             Text(
-                                // data.soCStart == null
-                                //     ? "-"
-                                //     : "${data.soCStart} %",
-                                "",
+                                data.soCStart == null
+                                    ? "-"
+                                    : "${data.soCStart} %",
+                                
                                 style: TextStyle(
                                     fontWeight: FontWeight.w600, fontSize: 12)),
                           ],
@@ -564,10 +567,10 @@ Widget _invoiceButton({
                                       color: CommonColors.neutral500,
                                       fontSize: 12)),
                               Text(
-                                  // data.soCEnd == null
-                                  //     ? "-"
-                                  //     : "${data.soCEnd} %",
-                                  "",
+                                  data.soCEnd == null
+                                      ? "-"
+                                      : "${data.soCEnd} %",
+                              
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12)),
