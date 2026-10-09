@@ -241,17 +241,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     //     // );
                     //   },
                     // ),
-                    _profileTile(
-                      CommonImagePath.vehicle,
-                      'Vehicle',
-                      () {
-                        Navigator.push(
-                          routeGlobalKey.currentContext!,
-                          MaterialPageRoute(
-                              builder: (context) => ManageVehicleScreen()),
-                        );
-                      },
-                    ),
+                    // _profileTile(
+                    //   CommonImagePath.vehicle,
+                    //   'Vehicle',
+                    //   () {
+                    //     Navigator.push(
+                    //       routeGlobalKey.currentContext!,
+                    //       MaterialPageRoute(
+                    //           builder: (context) => ManageVehicleScreen()),
+                    //     );
+                    //   },
+                    // ),
                     // _profileTile(
                     //   CommonImagePath.notification,
                     //   'Notification',

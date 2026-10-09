@@ -143,88 +143,88 @@ Set<ChargerFilterType> selectedFilters = {};
                 style: mapsStyle,
               ),
 
-               Positioned(
-  top: 10,
-  left: 20,
+//                Positioned(
+//   top: 10,
+//   left: 20,
 
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-      /// 🔍 SEARCH BAR (takes full remaining width)
-    Consumer<VehicleProvider>(
-  builder: (context, vehicleProvider, child) {
+//   child: Row(
+//     mainAxisAlignment: MainAxisAlignment.start,
+//     children: [
+//       /// 🔍 SEARCH BAR (takes full remaining width)
+//     Consumer<VehicleProvider>(
+//   builder: (context, vehicleProvider, child) {
    
-    if (vehicleProvider.evModels.isEmpty ||
-        vehicleProvider.userVehicles.isEmpty) {
-      return const SizedBox();
-    }
+//     if (vehicleProvider.evModels.isEmpty ||
+//         vehicleProvider.userVehicles.isEmpty) {
+//       return const SizedBox();
+//     }
 
-    final vehicle = vehicleProvider.defaultVehicle;
+//     final vehicle = vehicleProvider.defaultVehicle;
 
-    if (vehicle == null) {
-      return const SizedBox();
-    }
+//     if (vehicle == null) {
+//       return const SizedBox();
+//     }
 
-    final modelName = vehicleProvider.getModelName(
-      vehicle.carModelID,
-    );
+//     final modelName = vehicleProvider.getModelName(
+//       vehicle.carModelID,
+//     );
 
-    return GestureDetector(
-      onTap: ()
-      {
-         showMyVehiclesBottomSheet(
-        routeGlobalKey.currentContext!, 
+//     return GestureDetector(
+//       onTap: ()
+//       {
+//          showMyVehiclesBottomSheet(
+//         routeGlobalKey.currentContext!, 
         
-      );
-      },
-      child: Container(
-        padding: EdgeInsets.only(left: 8,right: 8),
-        decoration: BoxDecoration(color: CommonColors.greyText,
-        borderRadius: BorderRadius.all(Radius.circular(10))),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-               Text(modelName?? "",    style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),),
+//       );
+//       },
+//       child: Container(
+//         padding: EdgeInsets.only(left: 8,right: 8),
+//         decoration: BoxDecoration(color: CommonColors.greyText,
+//         borderRadius: BorderRadius.all(Radius.circular(10))),
+//         child: Row(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Column(
+//               crossAxisAlignment: CrossAxisAlignment.start,
+//               children: [
+//                Text(modelName?? "",    style: const TextStyle(
+//                     color: Colors.white,
+//                     fontSize: 12,
+//                     fontWeight: FontWeight.bold,
+//                   ),),
              
-                Text(
-               "${vehicle?.carRegistrationNumber ?? ""} ",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-            Icon(Icons.arrow_drop_down,color: CommonColors.white,)
-          ],
+//                 Text(
+//                "${vehicle?.carRegistrationNumber ?? ""} ",
+//                   style: const TextStyle(
+//                     color: Colors.white,
+//                     fontSize: 12,
+//                   ),
+//                 ),
+//               ],
+//             ),
+//             Icon(Icons.arrow_drop_down,color: CommonColors.white,)
+//           ],
           
-        ),
-      ),
-    );
-  },
-),
-    ])),
-              Positioned(
-  top: 10,
-  left: 20,
-  right: 20,
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    children: [
-      /// 🔍 SEARCH BAR (takes full remaining width)
-      Text("UAT",style: TextStyle(color: CommonColors.background,fontSize: 14,fontWeight: FontWeight.bold),),
-    ])),
+//         ),
+//       ),
+//     );
+//   },
+// ),
+//     ])),
+//               Positioned(
+//   top: 10,
+//   left: 20,
+//   right: 20,
+//   child: Row(
+//     mainAxisAlignment: MainAxisAlignment.end,
+//     children: [
+//       /// 🔍 SEARCH BAR (takes full remaining width)
+//       Text("UAT",style: TextStyle(color: CommonColors.background,fontSize: 14,fontWeight: FontWeight.bold),),
+//     ])),
 
               /// Search
               Positioned(
-  top: 60,
+  top: 30,
   left: 20,
   right: 20,
   child: Row(
@@ -244,7 +244,7 @@ Set<ChargerFilterType> selectedFilters = {};
 
               /// GPS Button
               Positioned(
-                top: 120,
+                top: 90,
                 right: 20,
                 child: _gpsButton(),
               ),
