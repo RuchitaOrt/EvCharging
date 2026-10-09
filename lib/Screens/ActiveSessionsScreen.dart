@@ -426,10 +426,12 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
       ),
       child: GestureDetector(
         onTap: () {
+          print("${session?.sessionId }");
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => SessionChargingScreen(
+                
                 args: SessionChargingArgs(
                     sessionId: session?.sessionId ?? "",
                     status: session?.status ?? "",
@@ -439,7 +441,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
                             session.totalEnergyKwh == "null")
                         ? "0"
                         : session!.totalEnergyKwh.toString(),
-                    batteryPercentage: "0",
+                    batteryPercentage: session.soCCurrent!.toString(),
                     endMeterReading:
                          "0",
                     duration: session?.durationMinutes?.toString() ?? "0",
@@ -544,7 +546,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
                       child: _infoChip(
                         Icons.power,
                         "Connector",
-                        "${session.ocpiLocationId}",
+                        "${session.connectorId}",
                       ),
                     ),
                     Expanded(

@@ -198,7 +198,7 @@ String formatonlyTimeIST(String? timeString) {
       // (response!.data!.session!.chargingHub!.addressLine1==null)?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
           _item("Charger type", "${response!.data!.chargerDetails!.chargerType}"),
           _item("Price per unit", "${response!.data!.summary!.costPerKwh}"),
-          _item("Connector details", "${response!.data!.session!.chargingHubName}"),
+          //  _item("Connector details", "${response!.data!.session!.chargingHubName}"),
         //  _item("Energy Cost",  "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
           _item("Total kW used", "${response!.data!.energyConsumption!.totalEnergy}"),
           _item("Total charging time", "${response!.data!.timing!.duration!.formattedDuration}"),
@@ -240,7 +240,7 @@ String formatonlyTimeIST(String? timeString) {
      
           _item("Charger type","-"),
           _item("Price per unit", "${Unifiedresponse!.data!.costDetails!.platformFeePerKwh.toString()}"),
-          _item("Connector details", "${Unifiedresponse!.data!.location!.address}"),
+          // _item("Connector details", "${Unifiedresponse!.data!.location!.address}"),
         
           _item("Total kW used", "${Unifiedresponse!.data!.totalEnergyKwh.toString()}"),
           _item("Total charging time", "${Unifiedresponse!.data!.timeLimit.toString()}"),

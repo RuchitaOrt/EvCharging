@@ -183,7 +183,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
                 );
         print(res);
         //  print(res!.data!.batteryStateOfCharge!);
-        print(res!.data!.batteryStateOfCharge!.currentSoC);
+        // print(res!.data!.batteryStateOfCharge!.currentSoC);
         print("RANE REFRESH EVEYR");
         // Extract all values first (outside setState)
         final newStatus =
@@ -424,47 +424,47 @@ print(
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: status == "Completed"
-                      ? null
-                      : () async {
-                        bool? result = await unlockSessionDialog(context);
-                        if (result == true) {
-  _durationTimer?.cancel();
+//               const SizedBox(width: 12),
+//               Expanded(
+//                 child: ElevatedButton(
+//                   onPressed: status == "Completed"
+//                       ? null
+//                       : () async {
+//                         bool? result = await unlockSessionDialog(context);
+//                         if (result == true) {
+//   _durationTimer?.cancel();
 
                          
-                          final response = await provider.unlockUnifiedConnector(
-                              context: context,
-                              chargingStationId: data!
-                                  .stationId!, // 🔑 station id
-                              connectorId:data.connectorId!
-                                  // int.parse(data.session!.chargingGunId!)
-                                  );
-                          status = response!.data!.status;
-} else {
-  // ❌ User clicked NO or closed dialog
-  print("User cancelled");
-}
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CommonColors.white,
-                    side: const BorderSide(
-                      color: CommonColors.blue, // 👈 border color
-                      width: 1.5, // 👈 border width
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    "Unlock Session",
-                    style: const TextStyle(color: CommonColors.blue),
-                  ),
-                ),
-              ),
+//                           final response = await provider.unlockUnifiedConnector(
+//                               context: context,
+//                               chargingStationId: data!
+//                                   .stationId!, // 🔑 station id
+//                               connectorId:data.connectorId!
+//                                   // int.parse(data.session!.chargingGunId!)
+//                                   );
+//                           status = response!.data!.status;
+// } else {
+//   // ❌ User clicked NO or closed dialog
+//   print("User cancelled");
+// }
+//                         },
+//                   style: ElevatedButton.styleFrom(
+//                     backgroundColor: CommonColors.white,
+//                     side: const BorderSide(
+//                       color: CommonColors.blue, // 👈 border color
+//                       width: 1.5, // 👈 border width
+//                     ),
+//                     shape: RoundedRectangleBorder(
+//                       borderRadius: BorderRadius.circular(12),
+//                     ),
+//                     padding: const EdgeInsets.symmetric(vertical: 14),
+//                   ),
+//                   child: Text(
+//                     "Unlock Session",
+//                     style: const TextStyle(color: CommonColors.blue),
+//                   ),
+//                 ),
+//               ),
             ],
           ),
         ),

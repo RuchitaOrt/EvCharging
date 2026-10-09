@@ -28,22 +28,22 @@ class UnifiedSessionDetailData {
   final bool? isActive;
   final DateTime? startDateTime;
   final DateTime? endDateTime;
-  final int? durationMinutes;
-  final double? totalEnergyKwh;
-  final double? totalCost;
-  final double? totalPayable;
+  final dynamic? durationMinutes;
+  final dynamic? totalEnergyKwh;
+  final dynamic? totalCost;
+  final dynamic? totalPayable;
   final String? currency;
-  final int? currentStateOfCharge;
+  final dynamic? currentStateOfCharge;
   final DateTime? stateOfChargeLastUpdate;
   final UnifiedLocation? location;
   final UnifiedPartner? partner;
   final String? evseUid;
   final String? connectorId;
   final UnifiedUser? user;
-  final double? energyLimit;
-  final double? costLimit;
-  final int? timeLimit;
-  final int? batteryIncreaseLimit;
+  final dynamic? energyLimit;
+  final dynamic? costLimit;
+  final dynamic? timeLimit;
+  final dynamic? batteryIncreaseLimit;
   final bool? limitViolationHandled;
   final String? invoiceNumber;
   final UnifiedCostDetails? costDetails;
@@ -188,7 +188,7 @@ class UnifiedLocation {
 }
 
 class UnifiedPartner {
-  final int? partnerCredentialId;
+  final dynamic? partnerCredentialId;
   final String? businessName;
   final String? countryCode;
   final String? partyId;
@@ -248,15 +248,15 @@ class UnifiedUser {
 }
 
 class UnifiedCostDetails {
-  final double? partnerCost;
-  final double? platformFeePerKwh;
-  final double? taxableValue;
-  final double? cgstRate;
-  final double? cgstAmount;
-  final double? sgstRate;
-  final double? sgstAmount;
-  final double? grandTotal;
-  final double? totalPayable;
+  final dynamic? partnerCost;
+  final dynamic? platformFeePerKwh;
+  final dynamic? taxableValue;
+  final dynamic? cgstRate;
+  final dynamic? cgstAmount;
+  final dynamic? sgstRate;
+  final dynamic? sgstAmount;
+  final dynamic? grandTotal;
+  final dynamic? totalPayable;
   final String? currency;
 
   UnifiedCostDetails({

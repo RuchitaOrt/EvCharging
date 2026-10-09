@@ -459,7 +459,7 @@ print("payload stop ${payload}");
 Future<SessionIdResponse?> pollForSessionId({
   required BuildContext context,
   required String authorizationReference,
-  int maxRetries = 12, // 12 x 5 = 60 seconds
+  int maxRetries = 48, // 12 x 5 = 60 seconds
 }) async {
     print("Tome pollForSessionId ${loading}");
   for (int i = 0; i < maxRetries; i++) {
@@ -477,7 +477,7 @@ Future<SessionIdResponse?> pollForSessionId({
     }
 notifyListeners();
     // Wait 5 seconds before next call
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 10));
   }
 
   return null;

@@ -1196,7 +1196,7 @@ Widget _stationsList(List<Station> stations) {
                     child: Column(
                       children: chargers.map((charger) {
                         final isAvailable =
-                            (charger.status == "Available" ||charger.status == "AVAILABLE");
+                            (charger.status == "Available" ||charger.status == "AVAILABLE" || charger.status=="BLOCKED" || charger.status == "Blocked"|| charger.status == "Occupied");
 
                         final isSelected =
                             _selectedCharger?.connectorId ==
@@ -1265,7 +1265,7 @@ Widget _stationsList(List<Station> stations) {
   showToast("Unable to fetch charging gun status.");
   return;
 }
-
+print("status at station");
 String? status;
 
 if (statusAvailable is ChargingGunStatusResponse) {
@@ -1273,17 +1273,19 @@ if (statusAvailable is ChargingGunStatusResponse) {
 } else if (statusAvailable is LocalGunResponseModel) {
   status = statusAvailable.data?.status?.status;
 }
-
+print("status at station 1");
 print("STATUS = $status");
-                if (status == "Available" || status=="AVAILABLE") {
+                if (status == "Available" || status=="AVAILABLE" ||  status=="BLOCKED" ||  status=="Blocked"|| status == "Occupied") {
+                  print("status at station 2");
                   // ✅ Status is available, navigate
                   bool? confirmed = await gunConnectorDialog(
   context,
   message: "Plug the charging connector into your vehicle to begin charging.",
 );
     print("CHARGE NOW confirmed ${confirmed}");
-if (confirmed == true) {
+// if (confirmed == true) {
   //18july
+  print("status at station 3");
   print("23jult");
   print(_selectedCharger!.connectorId!);
  _statusTimer?.cancel();
@@ -1302,11 +1304,11 @@ if (confirmed == true) {
                     ),
                   );
 }
-                } else {
-                  FocusScope.of(context).unfocus();
-                  showToast(
-                      "Charging gun status is not available. Please try again.");
-                }
+                // } else {
+                //   FocusScope.of(context).unfocus();
+                //   showToast(
+                //       "Charging gun status is not available. Please try again.");
+                // }
                
               },
         style: ElevatedButton.styleFrom(
