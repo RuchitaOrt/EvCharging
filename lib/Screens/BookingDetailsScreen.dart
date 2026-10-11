@@ -5,7 +5,6 @@ import 'package:HyCharge/model/SessionDetailResponse.dart';
 import 'package:HyCharge/model/SessionIDDetailResponse.dart';
 import 'package:HyCharge/model/UnifiedSessionDetailResponse.dart';
 
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -13,144 +12,142 @@ import 'package:provider/provider.dart';
 class BookingDetailsScreen extends StatefulWidget {
   final String recID;
   final String bookingType;
-  const BookingDetailsScreen({super.key, required this.recID, required this.bookingType});
+  const BookingDetailsScreen(
+      {super.key, required this.recID, required this.bookingType});
 
   @override
   State<BookingDetailsScreen> createState() => _BookingDetailsScreenState();
 }
 
 class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
-
-    @override
+  @override
   void initState() {
     super.initState();
-   loadData();
+    loadData();
   }
-SessionIDDetailResponse? response;
 
-UnifiedSessionDetailResponse? Unifiedresponse;
-bool isLoading = true;
-late ScrollController _scrollController;
-Future<void> loadData() async {
-  if(widget.bookingType=="L")
-  {
-final res = await context.read<ChargingProvider>()
-      .fetchSessionDetails(
-        context: context,
-        sessionId: widget.recID,
-      );
+  SessionIDDetailResponse? response;
 
-  setState(() {
-    response = res;
-    isLoading = false;
-  });
-  }else{
-    final res = await context.read<ChargingProvider>()
-      .fetchPartnerSessionDetails(
-        context: context,
-        sessionId: widget.recID,
-      );
+  UnifiedSessionDetailResponse? Unifiedresponse;
+  bool isLoading = true;
+  late ScrollController _scrollController;
+  Future<void> loadData() async {
+    if (widget.bookingType == "L") {
+      final res = await context.read<ChargingProvider>().fetchSessionDetails(
+            context: context,
+            sessionId: widget.recID,
+          );
 
-  setState(() {
-    Unifiedresponse = res;
-    isLoading = false;
-  });
+      setState(() {
+        response = res;
+        isLoading = false;
+      });
+    } else {
+      final res =
+          await context.read<ChargingProvider>().fetchPartnerSessionDetails(
+                context: context,
+                sessionId: widget.recID,
+              );
+
+      setState(() {
+        Unifiedresponse = res;
+        isLoading = false;
+      });
+    }
   }
-  
-}
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     
-       backgroundColor: CommonColors.white,
-        appBar: CommonAppBar(
-          title: "Booking Details",
-          onBack: () {
+      backgroundColor: CommonColors.white,
+      appBar: CommonAppBar(
+        title: "Booking Details",
+        onBack: () {
           Navigator.pop(context);
-          },
-        ),
-      body: isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : (response == null && widget.bookingType=="L" )
-            ? const Center(child: Text("No data found"))
-            : (Unifiedresponse == null && widget.bookingType=="P" )? const Center(child: Text("No data found")):
-            
-             SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: 
-        Column(
-          children: [
-            /// Amount Section
-             Text(
-          widget.bookingType=="L"  ?  "₹ ${response!.data!.costDetails!.totalCost.toString()}":"₹ ${Unifiedresponse!.data!.costDetails!.grandTotal.toString()}",
-              style: TextStyle(
-                fontSize: 34,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-             Text(
-            widget.bookingType=="L"  ?     "${response!.data!.status}":"${Unifiedresponse!.data!.status}",
-              style: TextStyle(
-                color: Colors.green,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 8),
-         
-          
-            /// Booking ID Card
-            _buildBookingId(),
-
-            const SizedBox(height: 16),
-
-            /// Details Card
-            _buildDetailsCard(),
-          ],
-        ),
+        },
       ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : (response == null && widget.bookingType == "L")
+              ? const Center(child: Text("No data found"))
+              : (Unifiedresponse == null && widget.bookingType == "P")
+                  ? const Center(child: Text("No data found"))
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          /// Amount Section
+                          Text(
+                            widget.bookingType == "L"
+                                ? "₹ ${response!.data!.costDetails!.totalCost.toString()}"
+                                :(Unifiedresponse!.data!.costDetails==null || Unifiedresponse!.data!.costDetails! =="null")? "₹ 0": "₹ ${Unifiedresponse!.data!.costDetails!.grandTotal!.toString()}",
+                            style: TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            widget.bookingType == "L"
+                                ? "${response!.data!.status}"
+                                : "${Unifiedresponse!.data!.status}",
+                            style: TextStyle(
+                              color: Colors.green,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          /// Booking ID Card
+                          _buildBookingId(),
+
+                          const SizedBox(height: 16),
+
+                          /// Details Card
+                          _buildDetailsCard(),
+                        ],
+                      ),
+                    ),
     );
   }
 
   Widget _buildBookingId() {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-    decoration: _cardDecoration(),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          "Booking ID",
-          style: TextStyle(color: Colors.grey),
-        ),
-        const SizedBox(width: 10),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      decoration: _cardDecoration(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Booking ID",
+            style: TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(width: 10),
 
-        /// Fix overflow here
-        Expanded(
-          child: Text(
-            widget.recID,
-            textAlign: TextAlign.right,
-            softWrap: true,
-            style: const TextStyle(
-              fontWeight: FontWeight.w400,
-             fontSize: 12
+          /// Fix overflow here
+          Expanded(
+            child: Text(
+              widget.recID,
+              textAlign: TextAlign.right,
+              softWrap: true,
+              style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 12),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
-  String formatTime(String dateTimeString) {
-  final dateTime = DateTime.parse(dateTimeString);
+        ],
+      ),
+    );
+  }
 
-  return DateFormat('EEE dd MMM yyyy').format(dateTime);
-}
+  String formatTime(String dateTimeString) {
+    final dateTime = DateTime.parse(dateTimeString);
+
+    return DateFormat('EEE dd MMM yyyy').format(dateTime);
+  }
+
   String formatonlyTime(String dateTimeString) {
-  final dateTime = DateTime.parse(dateTimeString);
-  return DateFormat('hh.mm a').format(dateTime);
-}
+    final dateTime = DateTime.parse(dateTimeString);
+    return DateFormat('hh.mm a').format(dateTime);
+  }
 // String formatonlyTimeIST(DateTime time) {
 //   final utcTime = DateTime.utc(
 //     time.year,
@@ -167,115 +164,168 @@ final res = await context.read<ChargingProvider>()
 
 //   return DateFormat("hh.mm a").format(istTime);
 // }
-String formatonlyTimeIST(String? timeString) {
-  if (timeString == null || timeString.isEmpty) return "";
+//   String formatonlyTimeIST(String? timeString) {
+//     if (timeString == null || timeString.isEmpty) return "";
+// print("timeStringtimeString ${timeString}");
+//     final parsed = DateTime.parse(timeString);
 
-  final parsed = DateTime.parse(timeString);
+//     final utcTime = DateTime.utc(
+//       parsed.year,
+//       parsed.month,
+//       parsed.day,
+//       parsed.hour,
+//       parsed.minute,
+//       parsed.second,
+//       parsed.millisecond,
+//       parsed.microsecond,
+//     );
 
-  final utcTime = DateTime.utc(
-    parsed.year,
-    parsed.month,
-    parsed.day,
-    parsed.hour,
-    parsed.minute,
-    parsed.second,
-    parsed.millisecond,
-    parsed.microsecond,
-  );
+//     final istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
 
-  final istTime = utcTime.add(const Duration(hours: 5, minutes: 30));
+//     return DateFormat("hh.mm a").format(istTime);
+//   }
 
-  return DateFormat("hh.mm a").format(istTime);
+String formatOnlyTimeIST(String? timeString) {
+  if (timeString == null || timeString.trim().isEmpty) {
+    return "";
+  }
+
+  try {
+    print("timeString: $timeString");
+
+    final parsed = DateTime.parse(timeString);
+
+    // If the API time is UTC, convert it to IST.
+    final istTime = parsed.toUtc().add(
+      const Duration(hours: 5, minutes: 30),
+    );
+
+    return DateFormat("hh.mm a").format(istTime);
+  } catch (e) {
+    print("Invalid date format: $timeString");
+    return "";
+  }
 }
+
+
   Widget _buildDetailsCard() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: _cardDecoration(),
-      child:widget.bookingType=="L"? Column(
-        children: [
-         _item("Date & time", "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTimeIST("${response!.data!.session!.startTime}")} - ${formatonlyTimeIST("${response!.data!.session!.endTime}")}"),
-      //     _item("Address details",
-      // (response!.data!.session!.chargingHub!.addressLine1==null)?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
-          _item("Charger type", "${response!.data!.chargerDetails!.chargerType}"),
-          _item("Price per unit", "${response!.data!.summary!.costPerKwh}"),
-          //  _item("Connector details", "${response!.data!.session!.chargingHubName}"),
-        //  _item("Energy Cost",  "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
-          _item("Total kW used", "${response!.data!.energyConsumption!.totalEnergy}"),
-          _item("Total charging time", "${response!.data!.timing!.duration!.formattedDuration}"),
-         _item("Service charge", "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
-          // // _item("Discount", "₹0.0"),
-          // // _item("Cashback", "0.0"),
-          _item("SGST (9%)",  "₹ ${response!.data!.costDetails!.sgst.toString()}"),
-          _item("CGST (9%)", "₹ ${response!.data!.costDetails!.cgst.toString()}"),
-         _item("Duration", "${response!.data!.timing!.duration!.formattedDuration.toString()}"),
-         
+      child: widget.bookingType == "L"
+          ? Column(
+              children: [
+                _item(
+  "Date & time",
+  "${formatTime(response!.data!.session!.createdOn!.toString())}\n"
+  "${formatOnlyTimeIST(response!.data!.session!.startTime?.toString())} - "
+  "${formatOnlyTimeIST(response!.data!.session!.endTime?.toString())}",
+),
+                // _item("Date & time",
+                //     "${formatTime(response!.data!.session!.createdOn!.toString())} \n${formatonlyTimeIST("${response!.data!.session!.startTime}")} - ${formatonlyTimeIST("${response!.data!.session!.endTime}")}"),
+                //     _item("Address details",
+                // (response!.data!.session!.chargingHub!.addressLine1==null)?"-":      "${response!.data!.session!.chargingHub!.addressLine1}"),
+                _item("Charger type",
+                    "${response!.data!.chargerDetails!.chargerType}"),
+                _item(
+                    "Price per unit", "${response!.data!.summary!.costPerKwh}"),
+                //  _item("Connector details", "${response!.data!.session!.chargingHubName}"),
+                //  _item("Energy Cost",  "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
+                _item("Total kW used",
+                 response!.data!.energyConsumption!.totalEnergy=="null"?"-":   "${response!.data!.energyConsumption!.totalEnergy}"),
+                _item("Total charging time",
+              response!.data!.timing!.duration!.formattedDuration=="null"?"-":       "${response!.data!.timing!.duration!.formattedDuration}"),
+                _item("Service charge",
+                    "₹ ${response!.data!.costDetails!.energyCost.toString()}"),
+                // // _item("Discount", "₹0.0"),
+                // // _item("Cashback", "0.0"),
+                _item("SGST (9%)",
+                    "₹ ${response!.data!.costDetails!.sgst.toString()}"),
+                _item("CGST (9%)",
+                    "₹ ${response!.data!.costDetails!.cgst.toString()}"),
+                _item("Duration",
+                    "${response!.data!.timing!.duration!.formattedDuration.toString()}"),
 
-          const Divider(height: 24),
+                const Divider(height: 24),
 
-          Row(
-            children:  [
-              Text(
-                "Total Amount",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                  fontSize: 16,
-                ),
-              ),
-              Spacer(),
-              Text(
-               "₹ ${response!.data!.costDetails!.totalCost.toString()}",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          )
-        ],
-      ):Column(
-        children: [
-          _item("Date & time", "${formatTime(Unifiedresponse!.data!.startDateTime!.toString())} \n${formatonlyTimeIST("${Unifiedresponse!.data!.startDateTime}")} - ${formatonlyTimeIST("${Unifiedresponse!.data!.endDateTime}")}"),
-     
-          _item("Charger type","-"),
-          _item("Price per unit", "${Unifiedresponse!.data!.costDetails!.platformFeePerKwh.toString()}"),
-          // _item("Connector details", "${Unifiedresponse!.data!.location!.address}"),
-        
-          _item("Total kW used", "${Unifiedresponse!.data!.totalEnergyKwh.toString()}"),
-          _item("Total charging time", "${Unifiedresponse!.data!.timeLimit.toString()}"),
-         _item("Service charge", "₹ ${Unifiedresponse!.data!.costDetails!.taxableValue.toString()}"),
-        
-           _item("SGST (9%)",  "₹ ${Unifiedresponse!.data!.costDetails!.sgstAmount.toString()}"),
-          _item("CGST (9%)", "₹ ${Unifiedresponse!.data!.costDetails!.cgstAmount.toString()}"),
-         _item("Duration", "${Unifiedresponse!.data!.durationMinutes!.toString()}"),
-         
+                Row(
+                  children: [
+                    Text(
+                      "Total Amount",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Spacer(),
+                    Text(
+                      "₹ ${response!.data!.costDetails!.totalCost.toString()}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            )
+          : Column(
+              children: [
+                _item(
+  "Date & time",
+  "${formatTime(Unifiedresponse!.data!.startDateTime!.toString())}\n"
+  "${formatOnlyTimeIST(Unifiedresponse!.data!.startDateTime.toString())} - "
+  "${formatOnlyTimeIST(Unifiedresponse!.data!.endDateTime.toString())}",
+),
+                // _item("Date & time",
+                //     "${formatTime(Unifiedresponse!.data!.startDateTime!.toString())} \n${formatonlyTimeIST("${Unifiedresponse!.data!.startDateTime}")} - ${formatonlyTimeIST("${Unifiedresponse!.data!.endDateTime}")}"),
 
-          const Divider(height: 24),
+                _item("Charger type", "-"),
+                _item("Price per unit",
+                  Unifiedresponse!.data!.costDetails==null?"":  "${Unifiedresponse!.data!.costDetails!.platformFeePerKwh.toString()}"),
+                // _item("Connector details", "${Unifiedresponse!.data!.location!.address}"),
 
-          Row(
-            children:  [
-              Text(
-                "Total Amount",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                  fontSize: 16,
-                ),
-              ),
-              Spacer(),
-              Text(
-                "₹ ${Unifiedresponse!.data!.costDetails!.grandTotal.toString()}",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                  fontSize: 16,
-                ),
-              ),
-            ],
-          )
-        ],
-      ),
+                _item("Total kW used",
+            Unifiedresponse!.data!.totalEnergyKwh==null?"-"     :   "${Unifiedresponse!.data!.totalEnergyKwh.toString()}"),
+                _item("Total charging time",
+             Unifiedresponse!.data!.timeLimit==null?"-":       "${Unifiedresponse!.data!.timeLimit.toString()}"),
+                _item("Service charge",
+                  Unifiedresponse!.data!.costDetails==null?"":  "₹ ${Unifiedresponse!.data!.costDetails!.taxableValue.toString()}"),
+
+                _item("SGST (9%)",
+                    Unifiedresponse!.data!.costDetails==null?"":    "₹ ${Unifiedresponse!.data!.costDetails!.sgstAmount.toString()}"),
+                _item("CGST (9%)",
+                   Unifiedresponse!.data!.costDetails==null?"":     "₹ ${Unifiedresponse!.data!.costDetails!.cgstAmount.toString()}"),
+                _item("Duration",
+                   Unifiedresponse!.data!.costDetails==null?"":     "${Unifiedresponse!.data!.durationMinutes!.toString()}"),
+
+                const Divider(height: 24),
+
+                Row(
+                  children: [
+                    Text(
+                      "Total Amount",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Spacer(),
+                    Text(
+                   Unifiedresponse!.data!.costDetails==null?"":       "₹ ${Unifiedresponse!.data!.costDetails!.grandTotal.toString()}",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
     );
   }
 

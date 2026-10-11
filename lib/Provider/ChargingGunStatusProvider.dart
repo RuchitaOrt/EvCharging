@@ -160,88 +160,154 @@ Future<void> refreshAll({
 
 final loc.LocationService _locationService = loc.LocationService();
 
+final Set<String> loadingStationIds = {};
+
 Future<void> getLocations(
   BuildContext context,
-  String hubID,
-) async {
+  String hubID, {
+  required String stationID,
+}) async {
+  if (loadingStationIds.contains(stationID)) return;
+
   try {
+    loadingStationIds.add(stationID);
+    notifyListeners();
+
     final response = await _locationService.getLocationLiveStatus(
       context,
       hubID,
     );
 
-    print("====================================");
-    print("LIVE API RESPONSE");
-    print("====================================");
-
-    print("Success: ${response.success}");
-    print("Total locations: ${response.totalCount}");
-
     final location = response.location;
 
     if (location == null) {
-      print("LOCATION IS NULL");
+      print("Location is null");
       return;
     }
 
-    print("Location: ${location.name}");
-    print("EVSE count: ${location.evses.length}");
-
-    // Match LIVE API connectorId with existing charger.connectorId
     for (final evse in location.evses) {
-      print("EVSE ID: ${evse.evseId}");
-      print("REFERENCE: ${evse.physicalReference}");
-      print("LIVE STATUS: ${evse.status}");
-
       for (final liveConnector in evse.connectors) {
-        print("LIVE CONNECTOR ID: ${liveConnector.id}");
-        print("LIVE STATUS: ${evse.status}");
+        final matchingEntries = _chargerMap.entries
+            .where(
+              (entry) =>
+                  entry.value.connectorId == liveConnector.id,
+            )
+            .toList();
 
-        // Find existing charger using connectorId
-        for (final entry in _chargerMap.entries) {
+        for (final entry in matchingEntries) {
           final charger = entry.value;
 
-          if (charger.connectorId == liveConnector.id) {
-            print("MATCH FOUND");
-            print("Existing charger ID: ${charger.id}");
-            print("Connector ID: ${charger.connectorId}");
-            print("Old status: ${charger.status}");
-            print("New status: ${evse.status}");
-
-            _chargerMap[entry.key] = Connector(
-              connectorId: charger.connectorId,
-              status: evse.status,
-              providerType: charger.providerType,
-              chargerTypeName: charger.chargerTypeName,
-              powerOutput: charger.powerOutput,
-              id: charger.id,
-              lastUpdated: evse.status,
-            );
-          }
+          _chargerMap[entry.key] = Connector(
+            connectorId: charger.connectorId,
+            status: evse.status,
+            providerType: charger.providerType,
+            chargerTypeName: charger.chargerTypeName,
+            powerOutput: charger.powerOutput,
+            id: charger.id,
+            lastUpdated: evse.status,
+          );
         }
       }
     }
 
-    // Important: rebuild Consumer<ChargingGunStatusProvider>
     notifyListeners();
-
-    print("====================================");
-    print("UPDATED CHARGERS");
-    print("====================================");
-
-    for (final entry in _chargerMap.entries) {
-      print(
-        "ID = ${entry.value.id} | "
-        "CONNECTOR ID = ${entry.value.connectorId} | "
-        "STATUS = ${entry.value.status}",
-      );
-    }
-
-    print("====================================");
-  } catch (e) {
+  } catch (e, stackTrace) {
     print("Location API error: $e");
+    print(stackTrace);
+  } finally {
+    loadingStationIds.remove(stationID);
+    notifyListeners();
   }
 }
+
+// String? loadingHubId;
+// Future<void> getLocations(
+//   BuildContext context,
+//   String hubID,
+// ) async {
+//   try {
+//     loadingHubId = hubID;
+//   notifyListeners();
+//   notifyListeners();
+//     final response = await _locationService.getLocationLiveStatus(
+//       context,
+//       hubID,
+//     );
+
+//     print("====================================");
+//     print("LIVE API RESPONSE");
+//     print("====================================");
+
+//     print("Success: ${response.success}");
+//     print("Total locations: ${response.totalCount}");
+
+//     final location = response.location;
+
+//     if (location == null) {
+//       print("LOCATION IS NULL");
+//       return;
+//     }
+
+//     print("Location: ${location.name}");
+//     print("EVSE count: ${location.evses.length}");
+
+//     // Match LIVE API connectorId with existing charger.connectorId
+//     for (final evse in location.evses) {
+//       print("EVSE ID: ${evse.evseId}");
+//       print("REFERENCE: ${evse.physicalReference}");
+//       print("LIVE STATUS: ${evse.status}");
+
+//       for (final liveConnector in evse.connectors) {
+//         print("LIVE CONNECTOR ID: ${liveConnector.id}");
+//         print("LIVE STATUS: ${evse.status}");
+
+//         // Find existing charger using connectorId
+//         for (final entry in _chargerMap.entries) {
+//           final charger = entry.value;
+
+//           if (charger.connectorId == liveConnector.id) {
+//             print("MATCH FOUND");
+//             print("Existing charger ID: ${charger.id}");
+//             print("Connector ID: ${charger.connectorId}");
+//             print("Old status: ${charger.status}");
+//             print("New status: ${evse.status}");
+
+//             _chargerMap[entry.key] = Connector(
+//               connectorId: charger.connectorId,
+//               status: evse.status,
+//               providerType: charger.providerType,
+//               chargerTypeName: charger.chargerTypeName,
+//               powerOutput: charger.powerOutput,
+//               id: charger.id,
+//               lastUpdated: evse.status,
+//             );
+//             loadingHubId = null;
+//     notifyListeners();
+//           }
+//         }
+//       }
+//     }
+
+//     // Important: rebuild Consumer<ChargingGunStatusProvider>
+//     notifyListeners();
+
+//     print("====================================");
+//     print("UPDATED CHARGERS");
+//     print("====================================");
+
+//     for (final entry in _chargerMap.entries) {
+//       print(
+//         "ID = ${entry.value.id} | "
+//         "CONNECTOR ID = ${entry.value.connectorId} | "
+//         "STATUS = ${entry.value.status}",
+//       );
+//     }
+
+//     print("====================================");
+//   } catch (e) {
+//     print("Location API error: $e");
+//   }
+// }
 void printExistingChargers() {
   print("====================================");
   print("EXISTING CHARGERS IN PROVIDER");

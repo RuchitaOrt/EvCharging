@@ -58,6 +58,14 @@ class _ChargingEstimateScreenState extends State<ChargingEstimateScreen> {
   
   String? chargingConnector;
   @override
+void dispose() {
+  context
+      .read<ChargingProvider>()
+      .cancelSessionIdPolling();
+
+  super.dispose();
+}
+  @override
   void initState() {
     super.initState();
     
@@ -149,6 +157,9 @@ async {
         ),
       );
     } else {
+       context
+      .read<ChargingProvider>()
+      .cancelSessionIdPolling();
       Navigator.pop(context);
     }
     return false; // ✅ now it's Future<bool>
@@ -167,6 +178,9 @@ async {
               ),
             );
               }else{
+                 context
+      .read<ChargingProvider>()
+      .cancelSessionIdPolling();
                  Navigator.pop(context);
               }
             },
@@ -288,6 +302,7 @@ print("Selected Tab Index: $tabIndex");
                                           chargingEstimate.percentage.toString(),
                                           tabIndex:tabIndex.toString() );
                                           print("RUCHI");
+                                          if (!mounted) return;
                                           if (response is StartUnifiedChargingSessionResponse) {
   // Partner charging session
        print("RUCHI ${response!}");
@@ -312,7 +327,7 @@ final responseSessionID = await provider.pollForSessionId(
   context: context,
   authorizationReference: authorizationReference,
 );
-
+if (!mounted) return;
 if (responseSessionID != null) {
   print(responseSessionID.data!.sessionId);
    Navigator.push(

@@ -219,6 +219,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
       ),
       child: GestureDetector(
         onTap: () {
+          print("session.duration? ${session.duration?.toString()}");
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -235,7 +236,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
                     batteryPercentage: session?.soCStart?.toString() ?? "0",
                     endMeterReading:
                         session?.endMeterReading?.toString() ?? "0",
-                    duration: session?.duration?.toString() ?? "0",
+                    duration: session.duration?.toString() ?? "0",
                     stationName: session.chargingStationName ?? "",
                     ConnectorGunID: session.chargingGunId ?? "",
                     isActive: true),
@@ -379,7 +380,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
                           Navigator.push(
                             routeGlobalKey.currentContext!,
                             MaterialPageRoute(
-                                builder: (context) => ChargingHistoryScreen()),
+                                builder: (context) => ChargingHistoryScreen(initialTabIndex: 0,)),
                           );
                           final provider =
                               context.read<ActiveSessionProvider>();
@@ -427,13 +428,17 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
       child: GestureDetector(
         onTap: () {
           print("${session?.sessionId }");
+           print("session.duration? ${session.durationMinutes?.toString()}");
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => SessionChargingScreen(
                 
                 args: SessionChargingArgs(
-                    sessionId: session?.sessionId ?? "",
+                    sessionId:session?.sessionId?.contains("P") == true
+    ? "${session?.sessionId}"
+    : "P:${session?.sessionId ?? ""}",
+                    //session?.sessionId!.contains("P")?"${session?.sessionId}": "P: ${session?.sessionId}" ?? "",
                     status: session?.status ?? "",
                     cost: session?.totalCost?.toString() ?? "0",
                     unitConsumed: session?.totalEnergyKwh?.toString() ?? "0",
@@ -588,7 +593,7 @@ class _ActiveSessionsScreenState extends State<ActiveSessionsScreen>
                           Navigator.push(
                             routeGlobalKey.currentContext!,
                             MaterialPageRoute(
-                                builder: (context) => ChargingHistoryScreen()),
+                                builder: (context) => ChargingHistoryScreen(initialTabIndex: 1,)),
                           );
                           final provider =
                               context.read<ActiveSessionProvider>();

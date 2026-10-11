@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/model/ChargerDetailsResponse.dart';
 import 'package:HyCharge/model/EndChargingSessionResponse.dart';
@@ -289,14 +291,15 @@ Future<dynamic> startUnifiedSession({
     if (res is StartUnifiedChargingSessionResponse) {
        print("Tome StartUnifiedChargingSessionResponse");
       if (res.success != true) {
-         loading = false;
+        //  loading = false;
          print("Tome  if ${loading}");
         showToast(res.message ?? "Failed");
-      }else{
-            loading = true;
-         print("Tome else ${loading}");
-       
       }
+      // else{
+      //       loading = true;
+      //    print("Tome else ${loading}");
+       
+      // }
     } else if (res is LocalStartUnifiedChargingSessionResponse) {
        print("Tome LocalStartUnifiedChargingSessionResponse");
       if (res.success != true) {
@@ -319,9 +322,10 @@ Future<dynamic> startUnifiedSession({
     showToast("Failed to start session");
     return null;
   } finally {
-     print("Tome finally ${loading}");
-  
-  }
+  loading = false;
+  notifyListeners();
+  debugPrint("Start session API loader stopped");
+}
 }
 
   //end
@@ -455,31 +459,114 @@ print("payload stop ${payload}");
     notifyListeners();
   }
 }
+bool _cancelPolling = false;
+Completer<void>? _pollingCancellation;
+int _pollingGeneration = 0;
+void cancelSessionIdPolling() {
+  _cancelPolling = true;
+  _pollingGeneration++;
 
+  // Cancel the pending 10-second delay.
+  if (!(_pollingCancellation?.isCompleted ?? true)) {
+    _pollingCancellation!.complete();
+  }
+
+  loading = false;
+  notifyListeners();
+
+  debugPrint("Session ID polling cancelled");
+}
 Future<SessionIdResponse?> pollForSessionId({
   required BuildContext context,
   required String authorizationReference,
-  int maxRetries = 48, // 12 x 5 = 60 seconds
+  int maxRetries = 48,
 }) async {
-    print("Tome pollForSessionId ${loading}");
-  for (int i = 0; i < maxRetries; i++) {
-    final response = await fetchSessionID(
-      context,
-      authorizationReference,
-    );
+  // Each polling operation has its own generation.
+  final generation = ++_pollingGeneration;
 
-    final sessionId = response?.data?.sessionId;
+  _cancelPolling = false;
+  final cancellation = Completer<void>();
+  _pollingCancellation = cancellation;
 
-    if (sessionId != null && sessionId.trim().isNotEmpty) {
-      loading=false;
-       print("Tome pollForSessionId ${loading}");
-      return response;
+  loading = true;
+  notifyListeners();
+
+  try {
+    for (int i = 0; i < maxRetries; i++) {
+      // Stop if cancelled or replaced by another polling operation.
+      if (_cancelPolling || generation != _pollingGeneration) {
+        debugPrint("Polling stopped before API call");
+        return null;
+      }
+
+      debugPrint("Polling attempt: ${i + 1}/$maxRetries");
+
+      final response = await fetchSessionID(
+        context,
+        authorizationReference,
+      );
+
+      // Check again after the API request finishes.
+      if (_cancelPolling || generation != _pollingGeneration) {
+        debugPrint("Polling stopped after API response");
+        return null;
+      }
+
+      final sessionId = response?.data?.sessionId;
+
+      if (sessionId != null && sessionId.trim().isNotEmpty) {
+        debugPrint("Session ID received: $sessionId");
+        return response;
+      }
+
+      // Wait 10 seconds, but wake up immediately on cancellation.
+      await Future.any<void>([
+        Future<void>.delayed(const Duration(seconds: 10)),
+        cancellation.future,
+      ]);
     }
-notifyListeners();
-    // Wait 5 seconds before next call
-    await Future.delayed(const Duration(seconds: 10));
-  }
 
-  return null;
+    debugPrint("Session ID polling timed out");
+    return null;
+  } catch (e) {
+    debugPrint("Session ID polling error: $e");
+    return null;
+  } finally {
+    // An older polling operation must not reset a newer operation's loader.
+    if (generation == _pollingGeneration) {
+      loading = false;
+      notifyListeners();
+
+      if (identical(_pollingCancellation, cancellation)) {
+        _pollingCancellation = null;
+      }
+    }
+  }
 }
+// Future<SessionIdResponse?> pollForSessionId({
+//   required BuildContext context,
+//   required String authorizationReference,
+//   int maxRetries = 48, // 12 x 5 = 60 seconds
+// }) async {
+//     print("Tome pollForSessionId ${loading}");
+//   for (int i = 0; i < maxRetries; i++) {
+//     final response = await fetchSessionID(
+//       context,
+//       authorizationReference,
+//     );
+
+//     final sessionId = response?.data?.sessionId;
+
+//     if (sessionId != null && sessionId.trim().isNotEmpty) {
+//       loading=false;
+//        print("Tome pollForSessionId ${loading}");
+//       return response;
+//     }
+// notifyListeners();
+//     // Wait 5 seconds before next call
+//     await Future.delayed(const Duration(seconds: 10));
+//   }
+
+//   return null;
+// }
 }

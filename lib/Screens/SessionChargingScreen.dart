@@ -68,28 +68,59 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
         formatBackendDuration(res!.data!.raw!.durationMinutes!.toString());
   }
 
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   _elapsedSeconds = durationToSeconds(duration);
+
+  //   // 3️⃣ Start timer from backend value
+  //   _startDurationTimer();
+
+  //   status = widget.args.status!;
+  //   duration = formatBackendDuration(widget.args.duration); //widget.args.duration
+  //   cost = widget.args.cost;
+  //   unitConsumed =  widget.args.unitConsumed;
+  //   outputPower = widget.args.outputPower;
+  //   batteryPercentage = widget.args.batteryPercentage;
+  //   stationName =widget.args.stationName;
+  //   endMeterReading = widget.args.endMeterReading;
+  //   ConnectorGunID = widget.args.ConnectorGunID;
+  //   print("BATTERY");
+  //   print(outputPower);
+  //   print("BATTERY");
+  //   print(batteryPercentage);
+
+  //   _controller = AnimationController(
+  //     vsync: this,
+  //     duration: const Duration(seconds: 2),
+  //   );
+
+  //   _animation = CurvedAnimation(
+  //     parent: _controller,
+  //     curve: Curves.easeInOut,
+  //   );
+
+  //   _controller.repeat();
+  //   _startPolling();
+  // }
   @override
   void initState() {
     super.initState();
 
+    status = widget.args.status;
+    duration = formatBackendDuration(widget.args.duration);
+
+    // Start counting from the duration received from ActiveSessionsScreen.
     _elapsedSeconds = durationToSeconds(duration);
 
-    // 3️⃣ Start timer from backend value
-    _startDurationTimer();
-
-    status = widget.args.status!;
-    duration = formatBackendDuration("00:00:00"); //widget.args.duration
     cost = widget.args.cost;
-    unitConsumed =  widget.args.unitConsumed;
+    unitConsumed = widget.args.unitConsumed;
     outputPower = widget.args.outputPower;
     batteryPercentage = widget.args.batteryPercentage;
-    stationName =widget.args.stationName;
+    stationName = widget.args.stationName;
     endMeterReading = widget.args.endMeterReading;
     ConnectorGunID = widget.args.ConnectorGunID;
-    print("BATTERY");
-    print(outputPower);
-    print("BATTERY");
-    print(batteryPercentage);
 
     _controller = AnimationController(
       vsync: this,
@@ -102,24 +133,119 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     );
 
     _controller.repeat();
+
+    // Start timer only after the initial duration has been set.
+    _startDurationTimer();
+
     _startPolling();
   }
 
   int _elapsedSeconds = 0;
-  String formatBackendDuration(String? raw) {
-    if (raw == null || raw.isEmpty) return "00:00:00";
+  // String formatBackendDuration(String? raw) {
+  //   if (raw == null || raw.isEmpty) return "00:00:00";
 
-    // Case 1: 01:19:22:07372260.0  → take first 3 parts
-    final parts = raw.split(':');
+  //   // Case 1: 01:19:22:07372260.0  → take first 3 parts
+  //   final parts = raw.split(':');
+
+  //   if (parts.length >= 3) {
+  //     final hours = parts[0].padLeft(2, '0');
+  //     final minutes = parts[1].padLeft(2, '0');
+
+  //     // seconds may contain decimals
+  //     final secondsPart = parts[2].split('.').first.padLeft(2, '0');
+
+  //     return "$hours:$minutes:$secondsPart";
+  //   }
+
+  //   return "00:00:00";
+  // }
+  String formatBackendDuration(String? raw) {
+  if (raw == null || raw.trim().isEmpty || raw == "null") {
+    return "00:00:00";
+  }
+
+  final value = raw.trim();
+
+  // Numeric value represents minutes: "1" = 00:01:00
+  if (!value.contains(':')) {
+    final totalMinutes = double.tryParse(value)?.toInt() ?? 0;
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    return "${hours.toString().padLeft(2, '0')}:"
+        "${minutes.toString().padLeft(2, '0')}:00";
+  }
+
+  final parts = value.split(':');
+
+  // HH:mm:ss — preserve the existing duration.
+  if (parts.length == 3) {
+    final hours = int.tryParse(parts[0]) ?? 0;
+    final minutes = int.tryParse(parts[1]) ?? 0;
+    final seconds = double.tryParse(parts[2])?.toInt() ?? 0;
+
+    return "${hours.toString().padLeft(2, '0')}:"
+        "${minutes.toString().padLeft(2, '0')}:"
+        "${seconds.toString().padLeft(2, '0')}";
+  }
+
+  // mm:ss — convert to HH:mm:ss.
+  if (parts.length == 2) {
+    final totalMinutes = int.tryParse(parts[0]) ?? 0;
+    final seconds = double.tryParse(parts[1])?.toInt() ?? 0;
+
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+
+    return "${hours.toString().padLeft(2, '0')}:"
+        "${minutes.toString().padLeft(2, '0')}:"
+        "${seconds.toString().padLeft(2, '0')}";
+  }
+
+  return "00:00:00";
+}
+
+  String formatBackendDurationPartner(String? raw) {
+    if (raw == null || raw.trim().isEmpty || raw == "null") {
+      return "00:00:00";
+    }
+
+    final value = raw.trim();
+
+    // API sends only seconds, such as "1" or "2".
+    if (!value.contains(':')) {
+      final seconds = double.tryParse(value)?.toInt() ?? 0;
+      final hours = seconds ~/ 3600;
+      final minutes = (seconds % 3600) ~/ 60;
+      final remainingSeconds = seconds % 60;
+
+      return "${hours.toString().padLeft(2, '0')}:"
+          "${minutes.toString().padLeft(2, '0')}:"
+          "${remainingSeconds.toString().padLeft(2, '0')}";
+    }
+
+    // API sends a duration such as "00:01:02".
+    final parts = value.split(':');
 
     if (parts.length >= 3) {
-      final hours = parts[0].padLeft(2, '0');
-      final minutes = parts[1].padLeft(2, '0');
+      final hours = int.tryParse(parts[0]) ?? 0;
+      final minutes = int.tryParse(parts[1]) ?? 0;
+      final seconds = int.tryParse(parts[2].split('.').first) ?? 0;
 
-      // seconds may contain decimals
-      final secondsPart = parts[2].split('.').first.padLeft(2, '0');
+      return "${hours.toString().padLeft(2, '0')}:"
+          "${minutes.toString().padLeft(2, '0')}:"
+          "${seconds.toString().padLeft(2, '0')}";
+    }
 
-      return "$hours:$minutes:$secondsPart";
+    // Supports "mm:ss".
+    if (parts.length == 2) {
+      final minutes = int.tryParse(parts[0]) ?? 0;
+      final seconds = int.tryParse(parts[1].split('.').first) ?? 0;
+
+      return "${(minutes ~/ 60).toString().padLeft(2, '0')}:"
+          "${(minutes % 60).toString().padLeft(2, '0')}:"
+          "${seconds.toString().padLeft(2, '0')}";
     }
 
     return "00:00:00";
@@ -175,7 +301,6 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
     _refreshTimer = Timer.periodic(
       const Duration(seconds: 10),
       (_) async {
-        
         final res =
             await context.read<ChargingProvider>().fetchChargingSessionDetails(
                   context: context,
@@ -187,20 +312,22 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
         print("RANE REFRESH EVEYR");
         // Extract all values first (outside setState)
         final newStatus =
-            res!.data!.raw!.status == null ? "" : res!.data!.raw!.status ?? "";
+            res!.data!.status == null ? "" : res!.data!.status ?? "";
         final newCost = "${res.data!.raw!.totalCost.toString()}";
         final newUnitConsumed = "${res.data!.energyDelivered.toString()}";
-        final newOutputPower = "${res.data!.raw!.totalEnergyKwh} KW";
+        final newOutputPower = "${res.data!.energyDelivered} KW";
         final isActive = res.data!.isActive == true;
         final newBatteryPercentage = isActive
-            ? res!.data!.batteryStateOfCharge!.currentSoC.toString() ?? "0"
-            : res.data!.batteryStateOfCharge?.endSoC?.toString() ?? "0";
+            ? res!.data! != null
+                ? res!.data!.batteryStateOfCharge!.currentSoC.toString()
+                : "" ?? "0"
+            : res!.data! != null
+                ? res.data!.batteryStateOfCharge?.endSoC?.toString()
+                : "" ?? "0";
         final newEndMeterReading = res.data!.meterCurrent.toString();
         final newStationName = res.data!.locationName;
         // final newConnectorGunID = res.data!.session!.connectorName;
-print(
-  "RANE newBatteryPercentage $newBatteryPercentage"
-);
+        print("RANE newBatteryPercentage $newBatteryPercentage");
         // Stop timers and vibrate if session completed
         if (res.data!.isActive == false) {
           _refreshTimer?.cancel();
@@ -303,7 +430,9 @@ print(
           Navigator.push(
             routeGlobalKey.currentContext!,
             MaterialPageRoute(
-              builder: (_) => ActiveSessionsScreen(selectedTabIndex: 0,),
+              builder: (_) => ActiveSessionsScreen(
+                selectedTabIndex: 0,
+              ),
             ),
           );
         } else {
@@ -338,7 +467,9 @@ print(
               Navigator.push(
                 routeGlobalKey.currentContext!,
                 MaterialPageRoute(
-                  builder: (_) => ActiveSessionsScreen(selectedTabIndex: 0,),
+                  builder: (_) => ActiveSessionsScreen(
+                    selectedTabIndex: 0,
+                  ),
                 ),
               );
             } else {
@@ -384,8 +515,9 @@ print(
                               Navigator.push(
                                 routeGlobalKey.currentContext!,
                                 MaterialPageRoute(
-                                    builder: (context) =>
-                                        ChargingHistoryScreen()),
+                                    builder: (context) => ChargingHistoryScreen(
+                                          initialTabIndex: 1,
+                                        )),
                               );
                               // status ="";
 
@@ -434,7 +566,6 @@ print(
 //                         if (result == true) {
 //   _durationTimer?.cancel();
 
-                         
 //                           final response = await provider.unlockUnifiedConnector(
 //                               context: context,
 //                               chargingStationId: data!
@@ -507,16 +638,22 @@ print(
                                   status = res!.data!.raw!.status == null
                                       ? ""
                                       : res!.data!.raw!.status;
-                                  cost =
-                                      "${res.data!.raw!.totalCost!.toString()!}";
-                                  unitConsumed =
-                                      "${res.data!.raw!.energyLimit!.toString()} ";
+                                  cost = "${res.data!.cost!.toString()!}";
+                                  unitConsumed = res.data!.raw!.energyLimit ==
+                                          null
+                                      ? ""
+                                      : "${res.data!.raw!.energyLimit!.toString()} ";
                                   outputPower =
                                       "${res.data!.raw!.totalEnergyKwh} KW";
 
                                   stationName = "${res.data!.locationName}";
                                   //  ConnectorGunID="${res.data!.session!.connectorName}";
-                                  batteryPercentage = res!.data!.isActive==1? res.data!.batteryStateOfCharge!.currentSoC.toString():res.data!.batteryStateOfCharge!.endSoC.toString();
+                                  batteryPercentage = res!.data!.isActive == 1
+                                      ? res.data!.batteryStateOfCharge!
+                                          .currentSoC
+                                          .toString()
+                                      :res.data!.batteryStateOfCharge==null?"": res.data!.batteryStateOfCharge!.endSoC
+                                          .toString();
                                   final isActive = res?.data?.isActive == 1;
 
                                   batteryPercentage = isActive
@@ -533,7 +670,9 @@ print(
                                       .toString());
 
                                   endMeterReading =
-                                      res.data!.meterCurrent.toString();
+                                      res.data!.meterCurrent == null
+                                          ? ""
+                                          : res.data!.meterCurrent.toString();
                                 });
                               },
                               child: provider.loading

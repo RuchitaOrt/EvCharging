@@ -17,7 +17,8 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ChargingHistoryScreen extends StatefulWidget {
-  const ChargingHistoryScreen({super.key});
+  final int initialTabIndex;
+  const ChargingHistoryScreen({super.key,this.initialTabIndex = 0,});
 
   @override
   State<ChargingHistoryScreen> createState() => _ChargingHistoryScreenState();
@@ -27,44 +28,109 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
     with SingleTickerProviderStateMixin {
   late final ScrollController _scrollController;
   late TabController _tabController;
-  @override
-  void initState() {
-    super.initState();
- final provider = context.read<ActiveSessionProvider>();
-    _scrollController = ScrollController()..addListener(_onScroll);
- provider.fetchActiveSessions(
-          context,
-          "",
-        );
-    // Initialize TabController first
-    _tabController = TabController(
-      length: 2,
-      vsync: this,
-    );
+//   @override
+//   void initState() {
+//     super.initState();
+//  final provider = context.read<ActiveSessionProvider>();
+//     _scrollController = ScrollController()..addListener(_onScroll);
+//  provider.fetchActiveSessions(
+//           context,
+//           "",
+//         );
+//     // Initialize TabController first
+//     _tabController = TabController(
+//       length: 2,
+//       vsync: this,
+//       initialIndex: widget.initialTabIndex,
+//     );
 
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        return;
-      }
+//     // _tabController.addListener(() {
+//     //   if (_tabController.indexIsChanging) {
+//     //     return;
+//     //   }
 
-     
 
-      provider.changeMainTab(_tabController.index);
 
-      if (_tabController.index == 0) {
-        provider.fetchActiveSessions(
-          context,
-          "",
-        );
-      } else {
-        provider.fetchAUnifiedctiveSessions(
-          context,
-          "",
-        );
-      }
-    });
-  }
+//     //   provider.changeMainTab(_tabController.index);
 
+//     //   if (widget.initialTabIndex  == 0) {
+//     //     provider.fetchActiveSessions(
+//     //       context,
+//     //       "",
+//     //     );
+//     //   } else {
+//     //     provider.fetchAUnifiedctiveSessions(
+//     //       context,
+//     //       "",
+//     //     );
+//     //   }
+//     // });
+
+
+// if (widget.initialTabIndex == 0) {
+//   provider.fetchActiveSessions(context, "");
+// } else {
+//   provider.fetchAUnifiedctiveSessions(context, "");
+// }
+
+// _tabController.addListener(() {
+//   if (_tabController.indexIsChanging) return;
+
+//   provider.changeMainTab(_tabController.index);
+
+//   if (_tabController.index == 0) {
+//     provider.fetchActiveSessions(context, "");
+//   } else {
+//     provider.fetchAUnifiedctiveSessions(context, "");
+//   }
+// });
+//   }
+@override
+void initState() {
+  super.initState();
+
+  final provider = context.read<ActiveSessionProvider>();
+
+  _scrollController = ScrollController()..addListener(_onScroll);
+
+  // Open the requested tab and update Provider state.
+  _tabController = TabController(
+    length: 2,
+    vsync: this,
+    initialIndex: widget.initialTabIndex,
+  );
+
+  // Set the provider tab before calling the API.
+  provider.changeMainTab(widget.initialTabIndex);
+
+  // Call the API for the initially selected tab only.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!mounted) return;
+
+    if (widget.initialTabIndex == 0) {
+      provider.fetchActiveSessions(context, "");
+    } else {
+      provider.fetchAUnifiedctiveSessions(context, "");
+    }
+  });
+
+  // Fetch the corresponding API when the user switches tabs.
+  _tabController.addListener(() {
+    if (_tabController.indexIsChanging) return;
+
+    final selectedIndex = _tabController.index;
+
+    if (provider.selectedMainTab == selectedIndex) return;
+
+    provider.changeMainTab(selectedIndex);
+
+    if (selectedIndex == 0) {
+      provider.fetchActiveSessions(context, "");
+    } else {
+      provider.fetchAUnifiedctiveSessions(context, "");
+    }
+  });
+}
   @override
   void dispose() {
     _scrollController.dispose();
@@ -495,7 +561,7 @@ Widget _invoiceButton({
                                       fontWeight: FontWeight.w400,
                                       color: CommonColors.neutral500,
                                       fontSize: 12)),
-                              Text("${data.totalEnergyKwh} kW",
+                              Text(data.totalEnergyKwh ==null ?"-":"${data.totalEnergyKwh} kW",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12)),
@@ -525,7 +591,7 @@ Widget _invoiceButton({
                                       fontWeight: FontWeight.w400,
                                       color: CommonColors.neutral500,
                                       fontSize: 12)),
-                              Text("₹${data.totalCost}",
+                              Text(data.totalCost==null?"-": "₹${data.totalCost}",
                                   style: TextStyle(
                                       fontWeight: FontWeight.w600,
                                       fontSize: 12)),
@@ -581,7 +647,33 @@ Widget _invoiceButton({
                       ],
                     ),
                     const SizedBox(height: 16),
-                    
+                          Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                       children: [
+                         Expanded(
+                              child: Column(
+                                 mainAxisAlignment: MainAxisAlignment.start,
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                
+                                  Text("Time",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: CommonColors.neutral500,
+                                          fontSize: 12)),
+                                  Text(
+                                     ( data.startDateTime == null || data.endDateTime==null)
+                                          ? "-"
+                                          : "${formatOnlyTimeIST(data.startDateTime!.toString())} - ${formatOnlyTimeIST(data.endDateTime!.toString())}",
+                                  
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                       ],
+                     ),
                     const SizedBox(height: 16),
                     data.status == "Active"
                         ? Container(
@@ -775,11 +867,37 @@ Widget _invoiceButton({
 
     return DateFormat('EEE dd MMM yyyy').format(dateTime);
   }
+String formatOnlyTimeIST(String? timeString) {
+  if (timeString == null || timeString.trim().isEmpty) {
+    return "";
+  }
 
+  try {
+    final parsed = DateTime.parse(timeString);
+
+    // API timestamp is UTC, so convert it to IST.
+    final istTime = DateTime.utc(
+      parsed.year,
+      parsed.month,
+      parsed.day,
+      parsed.hour,
+      parsed.minute,
+      parsed.second,
+      parsed.millisecond,
+      parsed.microsecond,
+    ).add(const Duration(hours: 5, minutes: 30));
+
+    return DateFormat("hh:mm a").format(istTime);
+  } catch (e) {
+    return "";
+  }
+}
   Widget _historyCard(ChargingSession data) {
     // print("API VALUE");
     // print(data.startTime!);
     // print(data.endTime!);
+    if(data.startTime !=null && data.endTime !=null )
+      print("${data.startTime} - ${data.endTime}");
     return Column(
       children: [
         GestureDetector(
@@ -1022,6 +1140,33 @@ Widget _invoiceButton({
                       ],
                     ),
                     const SizedBox(height: 16),
+                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                       children: [
+                         Expanded(
+                              child: Column(
+                                 mainAxisAlignment: MainAxisAlignment.start,
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                
+                                  Text("Time",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w400,
+                                          color: CommonColors.neutral500,
+                                          fontSize: 12)),
+                                  Text(
+                                     ( data.startTime == null || data.endTime==null)
+                                          ? "-"
+                                          : "${formatOnlyTimeIST(data.startTime!.toString())} - ${formatOnlyTimeIST(data.endTime!.toString())}",
+                                  
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12)),
+                                ],
+                              ),
+                            ),
+                       ],
+                     ),
                     //  Column(
                     //   mainAxisAlignment: MainAxisAlignment.start,
                     //   crossAxisAlignment: CrossAxisAlignment.start,

@@ -1130,21 +1130,7 @@ Widget _stationsList(List<Station> stations) {
                                     ),
                                     SizedBox(width: 20,),
                                     
-                                  GestureDetector(
-  onTap: () async {
-    await Provider.of<ChargingGunStatusProvider>(
-      context,
-      listen: false,
-    ).getLocations(
-      context,
-      widget.hub.id!,
-    );
-  },
-  child: const Icon(
-    Icons.refresh,
-    color: CommonColors.white,
-  ),
-),
+                                 
                                   ],
                                 ),
                               ],
@@ -1161,11 +1147,70 @@ Widget _stationsList(List<Station> stations) {
                       ),
 
                       /// 🔹 ARROW
-                      Icon(
-                        isExpanded
-                            ? Icons.keyboard_arrow_up
-                            : Icons.keyboard_arrow_down,
-                        color: CommonColors.white,
+                      Row(
+                        children: [
+                
+Consumer<ChargingGunStatusProvider>(
+  builder: (context, provider, child) {
+    final stationID = station.id.toString();
+
+    final isRefreshing =
+        provider.loadingStationIds.contains(stationID);
+
+    return GestureDetector(
+      onTap: isRefreshing
+          ? null
+          : () async {
+              await provider.getLocations(
+                context,
+                widget.hub.id.toString(),
+                stationID: stationID,
+              );
+            },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: isRefreshing
+              ? const CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: CommonColors.white,
+                )
+              : const Icon(
+                  Icons.refresh,
+                  color: CommonColors.white,
+                  size: 20,
+                ),
+        ),
+      ),
+    );
+  },
+),
+
+//                            GestureDetector(
+//   onTap: () async {
+//     await Provider.of<ChargingGunStatusProvider>(
+//       context,
+//       listen: false,
+//     ).getLocations(
+//       context,
+//       widget.hub.id!,
+//     );
+//   },
+//   child: const Icon(
+//     Icons.refresh,
+//     color: CommonColors.white,
+//   ),
+// ),
+SizedBox(width: 5,),
+                          Icon(
+                            isExpanded
+                                ? Icons.keyboard_arrow_up
+                                : Icons.keyboard_arrow_down,
+                            color: CommonColors.white,
+                          ),
+                        ],
                       )
                     ],
                   ),
