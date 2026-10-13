@@ -30,6 +30,79 @@ Future<BitmapDescriptor> getResizedMarker(
   );
 }
 
+// Future<BitmapDescriptor> createCurrentLocationMarker() async {
+//   const int canvasSize = 180;
+
+//   final recorder = ui.PictureRecorder();
+//   final canvas = Canvas(recorder);
+
+//   final center = Offset(
+//     canvasSize / 2,
+//     canvasSize / 2,
+//   );
+
+//   /// OUTER LIGHT ORANGE CIRCLE
+//   final outerPaint = Paint()
+//     ..color = const ui.Color.fromARGB(255, 212, 242, 214).withOpacity(0.35);
+
+//   canvas.drawCircle(
+//     center,
+//     75,
+//     outerPaint,
+//   );
+
+//   /// INNER ORANGE CIRCLE
+//   final innerPaint = Paint()
+//     ..color = const ui.Color.fromARGB(255, 134, 234, 152);
+
+//   canvas.drawCircle(
+//     center,
+//     50,
+//     innerPaint,
+//   );
+
+//   /// LOAD CAR IMAGE
+//   final ByteData data =
+//       await rootBundle.load(CommonImagePath.vehicle9);
+
+//   final Uint8List bytes = data.buffer.asUint8List();
+
+//   final codec = await ui.instantiateImageCodec(
+//     bytes,
+//     targetWidth: 85, // Increased from 55
+//     targetHeight: 85,
+//   );
+
+//   final frame = await codec.getNextFrame();
+//   final image = frame.image;
+
+//   /// DRAW CAR IMAGE IN CENTER
+//   canvas.drawImage(
+//     image,
+//     Offset(
+//       center.dx - image.width / 2,
+//       center.dy - image.height / 2,
+//     ),
+//     Paint(),
+//   );
+
+//   final picture = recorder.endRecording();
+
+//   final img = await picture.toImage(
+//     canvasSize,
+//     canvasSize,
+//   );
+
+//   final pngBytes = await img.toByteData(
+//     format: ui.ImageByteFormat.png,
+//   );
+
+//   return BitmapDescriptor.fromBytes(
+//     pngBytes!.buffer.asUint8List(),
+//   );
+// }
+
+
 Future<BitmapDescriptor> createCurrentLocationMarker() async {
   const int canvasSize = 180;
 
@@ -42,35 +115,38 @@ Future<BitmapDescriptor> createCurrentLocationMarker() async {
   );
 
   /// OUTER LIGHT ORANGE CIRCLE
-  final outerPaint = Paint()
-    ..color = const ui.Color.fromARGB(255, 212, 242, 214).withOpacity(0.35);
+  // final outerPaint = Paint()
+  //   ..color = const ui.Color.fromARGB(255, 212, 242, 214).withOpacity(0.35);
 
-  canvas.drawCircle(
-    center,
-    75,
-    outerPaint,
-  );
+  // canvas.drawCircle(
+  //   center,
+  //   75,
+  //   outerPaint,
+  // );
 
   /// INNER ORANGE CIRCLE
-  final innerPaint = Paint()
-    ..color = const ui.Color.fromARGB(255, 134, 234, 152);
+  // final innerPaint = Paint()
+  //   ..color = const ui.Color.fromARGB(255, 134, 234, 152);
 
-  canvas.drawCircle(
-    center,
-    50,
-    innerPaint,
-  );
+  // canvas.drawCircle(
+  //   center,
+  //   50,
+  //   innerPaint,
+  // );
 
   /// LOAD CAR IMAGE
   final ByteData data =
-      await rootBundle.load(CommonImagePath.vehicle9);
+      await rootBundle.load(
+        'assets/images/currentMarker.png'
+        // CommonImagePath.vehicle9
+        );
 
   final Uint8List bytes = data.buffer.asUint8List();
 
   final codec = await ui.instantiateImageCodec(
     bytes,
-    targetWidth: 85, // Increased from 55
-    targetHeight: 85,
+    targetWidth: 120,//85, // Increased from 55
+    targetHeight: 120//85,
   );
 
   final frame = await codec.getNextFrame();
