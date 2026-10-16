@@ -10,27 +10,27 @@ class ChargerDetailsProvider extends ChangeNotifier {
 
   bool isLoading = false;
 
- Future<ChargerDetailsResponse?> fetchChargerDetails(
-  BuildContext context,
-  String recId,
-) async {
+//  Future<ChargerDetailsResponse?> fetchChargerDetails(
+//   BuildContext context,
+//   String recId,
+// ) async {
 
-  isLoading = true;
-  notifyListeners();
+//   isLoading = true;
+//   notifyListeners();
 
-  try {
+//   try {
 
-    chargerDetailsResponse =
-        await _service.getChargerDetails(context, recId);
+//     chargerDetailsResponse =
+//         await _service.getChargerDetails(context, recId);
 
-    return chargerDetailsResponse; // ✅ RETURN DATA
+//     return chargerDetailsResponse; // ✅ RETURN DATA
 
-  } catch (e) {
-    debugPrint("CHARGER DETAILS ERROR $e");
-    return null;
-  } finally {
-    isLoading = false;
-    notifyListeners();
-  }
-}
+//   } catch (e) {
+//     debugPrint("CHARGER DETAILS ERROR $e");
+//     return null;
+//   } finally {
+//     isLoading = false;
+//     notifyListeners();
+//   }
+// }
 }

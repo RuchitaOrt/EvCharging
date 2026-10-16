@@ -158,6 +158,22 @@ class HubProvider extends ChangeNotifier {
 
   bool isMoreLoading = false;
   bool hasMoreData = true;
+void onStationScrollSettled(int index) {
+  if (index < 0 || index >= locations.length) return;
+  if (index == currentVisibleIndex) return;
+
+  currentVisibleIndex = index;
+
+  final hub = locations[index];
+  final latLng = LocationConvert.getLatLngFromUnifiedHub(hub);
+
+  notifyListeners();
+
+  if (latLng != null) {
+    mapController.zoomTo(latLng);
+    getUnifiedDirection(hub.id ?? '');
+  }
+}
 
   Marker _buildUnifiedMarker(
       {required String id,
@@ -224,7 +240,21 @@ class HubProvider extends ChangeNotifier {
     _createMarkersInternal();
     notifyListeners();
   }
+Position? currentPosition;
+bool isFetchingPosition = false;
 
+Future<void> loadCurrentPosition() async {
+  if (currentPosition != null || isFetchingPosition) return;
+
+  isFetchingPosition = true;
+
+  try {
+    currentPosition = await MapController().getCurrentPosition();
+  } finally {
+    isFetchingPosition = false;
+    notifyListeners();
+  }
+}
   void _createMarkersInternal() {
     // rebuild markers with active icon
     markers = markers.map((m) {

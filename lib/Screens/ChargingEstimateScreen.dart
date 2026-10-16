@@ -7,6 +7,7 @@ import 'package:HyCharge/Provider/WalletProvider.dart';
 import 'package:HyCharge/Provider/charger_details_provider.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
+import 'package:HyCharge/Screens/WaitingForSessionScreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
@@ -322,21 +323,31 @@ authorizationReference="${response.data!.raw!.authorizationReference!}";
                          {
                           authorizationReference="P:${response.data!.raw!.authorizationReference!}";
                          }        
-
-final responseSessionID = await provider.pollForSessionId(
-  context: context,
-  authorizationReference: authorizationReference,
-);
-if (!mounted) return;
-if (responseSessionID != null) {
-  print(responseSessionID.data!.sessionId);
+// Navigator.push(
+//   context,
+//   MaterialPageRoute(
+//     builder: (_) => WaitingForSessionScreen(
+//       authorizationReference: authorizationReference,
+//       connectorId: response.data!.connectorId ?? '',
+//     ),
+//   ),
+// );
+// final responseSessionID = await provider.pollForSessionId(
+//   context: context,
+//   authorizationReference: authorizationReference,
+// );
+// if (!mounted) return;
+// if (responseSessionID != null) {
+//   print(responseSessionID.data!.sessionId);
    Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => SessionChargingScreen(
                                           args: SessionChargingArgs(
+                                            authorizationReference:authorizationReference,
                                               sessionId:
-                                                 responseSessionID!.data!.sessionId!,
+                                              "",
+                                                //  responseSessionID!.data!.sessionId!,
                                               status: response.data?.raw?.status ??
                                                   "",
                                               cost:
@@ -378,10 +389,10 @@ if (responseSessionID != null) {
                                         ),
                                       ),
                                     );
-  // Navigate or do whatever you want
-} else {
-  showToast("Unable to get session id. Please try again.");
-}
+//   // Navigate or do whatever you want
+// } else {
+//   showToast("Unable to get session id. Please try again.");
+// }
 //  final responseSessionID = await provider.fetchSessionID(context,authorizationReference);
 
                                     //  print(responseSessionID!.data!.sessionId);

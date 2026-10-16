@@ -38,40 +38,52 @@ class StationCardWidget extends StatelessWidget {
       child: Consumer<HubProvider>(
         builder: (context, value, _) {
           print("16july Ruchita ${value.locations.length}");
-          return ListView.separated(
-            controller: value.scrollController,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            itemCount:
-            value.locations.length +
-            // value.recordsStation.length +
-    (value.isMoreLoading ? 1 : 0),
-            //  value.recordsStation.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
-            itemBuilder: (context, index) {
-  if (index >= value.locations.length) {
-    return const SizedBox(
-      width: 80,
-      child: Center(
-        child: CircularProgressIndicator(strokeWidth: 2,color: CommonColors.white,),
-      ),
-    );
-  }
+          return NotificationListener<ScrollEndNotification>(
+             onNotification: (notification) {
+    final itemWidth = screenWidth * 0.87 + 14;
 
-  final isSelected = value.currentVisibleIndex == index;
- 
-  return Padding(
-    padding: const EdgeInsets.only(left: 2),
-    child: _StationCard(
-      chargingHub: value.locations[index],
-      isSelected: isSelected,
-      cardWidth: screenWidth *0.87,
-      nearbyHubs: value.locations,
-    ),
-  );
-},
+    final index =
+        (value.scrollController.offset / itemWidth).round();
 
-          
+    context.read<HubProvider>().onStationScrollSettled(index);
+
+    return false;
+  },
+            child: ListView.separated(
+              controller: value.scrollController,
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              itemCount:
+              value.locations.length +
+              // value.recordsStation.length +
+                (value.isMoreLoading ? 1 : 0),
+              //  value.recordsStation.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+              if (index >= value.locations.length) {
+                return const SizedBox(
+                  width: 80,
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 2,color: CommonColors.white,),
+                  ),
+                );
+              }
+            
+              final isSelected = value.currentVisibleIndex == index;
+             
+              return Padding(
+                padding: const EdgeInsets.only(left: 2),
+                child: _StationCard(
+                  chargingHub: value.locations[index],
+                  isSelected: isSelected,
+                  cardWidth: screenWidth *0.87,
+                  nearbyHubs: value.locations,
+                ),
+              );
+            },
+            
+            
+            ),
           );
         },
       ),
@@ -98,24 +110,45 @@ class _StationCard extends StatefulWidget {
 class _StationCardState extends State<_StationCard> {
 
 
-   Position? _currentPosition;
-   void _fetchCurrentLocation() async {
-  final position = await MapController().getCurrentPosition();
-  if (!mounted) return; // ✅ IMPORTANT
+//    Position? _currentPosition;
+//    void _fetchCurrentLocation() async {
+//   final position = await MapController().getCurrentPosition();
+//   if (!mounted) return; // ✅ IMPORTANT
 
-  if (position != null) {
-    setState(() {
-      _currentPosition = position;
-    });
-  }
+//   if (position != null) {
+//     setState(() {
+//       _currentPosition = position;
+//     });
+//   }
+// }
+
+//   @override
+//   void initState() {
+//     // TODO: implement initState
+//     super.initState();
+//     _fetchCurrentLocation();
+//   }
+// Position? _currentPosition;
+
+// void _fetchCurrentLocation() async {
+//   final position = await MapController().getCurrentPosition();
+//   if (!mounted) return;
+
+//   if (position != null) {
+//     setState(() {
+//       _currentPosition = position;
+//     });
+//   }
+// }
+
+@override
+void initState() {
+  super.initState();
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    context.read<HubProvider>().loadCurrentPosition();
+  });
 }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    _fetchCurrentLocation();
-  }
    Widget _filter24hourChip() {
     return (widget.chargingHub!.id==CommonStrings.strDummyRecID ||  widget.chargingHub!.id ==CommonStrings.strDummyRecID1)?
      Container(
@@ -162,6 +195,7 @@ class _StationCardState extends State<_StationCard> {
       ),
     );
   }
+  
   @override
   Widget build(BuildContext context) {
     final openingTime ="";
@@ -172,19 +206,53 @@ class _StationCardState extends State<_StationCard> {
 
     // final distance =
     //     widget.chargingHub.distanceKm != null ? '${widget.chargingHub.distanceKm} KM' : 'N/A';
-     double distance=0.0;
+//      double distance=0.0;
 
-    LatLng? location = LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
- if (_currentPosition != null) {
-       distance  = Geolocator.distanceBetween(
-              _currentPosition!.latitude,
-              _currentPosition!.longitude,
-            location!.latitude,
-              location!.longitude) /
-          1000;
-    }
-    print("DISTANCE");
-    print(distance);
+//     LatLng? location = LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
+//  if (_currentPosition != null) {
+//        distance  = Geolocator.distanceBetween(
+//               _currentPosition!.latitude,
+//               _currentPosition!.longitude,
+//             location!.latitude,
+//               location!.longitude) /
+//           1000;
+//     }
+    // print("DISTANCE");
+    // print(distance);
+  //    final currentPosition = context.select<HubProvider, Position?>(
+  //   (provider) => provider.currentPosition,
+  // );
+
+  // final location =
+  //     LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
+
+  // double distance=0.0;
+
+  // if (currentPosition != null && location != null) {
+  //   distance = Geolocator.distanceBetween(
+  //     currentPosition.latitude,
+  //     currentPosition.longitude,
+  //     location.latitude,
+  //     location.longitude,
+  //   ) / 1000;
+  // }
+  final currentPosition = context.select<HubProvider, Position?>(
+  (provider) => provider.currentPosition,
+);
+
+final location =
+    LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
+
+double? distance;
+
+if (currentPosition != null && location != null) {
+  distance = Geolocator.distanceBetween(
+    currentPosition.latitude,
+    currentPosition.longitude,
+    location.latitude,
+    location.longitude,
+  ) / 1000;
+}
     // print(widget.chargingHub.stations[0].chargers[0].chargerTariff);
     final typeAPrice =
     //  widget.chargingHub.typeATariff?.isNotEmpty == true
@@ -284,8 +352,14 @@ class _StationCardState extends State<_StationCard> {
                           spacing: 4,
                           runSpacing: 4,
                           children: [
-                          _InfoTag(
-                                icon: CommonImagePath.redpin, text: "${distance.toStringAsFixed(2)} km"),
+                            _InfoTag(
+  icon: CommonImagePath.redpin,
+  text: distance == null
+      ? '0.0'
+      : '${distance.toStringAsFixed(2)} km',
+),
+                          // _InfoTag(
+                          //       icon: CommonImagePath.redpin, text: "${distance.toStringAsFixed(2)} km"),
                                 widget.chargingHub!.averageRating==null?Container():
 _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!.toStringAsFixed(0)}",),
                             //  _InfoTag(icon: CommonImagePath.star, text: "${widget.chargingHub!.averageRating!.toString()}"),
