@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:HyCharge/Provider/LoginProvider.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/auth/ResetPassword_bottom_sheet.dart';
+import 'package:HyCharge/Screens/auth/login_bottom_sheet.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
@@ -11,6 +12,7 @@ import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class VerifyOtpBottomSheet extends StatefulWidget {
@@ -102,16 +104,51 @@ void startTimer() {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Image.asset(CommonImagePath.shield),
-                          const SizedBox(height: 12),
-                          Center(
-                            child: Text(CommonStrings.strVerifyOTP,
-                                style: CommonStyles.tsblackHeading),
-                          ),
+                         Center(
+                  child: Container(
+                    width: 36,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDDE2EB),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+
+                // Logo
+                Center(
+  child: Container(
+    width: 50,
+    height: 50,
+    decoration: BoxDecoration(
+      color: const Color(0xFF142D78),
+      borderRadius: BorderRadius.circular(18),
+    ),
+    alignment: Alignment.center,
+    child: SvgPicture.asset(
+      CommonImagePath.chargingGreen,
+      width: 28,
+      height: 28,
+      fit: BoxFit.contain,
+    ),
+  ),
+),
+                const SizedBox(height: 12),
+
+                // Login heading
+             
+Center(
+  child: Padding(
+    padding: const EdgeInsets.only(top: 12, bottom: 2),
+    child: const Text( CommonStrings.strVerifyOTP,textAlign: TextAlign.center, style: LoginText.title),
+  ),
+),
                           Center(
                             child: Text(
                                 "${CommonStrings.strSendOTP} ${widget.mobileNo}",
-                                style: CommonStyles.textFieldHint),
+                                style: LoginText.subtitle),
                           ),
 
                           const SizedBox(height: 15),
@@ -152,7 +189,7 @@ void startTimer() {
                                         },
                                         child: Text(
                                           "Resend Otp",
-                                          style: CommonStyles.tsbllueHeading,
+                                          style: LoginText.titlesubHead,
                                         ),
                                       )
                                     : Text(
@@ -172,18 +209,22 @@ void startTimer() {
                             ),
                           ),
                           const SizedBox(height: 15),
+                          
                           // Login Button / Loader
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: CommonColors.blue,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
+          backgroundColor: const Color(0xFF142D78),
+          foregroundColor: Colors.white,
+          disabledBackgroundColor: const Color(0xFF142D78),
+          disabledForegroundColor: Colors.white,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
                               onPressed: () async {
                                 await loginProvider.verifyOtp(
                                   context: context,

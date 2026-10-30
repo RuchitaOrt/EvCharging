@@ -132,8 +132,8 @@ class HubProvider extends ChangeNotifier {
   // Load icons once
   Future<void> loadIcons() async {
     normalMarkerIcon = await getResizedMarker(
-      'assets/images/normalMarker.png',
-      width: 32,
+      'assets/images/green_charging_marker.png',
+      width: 102,
     );
     activeMarkerIcon = await getResizedMarker(
       'assets/images/targetMarker.png',

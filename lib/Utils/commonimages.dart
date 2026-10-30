@@ -1,6 +1,35 @@
 class CommonImagePath {
   CommonImagePath._();
 
+   static String alertBlue = "assets/images/alert.svg";
+    static String faqBlue = "assets/images/faq.svg";
+     static String mailBlue = "assets/images/mail.svg";
+      static String callwhite = "assets/images/callwhite.svg";
+       static String headphones = "assets/images/headphones.svg";
+
+
+  static String location = "assets/images/location.svg";
+  static String chargerwhite = "assets/images/chargerwhite.svg";
+  static String borderGreen = "assets/images/borderGreen.png";
+  static String clock_green = "assets/images/clock_green.svg";
+
+  static String car_navy = "assets/images/car_navy.svg";
+   static String refresh_muted = "assets/images/refresh_muted.svg";
+     static String plugdark = "assets/images/plugdark.svg";
+  static String support = "assets/images/support.svg";
+  static String Charging_History = "assets/images/Charging_History.svg";
+  static String set_key = "assets/images/set_key.svg";
+  static String carskyblue = "assets/images/carskyblue.png";
+
+  static String logout_red = "assets/images/logout_red.svg";
+
+  static String edit_blue = "assets/images/edit_blue.svg";
+  static String transactions_blue = "assets/images/transactions_blue.svg";
+  static String pencil_navy = "assets/images/pencil_navy.svg";
+
+  static String track = "assets/images/track.svg";
+  static String chargingGreen = "assets/images/chargingGreen.svg";
+
   static String onboard1 = "assets/images/onboard1.svg";
   static String onboard2 = "assets/images/onboard2.svg";
   static String onboard3 = "assets/images/onboard3.svg";
@@ -52,10 +81,15 @@ class CommonImagePath {
   static String dropdown = "assets/images/dropdown.svg";
 
   static String dropup = "assets/images/dropup.svg";
-  static String back = "assets/images/back.png";
-
+  static String back = "assets/images/back-button.svg";
+  static String currentloc = "assets/images/currentloc.svg";
   static String lock = "assets/images/lock.png";
+  static String carIcons = "assets/images/carIcons.svg";
+  static String locationred = "assets/images/location-red.svg";
+
+  static String stargold = "assets/images/stargold.svg";
   static String shield = "assets/images/shield.png";
+  static String stationImage = "assets/images/station.jpg";
 
   static String help = "assets/images/help.png";
 
@@ -79,7 +113,7 @@ class CommonImagePath {
   static String swipe = "assets/images/swipe.png";
   static String filter = "assets/images/filter.png";
   static String filterblue = "assets/images/filter.svg";
-
+  static String filterwhite = "assets/images/filterwhite.svg";
   static String google = "assets/images/google.png";
 
   static String apple = "assets/images/apple.png";
@@ -89,7 +123,7 @@ class CommonImagePath {
   static String unitconsumed = "assets/images/unit.svg";
   static String poweroutput = "assets/images/poweroutput.svg";
   static String current = "assets/images/currency.svg";
-
+static String carblue = "assets/images/car_blue.png";
   static String vehicle1 = "assets/images/BYD.jpeg";
   static String vehicle2 = "assets/images/EV.jpeg";
   static String vehicle3 = "assets/images/EV2.jpeg";

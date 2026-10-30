@@ -73,20 +73,30 @@ class CustomTextFieldWidget extends StatefulWidget {
 
 class _CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
   final FocusNode _focusNode = FocusNode();
-  final BorderSide enableBorder = BorderSide(
-    color: CommonColors.background,
-    // color: CraftColors.neutral20Color,
-    width: 1.0,
-  );
-  final BorderRadius borderRadius = const BorderRadius.all(
+  // final BorderSide enableBorder = BorderSide(
+  //   color: CommonColors.background,
+  //   // color: CraftColors.neutral20Color,
+  //   width: 1.0,
+  // );
+  // final BorderRadius borderRadius = const BorderRadius.all(
     
-    Radius.circular(8),
-  );
-  final BorderSide focusedBorder = const BorderSide(
-     color: CommonColors.blue,
-    width: 1.0,
-  );
+  //   Radius.circular(8),
+  // );
+  // final BorderSide focusedBorder = const BorderSide(
+  //    color: CommonColors.blue,
+  //   width: 1.0,
+  // );
+final BorderRadius borderRadius = BorderRadius.circular(16);
 
+final BorderSide enableBorder = const BorderSide(
+  color: Color(0xFFDCE2EC),
+  width: 1,
+);
+
+final BorderSide focusedBorder = const BorderSide(
+  color: Color(0xFF142D78),
+  width: 1.4,
+);
   @override
   void initState() {
     super.initState();
@@ -120,36 +130,69 @@ class _CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
       );
     });
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Focus(
-      onFocusChange: (hasFocus) {
-        if (hasFocus) {
-          if (widget.onFocusField != null) {
-            widget.onFocusField!(_focusNode);
-          }
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+@override
+Widget build(BuildContext context) {
+  return Focus(
+    onFocusChange: (hasFocus) {
+      if (hasFocus && widget.onFocusField != null) {
+        widget.onFocusField!(_focusNode);
+      }
+    },
+    child: SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.title.trim().isNotEmpty) ...[
             _textFieldLabel(),
-            8.0.heightBox,
-            Container(
-              height: widget.textFieldContainerHeight,
-            
-              child: _textFieldWidget()),
-            _getInputTextHintLength(widget.textEditingController.text),
-            _errorTextWidget(),
+            const SizedBox(height: 8),
           ],
-        ),
+
+          SizedBox(
+            height: widget.textFieldContainerHeight,
+            child: _textFieldWidget(),
+          ),
+
+          _getInputTextHintLength(
+            widget.textEditingController.text,
+          ),
+
+          _errorTextWidget(),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Focus(
+  //     onFocusChange: (hasFocus) {
+  //       if (hasFocus) {
+  //         if (widget.onFocusField != null) {
+  //           widget.onFocusField!(_focusNode);
+  //         }
+  //       }
+  //     },
+  //     child: Container(
+  //       width: double.infinity,
+  //       padding: const EdgeInsets.symmetric(vertical: 8.0),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.stretch,
+  //         children: [
+  //           _textFieldLabel(),
+  //           8.0.heightBox,
+  //           Container(
+  //             height: widget.textFieldContainerHeight,
+            
+  //             child: _textFieldWidget()),
+  //           _getInputTextHintLength(widget.textEditingController.text),
+  //           _errorTextWidget(),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _textFieldLabel() {
     return  
@@ -195,36 +238,103 @@ Widget _textFieldWidget() {
         }
       });
     },
-    decoration: InputDecoration(
-      hintText: widget.hintText,
-      hintStyle: CommonStyles.textFieldHint,
-      errorStyle: CommonStyles.textFieldHint,
-      counterText: "",
-      contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
-      border: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
-      focusedBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorder),
-      enabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
-      disabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
-      errorBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
-      focusedErrorBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorder),
-      filled: true,
-      fillColor: widget.fillColor,
-      prefixIcon: widget.leadingIcon != null
-          ? Container(
-              margin: const EdgeInsets.only(right: 10, left: 10),
-              child: widget.leadingIcon,
-            )
-          : null,
-      prefixIconConstraints: const BoxConstraints(minHeight: 20, minWidth: 20, maxHeight: 40, maxWidth: 90),
-      suffixIcon: widget.suffixIcon != null
+  decoration: InputDecoration(
+  hintText: widget.hintText,
+  hintStyle: const TextStyle(
+    fontSize: 13,
+    color: Color(0xFF939BAD),
+    fontWeight: FontWeight.w400,
+  ),
+  errorStyle: CommonStyles.textFieldHint,
+  counterText: '',
+
+  contentPadding: const EdgeInsets.symmetric(
+    horizontal: 16,
+    vertical: 16,
+  ),
+
+  border: OutlineInputBorder(
+    borderRadius: borderRadius,
+    borderSide: enableBorder,
+  ),
+  enabledBorder: OutlineInputBorder(
+    borderRadius: borderRadius,
+    borderSide: enableBorder,
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderRadius: borderRadius,
+    borderSide: focusedBorder,
+  ),
+  disabledBorder: OutlineInputBorder(
+    borderRadius: borderRadius,
+    borderSide: enableBorder,
+  ),
+  errorBorder: OutlineInputBorder(
+    borderRadius: borderRadius,
+    borderSide: enableBorder,
+  ),
+  focusedErrorBorder: OutlineInputBorder(
+    borderRadius: borderRadius,
+    borderSide: focusedBorder,
+  ),
+
+  filled: true,
+  fillColor: widget.fillColor,
+
+  // Keep your existing prefixIcon, suffixIcon,
+  // and their constraints unchanged.
+   suffixIcon: widget.suffixIcon != null
           ? Container(
               margin: const EdgeInsets.only(right: 10, left: 10),
               child: widget.suffixIcon,
             )
           : null,
-      suffixIconConstraints: const BoxConstraints(minHeight: 20, minWidth: 20, maxHeight: 40, maxWidth: 90),
-      errorMaxLines: 3,
-    ),
+               prefixIcon: widget.leadingIcon != null
+          ? Container(
+              margin: const EdgeInsets.only(right: 10, left: 10),
+              child: widget.leadingIcon,
+            )
+          : null,
+  errorMaxLines: 3,
+),
+    // decoration: InputDecoration(
+    //   hintText: widget.hintText,
+    //   // hintStyle: CommonStyles.textFieldHint,
+    //   hintStyle: const TextStyle(
+    //                     fontSize: 13,
+    //                     color: Color(0xFF939BAD),
+    //                   ),
+    //   errorStyle: CommonStyles.textFieldHint,
+    //   counterText: "",
+    //    contentPadding: const EdgeInsets.symmetric(
+    //                     vertical: 16,
+    //                     horizontal: 16,
+    //                   ),
+    //   // contentPadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 8.0),
+    //   border: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
+    //   focusedBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorder),
+    //   enabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
+    //   disabledBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
+    //   errorBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: enableBorder),
+    //   focusedErrorBorder: OutlineInputBorder(borderRadius: borderRadius, borderSide: focusedBorder),
+    //   filled: true,
+    //   fillColor: widget.fillColor,
+    //   prefixIcon: widget.leadingIcon != null
+    //       ? Container(
+    //           margin: const EdgeInsets.only(right: 10, left: 10),
+    //           child: widget.leadingIcon,
+    //         )
+    //       : null,
+    //   prefixIconConstraints: const BoxConstraints(minHeight: 20, minWidth: 20, maxHeight: 40, maxWidth: 90),
+    //   suffixIcon: widget.suffixIcon != null
+    //       ? Container(
+    //           margin: const EdgeInsets.only(right: 10, left: 10),
+    //           child: widget.suffixIcon,
+    //         )
+    //       : null,
+    //   suffixIconConstraints: const BoxConstraints(minHeight: 20, minWidth: 20, maxHeight: 40, maxWidth: 90),
+    //   errorMaxLines: 3,
+    // ),
     style: CommonStyles.textFieldHeading,
     minLines: widget.textFieldLines == 0 ? 1 : widget.textFieldLines,
     maxLines: widget.textFieldLines == 0 ? 1 : widget.textFieldLines,

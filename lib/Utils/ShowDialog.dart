@@ -1,51 +1,45 @@
-  import 'package:HyCharge/Screens/MainTab.dart';
-import 'package:HyCharge/Screens/SplashScreen.dart';
+import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
-import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
-import 'package:HyCharge/main.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
+import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+unAthorizedTokenErrorDialog(BuildContext context, {String? message}) {
+  Widget okButton = ElevatedButton(
+      child: Text("OK"),
+      onPressed: () async {
+        await APIManager.clearCookies();
 
+        await AuthStorage.clearAuthData();
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => MainTab()),
+        );
+      });
 
-    unAthorizedTokenErrorDialog(BuildContext context, {String? message}) {
-
-  
-
-    Widget okButton = ElevatedButton(
-        child: Text("OK"),
-        onPressed: () async {
-           await APIManager.clearCookies();
-
-         await AuthStorage.clearAuthData(); 
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (_) => MainTab
-    ()),
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Ev Charging"),
+    content: Text(message!),
+    actions: [
+      okButton,
+    ],
   );
-        });
 
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text("Ev Charging"),
-      content: Text(message!),
-      actions: [
-        okButton,
-      ],
-    );
+  // show the dialog
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}
 
-    // show the dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
 Future<bool?> gunConnectorDialog(BuildContext context, {String? message}) {
   return showDialog<bool>(
     context: context,
@@ -57,43 +51,47 @@ Future<bool?> gunConnectorDialog(BuildContext context, {String? message}) {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: CommonColors.neutral200,
+            color: CommonColors.white,
             borderRadius: BorderRadius.circular(24),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               /// 🔌 Icon + Title
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                Image.asset(
-                "assets/images/plug.png", // <-- add your image
-                height: 25,
-                fit: BoxFit.contain,
-              ),
-              SizedBox(width: 6,),
-                
-                  const Text(
-                    "Connect Charger",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+               Container(
+  width: 42,
+  height: 42,
+  decoration: const BoxDecoration(
+    color: Color(0xFFEEF0F5),
+    shape: BoxShape.circle,
+  ),
+  alignment: Alignment.center,
+  child: SvgPicture.asset(
+    CommonImagePath.plugdark,
+    width: 20,
+    height: 20,
+    fit: BoxFit.contain,
+  ),
+),
 
               const SizedBox(height: 16),
-
+ const Text(
+                    "Connect Charger",
+                    style: TextStyle(
+                      fontSize: 18,
+                       fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                   const SizedBox(height: 8),
               /// 📄 Description
               Text(
                 message ??
                     "Plug the charging connector into your vehicle to begin charging.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.grey.shade700,
+                   fontFamily: 'Poppins',
+                  color: Colors.black,
                   fontSize: 13,
                 ),
               ),
@@ -101,68 +99,87 @@ Future<bool?> gunConnectorDialog(BuildContext context, {String? message}) {
               const SizedBox(height: 20),
 
               /// 🚗 Image (replace with your asset)
-              Image.asset(
-                "assets/images/charging_car.png", // <-- add your image
-                height: 160,
-                fit: BoxFit.contain,
+              Container(
+               
+                 decoration: BoxDecoration(
+                  color: Color(0xFFEEF0F5),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 80,right: 80,top: 20,bottom: 20),
+                  child: Image.asset(
+                    CommonImagePath.carskyblue, // <-- add your image
+                    height: 80,
+                    fit: BoxFit.contain,
+                  ),
+                ),
               ),
 
               const SizedBox(height: 20),
 
               /// 🔵 Main Button
-             Container(
-  // margin: const EdgeInsets.symmetric(horizontal: 10),
-  padding: const EdgeInsets.only(left: 10,right: 10,top: 10), // ✅ IMPORTANT (creates white border space)
-  decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(12),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.08),
-        blurRadius: 12,
-        offset: const Offset(0, 4),
-      ),
-    ],
-  ),
-  child: Column(
-    children: [
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            backgroundColor: CommonColors.blue,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-          ),
-          child: const Text(
-            "I’ve Connected It",
-            style: TextStyle(fontSize: 14, color: Colors.white),
-          ),
-          onPressed: () {
-            Navigator.pop(context, true);
-          },
-        ),
-      ),
-      const SizedBox(height: 10),
+              Container(
+                // margin: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                    top: 10), // ✅ IMPORTANT (creates white border space)
+                // decoration: BoxDecoration(
+                //   color: Colors.white,
+                //   borderRadius: BorderRadius.circular(12),
+                //   boxShadow: [
+                //     BoxShadow(
+                //       color: Colors.black.withOpacity(0.08),
+                //       blurRadius: 12,
+                //       offset: const Offset(0, 4),
+                //     ),
+                //   ],
+                // ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: CommonColors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        child:  Text(
+                          "I’ve Connected It",
+                          style: TextStyle(fontSize: 14, color: Colors.white, fontFamily: 'Poppins',fontWeight: FontWeight.w800),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
 
-              /// ❌ Cancel
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context, false);
-                },
-                child: const Text(
-                  "Cancel",
-                  style: TextStyle(color: CommonColors.blue),
+                    /// ❌ Cancel
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context, false);
+                        //  Navigator.pop(context);
+                      },
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: CommonColors.black, fontFamily: 'Poppins',),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-    ],
-  ),
-),
-
-              
             ],
           ),
         ),
@@ -171,59 +188,6 @@ Future<bool?> gunConnectorDialog(BuildContext context, {String? message}) {
   );
 }
 
-
-
-//Stop session
-
-//   Future<bool?> stopSessionDialog(BuildContext context, {String? message}) {
-//   return showDialog<bool>(
-//     context: context,
-//     barrierDismissible: false,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: const Text(
-//           "Stop Session",
-//           style: TextStyle(color: CommonColors.black, fontSize: 14),
-//         ),
-//         content: Text(
-//           message ?? "Are you sure you want to stop the session?",
-//           style: TextStyle(color: CommonColors.blue, fontSize: 13),
-//         ),
-//         actions: [
-//           ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: CommonColors.blue,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(12),
-//               ),
-//             ),
-//             child: const Text(
-//               "YES",
-//               style: TextStyle(color: CommonColors.white, fontSize: 12),
-//             ),
-//             onPressed: () {
-//               Navigator.pop(context, true); // ✅ YES
-//             },
-//           ),
-//           ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: CommonColors.white,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(12),
-//               ),
-//             ),
-//             child: const Text(
-//               "NO",
-//               style: TextStyle(color: CommonColors.blue, fontSize: 12),
-//             ),
-//             onPressed: () {
-//               Navigator.pop(context, false); // ✅ NO
-//             },
-//           ),
-//         ],
-//       );
-//     },
-//   );
 // }
 Future<bool?> stopSessionDialog(BuildContext context,
     {String? amount, String? units}) {
@@ -243,11 +207,9 @@ Future<bool?> stopSessionDialog(BuildContext context,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               /// ⚠️ Warning Icon
               Container(
                 padding: const EdgeInsets.all(12),
-               
                 child: const Icon(Icons.warning_amber_rounded,
                     color: Colors.orange, size: 45),
               ),
@@ -267,8 +229,10 @@ Future<bool?> stopSessionDialog(BuildContext context,
 
               /// Description
               Text(
-              amount==""?  "You've consumed ₹${amount ?? ""} (${units ?? ""} unit) so far.\n\n"
-                "Stopping now will end the session and release the charger.": "Stopping now will end the session and release the charger.",
+                amount == ""
+                    ? "You've consumed ₹${amount ?? ""} (${units ?? ""} unit) so far.\n\n"
+                        "Stopping now will end the session and release the charger."
+                    : "Stopping now will end the session and release the charger.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey.shade700,
@@ -336,9 +300,9 @@ Future<bool?> stopSessionDialog(BuildContext context,
     },
   );
 }
+
 //unlock session
-Future<bool?> unlockSessionDialog(BuildContext context,
-    {String? message}) {
+Future<bool?> unlockSessionDialog(BuildContext context, {String? message}) {
   return showDialog<bool>(
     context: context,
     barrierDismissible: false,
@@ -355,7 +319,6 @@ Future<bool?> unlockSessionDialog(BuildContext context,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               /// 🔓 Unlock Icon
               Container(
                 padding: const EdgeInsets.all(12),
@@ -363,8 +326,8 @@ Future<bool?> unlockSessionDialog(BuildContext context,
                   color: Colors.blue.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.lock_open,
-                    color: Colors.blue, size: 28),
+                child:
+                    const Icon(Icons.lock_open, color: Colors.blue, size: 28),
               ),
 
               const SizedBox(height: 12),
@@ -384,7 +347,7 @@ Future<bool?> unlockSessionDialog(BuildContext context,
               Text(
                 message ??
                     "Are you sure you want to unlock the session?\n\n"
-                    "This will allow the connector to be removed.",
+                        "This will allow the connector to be removed.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.grey.shade700,
@@ -453,88 +416,39 @@ Future<bool?> unlockSessionDialog(BuildContext context,
   );
 }
 
-//   Future<bool?> unlockSessionDialog(BuildContext context, {String? message}) {
-//   return showDialog<bool>(
-//     context: context,
-//     barrierDismissible: false,
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: const Text(
-//           "UnLock Session",
-//           style: TextStyle(color: CommonColors.black, fontSize: 14),
-//         ),
-//         content: Text(
-//           message ?? "Are you sure you want to unlock the session?",
-//           style: TextStyle(color: CommonColors.blue, fontSize: 13),
-//         ),
-//         actions: [
-//           ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: CommonColors.blue,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(12),
-//               ),
-//             ),
-//             child: const Text(
-//               "YES",
-//               style: TextStyle(color: CommonColors.white, fontSize: 12),
-//             ),
-//             onPressed: () {
-//               Navigator.pop(context, true); // ✅ YES
-//             },
-//           ),
-//           ElevatedButton(
-//             style: ElevatedButton.styleFrom(
-//               backgroundColor: CommonColors.white,
-//               shape: RoundedRectangleBorder(
-//                 borderRadius: BorderRadius.circular(12),
-//               ),
-//             ),
-//             child: const Text(
-//               "NO",
-//               style: TextStyle(color: CommonColors.blue, fontSize: 12),
-//             ),
-//             onPressed: () {
-//               Navigator.pop(context, false); // ✅ NO
-//             },
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-   void showToast(String message,{ToastGravity gravity=ToastGravity.BOTTOM}) {
-    Fluttertoast.showToast(
+void showToast(String message, {ToastGravity gravity = ToastGravity.BOTTOM}) {
+  Fluttertoast.showToast(
     msg: message,
     toastLength: Toast.LENGTH_LONG,
-    gravity:gravity?? ToastGravity.BOTTOM,
+    gravity: gravity ?? ToastGravity.BOTTOM,
     backgroundColor: Colors.black.withOpacity(0.7),
     textColor: Colors.white,
     fontSize: 12.0,
   );
-  }
-  infoNormalDialog(BuildContext context, {String? message}) {
-    Widget okButton = ElevatedButton(
-        child: Text("OK"),
-        onPressed: () {
-          Navigator.pop(context);
-        });
+}
 
-    // set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: Text("Ev-charging"),
-      content: Text(message!),
-      actions: [
-        okButton,
-      ],
-    );
+infoNormalDialog(BuildContext context, {String? message}) {
+  Widget okButton = ElevatedButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.pop(context);
+      });
 
-    // show the dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Ev-charging"),
+    content: Text(message!),
+    actions: [
+      okButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
+}

@@ -10,6 +10,7 @@ import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 
@@ -84,7 +85,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           backgroundColor: CommonColors.neutral50,
           elevation: 0,
           leading: IconButton(
-            icon: Image.asset(CommonImagePath.back),
+            icon: SvgPicture.asset(CommonImagePath.back),
             onPressed: () 
             {
                 Navigator.pushReplacement(

@@ -1,5 +1,5 @@
 {
-    "environment": "development",
+    "environment": "Sanity",
     "version": "1",
     "development": {
       
@@ -9,6 +9,11 @@
     },
     "production": {
         "hostUrl": "https://api.hycharge.in/api",
+        "timeout": 120,
+        "retry": 3
+    },
+    "Sanity": {
+        "hostUrl": "https://api-delta.hycharge.in/api",
         "timeout": 120,
         "retry": 3
     }

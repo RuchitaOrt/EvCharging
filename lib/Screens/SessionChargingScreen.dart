@@ -1,20 +1,18 @@
 import 'package:HyCharge/Provider/ChargingProvider.dart';
 import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';
-import 'package:HyCharge/Screens/ChargingHistoryScreen.dart';
+import 'package:HyCharge/Screens/DetailScreen.dart';
+// import 'package:HyCharge/Screens/ChargingHistoryScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
-import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
-import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/main.dart';
 
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
-import 'dart:math' as math;
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -29,10 +27,7 @@ class SessionChargingScreen extends StatefulWidget {
     required this.args,
   });
 
-  //  SessionChargingScreen({
-  //   super.key,
-  //   required this.args,
-  // });
+
 
   @override
   State<SessionChargingScreen> createState() => _SessionChargingScreenState();
@@ -60,52 +55,7 @@ class _SessionChargingScreenState extends State<SessionChargingScreen>
   final String recId = "";
   String? _sessionId;
 bool _isWaitingForSession = true;
-  // session() async {
-  //   final res =
-  //       await context.read<ChargingProvider>().fetchChargingSessionDetails(
-  //             context: context,
-  //             sessionId: widget.args.sessionId!,
-  //           );
-  //   duration =
-  //       formatBackendDuration(res!.data!.raw!.durationMinutes!.toString());
-  // }
-
-  // @override
-  // void initState() {
-  //   super.initState();
-
-  //   _elapsedSeconds = durationToSeconds(duration);
-
-  //   // 3️⃣ Start timer from backend value
-  //   _startDurationTimer();
-
-  //   status = widget.args.status!;
-  //   duration = formatBackendDuration(widget.args.duration); //widget.args.duration
-  //   cost = widget.args.cost;
-  //   unitConsumed =  widget.args.unitConsumed;
-  //   outputPower = widget.args.outputPower;
-  //   batteryPercentage = widget.args.batteryPercentage;
-  //   stationName =widget.args.stationName;
-  //   endMeterReading = widget.args.endMeterReading;
-  //   ConnectorGunID = widget.args.ConnectorGunID;
-  //   print("BATTERY");
-  //   print(outputPower);
-  //   print("BATTERY");
-  //   print(batteryPercentage);
-
-  //   _controller = AnimationController(
-  //     vsync: this,
-  //     duration: const Duration(seconds: 2),
-  //   );
-
-  //   _animation = CurvedAnimation(
-  //     parent: _controller,
-  //     curve: Curves.easeInOut,
-  //   );
-
-  //   _controller.repeat();
-  //   _startPolling();
-  // }
+ 
 String message = 'Waiting for charger confirmation...';
 
 bool hasError = false;
@@ -146,11 +96,6 @@ String? sessionId;
 _sessionId = widget.args.sessionId;
 _isWaitingForSession = _sessionId!.isEmpty;
 
-
-    // Start timer only after the initial duration has been set.
-    // _startDurationTimer();
-
-    // _startPolling();
 _sessionId = widget.args.sessionId;
   _isWaitingForSession = _sessionId == null || _sessionId!.isEmpty;
 print("PRASAD ${_sessionId}");
@@ -276,24 +221,7 @@ Future<void> _waitForSession() async {
   }
 }
   int _elapsedSeconds = 0;
-  // String formatBackendDuration(String? raw) {
-  //   if (raw == null || raw.isEmpty) return "00:00:00";
 
-  //   // Case 1: 01:19:22:07372260.0  → take first 3 parts
-  //   final parts = raw.split(':');
-
-  //   if (parts.length >= 3) {
-  //     final hours = parts[0].padLeft(2, '0');
-  //     final minutes = parts[1].padLeft(2, '0');
-
-  //     // seconds may contain decimals
-  //     final secondsPart = parts[2].split('.').first.padLeft(2, '0');
-
-  //     return "$hours:$minutes:$secondsPart";
-  //   }
-
-  //   return "00:00:00";
-  // }
   String formatBackendDuration(String? raw) {
   if (raw == null || raw.trim().isEmpty || raw == "null") {
     return "00:00:00";
@@ -413,25 +341,6 @@ Future<void> _waitForSession() async {
     });
   }
 
-// void _startDurationTimer() {
-//   _durationTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-//     if (_sessionStartTime == null) return;
-
-//     final diff = DateTime.now().difference(_sessionStartTime!);
-
-//     final minutes = diff.inMinutes.remainder(60);
-//     final seconds = diff.inSeconds.remainder(60);
-//     final hours = diff.inHours;
-
-//     setState(() {
-//       duration =
-//           "${hours.toString().padLeft(2, '0')}:"
-//           "${minutes.toString().padLeft(2, '0')}:"
-//           "${seconds.toString().padLeft(2, '0')}";
-//     });
-//   });
-// }
-
 
 bool _isPollingRequestInProgress = false;
 
@@ -534,9 +443,12 @@ print("UI COST setState $cost");
       if (!mounted) return;
 
       showToast('Charging session completed');
+      print("Session ID 1 ${id}");
         Navigator.push(
             routeGlobalKey.currentContext!,
-            MaterialPageRoute(builder: (context) => ChargingHistoryScreen()),
+            MaterialPageRoute(builder: (context) =>
+            DetailScreen(recID: id!, bookingType: id.contains("L")?"L":"P",),)
+            //  ChargingHistoryScreen(initialTabIndex:  id.contains("L")?0: 1,)),
           );
     }
   } catch (e, stackTrace) {
@@ -547,255 +459,6 @@ print("UI COST setState $cost");
   }
 }
 
-// void _startPolling() {
-//   // Prevent duplicate polling timers.
-//   _refreshTimer?.cancel();
-
-//   _refreshTimer = Timer.periodic(
-//     const Duration(seconds: 10),
-//     (_) async {
-//       final id = _sessionId;
-
-//       if (!mounted || id == null || id.isEmpty) return;
-
-//       try {
-//         final res = await context
-//             .read<ChargingProvider>()
-//             .fetchChargingSessionDetails(
-//               context: context,
-//               sessionId: id,
-//             );
-
-//         if (!mounted || res?.data == null) return;
-
-//         final data = res!.data!;
-
-//         // 1. Extract all values BEFORE setState.
-//         final newStatus = data.status ?? '';
-
-//         final newCost = data.cost?.toString() ??
-//             data.raw?.totalCost?.toString() ??
-//             '0';
-
-//         final newUnitConsumed =
-//             data.energyDelivered?.toString() ?? '0';
-
-//         final newOutputPower =
-//             '${data.energyDelivered ?? 0} KW';
-
-//         final newBatteryPercentage =
-//             (data.isActive == true
-//                     ? data.batteryStateOfCharge?.currentSoC
-//                     : data.batteryStateOfCharge?.endSoC ??
-//                         data.batteryStateOfCharge?.currentSoC)
-//                 ?.toString() ??
-//             '0.0';
-
-//         final newEndMeterReading =
-//             data.meterCurrent?.toString() ?? '';
-
-//         final newStationName = data.locationName ?? '';
-
-//         print('SESSION ID: $id');
-//         print('SESSION STATUS: $newStatus');
-//         print('SESSION COST: $newCost');
-//         print('SESSION ENERGY: $newUnitConsumed');
-//         print('SESSION BATTERY: $newBatteryPercentage');
-
-//         // 2. Update UI synchronously.
-//         setState(() {
-//           status = newStatus;
-//           cost = newCost;
-//           unitConsumed = newUnitConsumed;
-//           outputPower = newOutputPower;
-//           batteryPercentage = newBatteryPercentage;
-//           endMeterReading = newEndMeterReading;
-//           stationName = newStationName;
-//         });
-
-//         // 3. Handle completion OUTSIDE setState.
-//         if (data.isActive == false ||
-//     newStatus.toUpperCase() == 'COMPLETED') {
-//   _refreshTimer?.cancel();
-//   _durationTimer?.cancel();
-
-//   if (await Vibration.hasVibrator() ?? false) {
-//     Vibration.vibrate(duration: 800);
-//   }
-
-//   if (!mounted) return;
-
-//   showToast('Charging session completed');
-//   return; // Do not navigate away automatically.
-// }
-//         //  if (res.data!.isActive == false) {
-//         //   _refreshTimer?.cancel();
-//         //   _durationTimer?.cancel();
-
-//         //   if (await Vibration.hasVibrator() ?? false) {
-//         //     Vibration.vibrate(duration: 800);
-//         //   }
-//         //   showToast("Charging session completed");
-//         //   Navigator.push(
-//         //     routeGlobalKey.currentContext!,
-//         //     MaterialPageRoute(builder: (context) => ChargingHistoryScreen()),
-//         //   );
-//         // }
-//         // if (data.isActive == false && !_isHandlingCompletion) {
-//         //   _isHandlingCompletion = true;
-
-//         //   _refreshTimer?.cancel();
-//         //   _durationTimer?.cancel();
-
-//         //   final hasVibrator =
-//         //       await Vibration.hasVibrator() ?? false;
-
-//         //   if (!mounted) return;
-
-//         //   if (hasVibrator) {
-//         //     Vibration.vibrate(duration: 800);
-//         //   }
-
-//         //   showToast('Charging session completed');
-
-//         //   // Keep your existing navigation if you want to
-//         //   // automatically open Charging History:
-//         //   Navigator.push(
-//         //     context,
-//         //     MaterialPageRoute(
-//         //       builder: (_) => ChargingHistoryScreen(),
-//         //     ),
-//         //   );
-//         // }
-//       } catch (e, stackTrace) {
-//         debugPrint('Session polling failed: $e');
-//         debugPrintStack(stackTrace: stackTrace);
-//       }
-//     },
-//   );
-// }
-  // void _startPolling() {
-  //   _refreshTimer = Timer.periodic(
-  //     const Duration(seconds: 10),
-  //     (_) async {
-  //       if(_sessionId!=null)
-  //       {
-  //         print("PRASAD ${_sessionId}");
-  //         print("MEGHANA");
-  //       final res =
-  //           await context.read<ChargingProvider>().fetchChargingSessionDetails(
-  //                 context: context,
-  //                 sessionId: _sessionId!
-  //                 // sessionId: widget.args.sessionId!,
-  //               );
-     
-  //       // Update UI synchronously
-  //       setState(() async {
-  //            print(res);
-  //       //  print(res!.data!.batteryStateOfCharge!);
-  //       // print(res!.data!.batteryStateOfCharge!.currentSoC);
-  //       print("RANE REFRESH EVEYR");
-  //       // Extract all values first (outside setState)
-  //       final newStatus =res!.data ==null?"":
-  //           res!.data!.status == null ? "" : res!.data!.status ?? "";
-  //       final newCost =res.data!.cost==null? "${res.data!.raw!.totalCost.toString()}": res.data!.cost;
-  //       final newUnitConsumed = "${res.data!.energyDelivered.toString()}";
-  //       final newOutputPower = "${res.data!.energyDelivered} KW";
-  //       final isActive = res.data!.isActive == true;
-  //       final newBatteryPercentage = isActive
-  //           ? res!.data! != null
-  //               ?res!.data!.batteryStateOfCharge==null?"0.0": res!.data!.batteryStateOfCharge!.currentSoC.toString()
-  //               : "0.0" ?? "0"
-  //           : res!.data! != null
-  //               ?res!.data!.batteryStateOfCharge==null?"0.0": res.data!.batteryStateOfCharge?.endSoC?.toString()
-  //               : "0.0" ?? "0";
-  //       final newEndMeterReading = res.data!.meterCurrent.toString();
-  //       final newStationName = res.data!.locationName;
-  //       // final newConnectorGunID = res.data!.session!.connectorName;
-  //       print("RANE newBatteryPercentage $newBatteryPercentage");
-  //       // Stop timers and vibrate if session completed
-  //       if (res.data!.isActive == false) {
-  //         _refreshTimer?.cancel();
-  //         _durationTimer?.cancel();
-
-  //         if (await Vibration.hasVibrator() ?? false) {
-  //           Vibration.vibrate(duration: 800);
-  //         }
-  //         showToast("Charging session completed");
-  //         Navigator.push(
-  //           routeGlobalKey.currentContext!,
-  //           MaterialPageRoute(builder: (context) => ChargingHistoryScreen()),
-  //         );
-  //       }
-
-  //         status = newStatus;
-  //         cost = newCost;
-  //         unitConsumed = newUnitConsumed;
-  //         outputPower = newOutputPower;
-  //         batteryPercentage = newBatteryPercentage;
-  //         print("RANE ${batteryPercentage}");
-          
-  //         endMeterReading = newEndMeterReading;
-  //         stationName = newStationName;
-  //         print("RANE ${newStatus} ${cost} ${unitConsumed} ${outputPower} ${batteryPercentage} ${endMeterReading} ${stationName} ");
-  //         // ConnectorGunID = newConnectorGunID;
-  //       });
-  //     }
-  //     }
-  //   );
-  
-  //   // _refreshTimer = Timer.periodic(
-  //   //   const Duration(seconds: 10),
-  //   //   (_) async {
-  //   //     final res =
-  //   //         await context.read<ChargingProvider>().fetchChargingSessionDetails(
-  //   //               context: context,
-  //   //               sessionId: widget.args.sessionId!,
-  //   //             );
-  //   //     setState(() async {
-  //   //       status = res!.data!.session!.status == null
-  //   //           ? ""
-  //   //           : res!.data!.session!.status;
-  //   //       cost = "${res.data!.costDetails!.totalCost!.toString()!}";
-  //   //       unitConsumed =
-  //   //           "${res.data!.energyConsumption!.totalEnergy!.toString()}";
-  //   //       outputPower = "${res.data!.chargerDetails!.powerOutput} KW";
-  //   //       print("outputPower ${res.data!.chargerDetails!.powerOutput} KW");
-
-  //   //       // batteryPercentage = res!.data!.session!.active==1? res.data!.batteryStateOfCharge.currentSoC.toString():res.data!.batteryStateOfCharge.endSoC.toString();
-  //   //       final isActive = res?.data?.session?.active == 1;
-
-  //   //       batteryPercentage = isActive
-  //   //           ? res?.data?.batteryStateOfCharge?.currentSoC?.toString() ?? "0"
-  //   //           : res?.data?.batteryStateOfCharge?.endSoC?.toString() ?? "0";
-  //   //       print("AFTER 15 sec batteryStateOfCharge");
-  //   //       print(res.data!.batteryStateOfCharge!.currentSoC.toString());
-
-  //   //       endMeterReading = res.data!.session!.endMeterReading.toString();
-  //   //       stationName=res.data!.session!.chargingStationName;
-  //   //       ConnectorGunID= res.data!.session!.chargingGunId;
-  //   //       print("AFTER 15 sec ${outputPower}");
-  //   //       // 🔴 Stop polling if session completed
-  //   //       if (res!.data!.isActive == false) {
-  //   //         _refreshTimer?.cancel();
-  //   //         _durationTimer?.cancel();
-
-  //   //         if (await Vibration.hasVibrator() ?? false) {
-  //   //           Vibration.vibrate(duration: 800);
-  //   //         }
-
-  //   //         // Optional UI message
-  //   //         ScaffoldMessenger.of(context).showSnackBar(
-  //   //           const SnackBar(
-  //   //             content: Text("Charging session completed"),
-  //   //             duration: Duration(seconds: 2),
-  //   //           ),
-  //   //         );
-  //   //       }
-  //   //     });
-  //   //   },
-  //   // );
-  // }
 
   @override
   void dispose() {
@@ -806,553 +469,1203 @@ print("UI COST setState $cost");
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<ChargingProvider>();
-    final data = provider.sessionDetails?.data;
+@override
+Widget build(BuildContext context) {
+  final provider = context.watch<ChargingProvider>();
 
-    return WillPopScope(
-      onWillPop: () async {
-        if (widget.args!.isActive!) {
-          Navigator.push(
-            routeGlobalKey.currentContext!,
-            MaterialPageRoute(
-              builder: (_) => ActiveSessionsScreen(
-                selectedTabIndex: 0,
-              ),
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MainTab(
-                isLoggedIn: GlobalLists.islLogin,
-                currentIndex: 1,
-              ),
-            ),
-          );
-        }
+  final bool isPreparing = _isWaitingForSession ||
+      _sessionId == null ||
+      _sessionId!.isEmpty;
 
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => MainTab(
-        //       isLoggedIn: GlobalLists.islLogin,
-        //       currentIndex: 1,
-        //     ),
-        //   ),
-        // );
-        return false; // prevent default pop
-      },
-      child: Scaffold(
-        backgroundColor: CommonColors.white,
-        appBar: CommonAppBar(
-          title: "Charging Session",
-          onBack: () {
-            if (widget.args!.isActive!) {
-              Navigator.push(
-                routeGlobalKey.currentContext!,
-                MaterialPageRoute(
-                  builder: (_) => ActiveSessionsScreen(
-                    selectedTabIndex: 0,
-                  ),
-                ),
-              );
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MainTab(
-                    isLoggedIn: GlobalLists.islLogin,
-                    currentIndex: 1,
-                  ),
-                ),
-              );
-            }
-          },
+  final String currentStatus =
+      (status ?? '').toLowerCase().trim();
+
+  final bool isCharging = !isPreparing &&
+      (currentStatus == 'active' ||
+          currentStatus == 'charging');
+
+  final Color navy = const Color(0xFF142B70);
+  final Color muted = const Color(0xFF667085);
+  final Color green = const Color(0xFF27C36A);
+
+  return WillPopScope(
+    onWillPop: () async {
+      _navigateBack();
+      return false;
+    },
+    child: Scaffold(
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          'Charging Session',
+          style: TextStyle(
+            color: Color(0xFF101828),
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
-        bottomNavigationBar: _sessionId != ""  && status !=null? Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: Color(0xFF142B70),
+          ),
+          onPressed: _navigateBack,
+        ),
+      ),
+
+      // bottomNavigationBar: !isPreparing &&
+      //         status != null &&
+      //         currentStatus != 'completed'
+      //     ? Container(
+      //         color: Colors.white,
+      //         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      //         child: SafeArea(
+      //           top: false,
+      //           child: SizedBox(
+      //             height: 50,
+      //             child: ElevatedButton(
+      //               onPressed: () async {
+      //                 final result = await stopSessionDialog(
+      //                   context,
+      //                   amount: cost,
+      //                   units: unitConsumed,
+      //                 );
+
+      //                 if (result != true || !mounted) return;
+
+      //                 final id = _sessionId;
+      //                 if (id == null || id.isEmpty) return;
+
+      //                 final response = await context
+      //                     .read<ChargingProvider>()
+      //                     .endUnifiedSession(
+      //                       context: context,
+      //                       sessionId: id,
+      //                       endMeterReading: endMeterReading ?? '',
+      //                     );
+
+      //                 if (!mounted) return;
+
+      //                 _durationTimer?.cancel();
+      //                 _refreshTimer?.cancel();
+
+      //                 if (await Vibration.hasVibrator() ?? false) {
+      //                   Vibration.vibrate(
+      //                     pattern: [0, 500, 200, 500],
+      //                   );
+      //                 }
+
+      //                 showToast('Charging session stopped');
+
+      //                 Navigator.push(
+      //                   routeGlobalKey.currentContext!,
+      //                   MaterialPageRoute(
+      //                     builder: (_) => ChargingHistoryScreen(
+      //                       initialTabIndex:id.contains("L")?0: 1,
+      //                     ),
+      //                   ),
+      //                 );
+      //               },
+      //               style: ElevatedButton.styleFrom(
+      //                 backgroundColor: navy,
+      //                 foregroundColor: Colors.white,
+      //                 elevation: 0,
+      //                 shape: RoundedRectangleBorder(
+      //                   borderRadius: BorderRadius.circular(14),
+      //                 ),
+      //               ),
+      //               child: const Text(
+      //                 'Stop Charging',
+      //                 style: TextStyle(
+      //                   fontSize: 15,
+      //                   fontWeight: FontWeight.w700,
+      //                 ),
+      //               ),
+      //             ),
+      //           ),
+      //         ),
+      //       )
+      //     : null,
+
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: status == "Completed"
-                      ? null
-                      : () async {
-                          // print("Charging session ID ${data!.session!.recId!}");
-
-                          bool? result = await stopSessionDialog(context,
-                              amount: cost, units: unitConsumed);
-                          if (result == true) {
-                            // ✅ User clicked YES
-                            final response = await provider.endUnifiedSession(
-                                context: context,
-                                sessionId:
-                                    widget.args.sessionId!, // 🔑 station id
-                                endMeterReading: endMeterReading!);
-
-                            setState(() async {
-                              _durationTimer?.cancel();
-                              if (await Vibration.hasVibrator() ?? false) {
-                                Vibration.vibrate(pattern: [0, 500, 200, 500]);
-                              }
-                              showToast("charging session stopped");
-                              Navigator.push(
-                                routeGlobalKey.currentContext!,
-                                MaterialPageRoute(
-                                    builder: (context) => ChargingHistoryScreen(
-                                          initialTabIndex: 1,
-                                        )),
-                              );
-                              // status ="";
-
-                              // cost = response.data!.cost!.toString();
-                              // unitConsumed =
-                              //     response.data!.energyConsumed.toString();
-                              // outputPower = response
-                              //     .data!.session!.chargingGun!.powerOutput
-                              //     .toString();
-                              // batteryPercentage = response
-                              //             .data!.batteryStateOfCharge!.endSoC ==
-                              //         null
-                              //     ? "0"
-                              //     : response.data!.batteryStateOfCharge!.endSoC
-                              //         .toString();
-                              // endMeterReading =
-                              //     response.data!.meterStop.toString();
-                              //     stationName=response.data!.session!.chargingStationName;
-                              //     // ConnectorGunID=response.data!.session!.connectorName;
-                            });
-                          } else {
-                            // ❌ User clicked NO or closed dialog
-                            print("User cancelled");
-                          }
-                        },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CommonColors.blue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              // Vehicle card and status badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
+                decoration: _cardDecoration(),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 76,
+                      height: 54,
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        // color: const Color(0xFFF5F7FB),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Image.asset(
+                        CommonImagePath.carskyblue,
+                        fit: BoxFit.contain,
+                      ),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: Text(
-                    "Stop Charging",
-                    style: const TextStyle(color: CommonColors.white),
-                  ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Q4',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF101828),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                             SvgPicture.asset(CommonImagePath.car_navy,width: 12,height: 12,),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  widget.args.sessionId.isNotEmpty
+                                      ? 'Connected'
+                                      : 'Connecting vehicle...',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: muted,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _statusBadge(
+                      isPreparing
+                          ? 'Preparing'
+                          : isCharging
+                              ? 'Charging'
+                              : (status ?? 'Connected'),
+                      isPreparing
+                          ?  Colors.grey.shade300
+                          : isCharging
+                              ? const Color(0xFFDDF8E6)
+                              : Colors.grey.shade300,
+                      isPreparing
+                          ? Colors.black87.withOpacity(0.5)
+                          : isCharging
+                              ?  CommonColors.darkgreen
+                              : navy,
+                              isPreparing
+                          ? Colors.amber
+                          : isCharging
+                              ?  CommonColors.darkgreen
+                              : navy
+                             
+                              
+                    ),
+                  ],
                 ),
               ),
-//               const SizedBox(width: 12),
+
+              const SizedBox(height: 14),
+
+              // Main session card
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: _cardDecoration(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isPreparing
+                          ? 'Getting your charger ready'
+                          : isCharging
+                              ? 'Charging in progress'
+                              : 'Charging session details',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF101828),
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      isPreparing
+                          ? hasError
+                              ? message
+                              : 'Connecting to your charging station...'
+                          : isCharging
+                              ? "You can leave the app, we'll keep tracking"
+                              : 'Your latest charging session information',
+                      style: TextStyle(
+                        fontSize: 11,
+                        height: 1.4,
+                        color: muted,
+                        fontWeight: FontWeight.w200
+
+                      ),
+                    ),
+
+                    if (isPreparing && hasError) ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: isWaiting ? null : _waitForSessionId,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Try Again'),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 22),
+
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Units',
+                                style: TextStyle(
+                                  color: muted,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    isPreparing
+                                        ? '0'
+                                        : (unitConsumed ?? '0'),
+                                    style: TextStyle(
+                                      color: navy,
+                                      fontSize: 42,
+                                      height: 1,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 4,
+                                      bottom: 5,
+                                    ),
+                                    child: Text(
+                                      'kWh',
+                                      style: TextStyle(
+                                        fontSize: 17,
+                                        color: Color(0xFF667085),
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        _energyBars(
+                          active: isCharging,
+                          color: isCharging
+                              ? green
+                              : const Color(0xFFE8EBF1),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Battery (estimated)',
+                          style: TextStyle(
+                            color: muted,
+                            fontSize: 10,
+                          ),
+                        ),
+                        Text(
+                          '${batteryPercentage ?? '0'}%',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF101828),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: LinearProgressIndicator(
+                        value: ((double.tryParse(
+                                      batteryPercentage ?? '0') ??
+                                  0)
+                              .clamp(0, 100)) /
+                            100,
+                        minHeight: 7,
+                        backgroundColor: const Color(0xFFEAEDF2),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          green,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    _sessionSteps(
+                      isPreparing: isPreparing,
+                      isCharging: isCharging,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Three summary cards
+              Row(
+                children: [
+                  Expanded(
+                    child: _summaryCard(
+                      icon: Icons.currency_rupee_rounded,
+                      value: '₹ ${cost ?? '0'}',
+                      label: 'Amount',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _summaryCard(
+                      icon: Icons.speed_rounded,
+                      value: outputPower ?? '0 kWh',
+                      label: 'Output Power',
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _summaryCard(
+                      icon: Icons.access_time_rounded,
+                      value: duration,
+                      label: 'Duration',
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // Station details
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: _cardDecoration(),
+                child: Row(
+                  children: [
+                    Container(
+  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: CommonColors.lightblue,
+                    borderRadius: BorderRadius.circular(14)
+                  ),
+                  padding: const EdgeInsets.all(9),
+  alignment: Alignment.center,
+  child: SvgPicture.asset(
+    CommonImagePath.plugdark,
+    color: CommonColors.blue,
+    width: 20,
+    height: 20,
+    fit: BoxFit.contain,
+  ),
+),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Station Name:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: Color(0xFF101828),
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            (stationName?.isNotEmpty == true)
+                                ? "${stationName!} (Connector: ${ConnectorGunID ?? '--'})"
+                                : 'Waiting for station details',
+                            style: TextStyle(
+                              color: muted,
+                              fontSize: 12,
+                            ),
+                          ),
+                          // const SizedBox(height: 3),
+                          // Text(
+                          //   'Connector ${ConnectorGunID ?? '--'}',
+                          //   style: TextStyle(
+                          //     color: muted,
+                          //     fontSize: 12,
+                          //   ),
+                          // ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+         !isPreparing &&
+              status != null &&
+              currentStatus != 'completed'
+          ?     GestureDetector(
+                onTap: ()
+                async {
+                   final result = await stopSessionDialog(
+                        context,
+                        amount: cost,
+                        units: unitConsumed,
+                      );
+
+                      if (result != true || !mounted) return;
+
+                      final id = _sessionId;
+                      if (id == null || id.isEmpty) return;
+
+                      final response = await context
+                          .read<ChargingProvider>()
+                          .endUnifiedSession(
+                            context: context,
+                            sessionId: id,
+                            endMeterReading: endMeterReading ?? '',
+                          );
+
+                      if (!mounted) return;
+
+                      _durationTimer?.cancel();
+                      _refreshTimer?.cancel();
+
+                      if (await Vibration.hasVibrator() ?? false) {
+                        Vibration.vibrate(
+                          pattern: [0, 500, 200, 500],
+                        );
+                      }
+
+                      showToast('Charging session stopped');
+ print("Session ID ${id}");
+                      Navigator.push(
+                        routeGlobalKey.currentContext!,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                           DetailScreen(recID: id!, bookingType: id.contains("L")?"L":"P",),
+                          //  ChargingHistoryScreen(
+                          //   initialTabIndex:id.contains("L")?0: 1,
+                          // ),
+                        ),
+                      );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                                    'Preview: session ended state',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                        fontFamily: 'Poppins',
+                                      fontSize: 10,
+                                      color: CommonColors.blue,
+                                    ),
+                                  ),
+                                  Icon(Icons.arrow_forward,color: CommonColors.blue,size: 12,)
+                    ],
+                  ),
+                ),
+              ):Container()
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+BoxDecoration _cardDecoration() {
+  return BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(22),
+    boxShadow: [
+      BoxShadow(
+        color: const Color(0xFF142B70).withOpacity(0.06),
+        blurRadius: 18,
+        offset: const Offset(0, 5),
+      ),
+    ],
+  );
+}
+
+Widget _statusBadge(
+  String label,
+  Color background,
+  Color foreground,
+  Color dot
+) {
+  return Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: 10,
+      vertical: 7,
+    ),
+    decoration: BoxDecoration(
+      color: background,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: dot,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 5),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: foreground,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _energyBars({
+  required bool active,
+  required Color color,
+}) {
+  const heights = [18.0, 29.0, 37.0, 25.0, 34.0, 21.0];
+
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.end,
+    children: heights.map((height) {
+      return Container(
+        width: 6,
+        height: height,
+        margin: const EdgeInsets.only(left: 4),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(5),
+        ),
+      );
+    }).toList(),
+  );
+}
+
+Widget _sessionSteps({
+  required bool isPreparing,
+  required bool isCharging,
+}) {
+  const green = Color(0xFF27C36A);
+  const navy = Color(0xFF142B70);
+  const grey = Color(0xFFE9EDF3);
+
+  final int activeStep = isPreparing ? 1 : isCharging ? 3 : 2;
+
+  Widget step(int number, String title) {
+    final bool completed = number < activeStep;
+    final bool active = number == activeStep;
+
+    // Completed = green; active and pending = blue
+    final Color circleColor = completed ? green : navy;
+
+    final Color textColor = (active || completed)
+        ? navy
+        : Colors.black;
+
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: circleColor,
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: completed
+                ? const Icon(
+                    Icons.check_rounded,
+                    color: Colors.white,
+                    size: 15,
+                  )
+                : Text(
+                    '$number',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  return Row(
+    children: [
+      step(1, 'Connecting'),
+      step(2, 'Authorizing'),
+      step(3, 'Charging'),
+    ],
+  );
+}
+
+// Widget _sessionSteps({
+//   required bool isPreparing,
+//   required bool isCharging,
+// }) {
+//   const green = Color(0xFF27C36A);
+//   const navy = Color(0xFF142B70);
+//   const grey = Color(0xFFE9EDF3);
+
+//   final int activeStep = isPreparing ? 1 : isCharging ? 3 : 2;
+
+//   Widget step(int number, String title) {
+//     final bool completed = number < activeStep;
+//     final bool active = number == activeStep;
+
+//     final Color circleColor = completed
+//         ? green
+//         : active
+//             ? navy
+//             : grey;
+
+//     final Color textColor = 
+//     active || completed
+//         ? navy
+//         : 
+//         const Color(0xFF98A2B3);
+
+//     return Expanded(
+//       child: Column(
+//         children: [
+//           Container(
+//             width: 23,
+//             height: 23,
+//             decoration: BoxDecoration(
+//               color: circleColor,
+//               shape: BoxShape.circle,
+//             ),
+//             child: Icon(
+//               completed ? Icons.check_rounded :null,
+//               color: Colors.white,
+//               size: 15,
+//             ),
+//           ),
+//           const SizedBox(height: 8),
+//           Text(
+//             title,
+//             textAlign: TextAlign.center,
+//             style: TextStyle(
+//               fontSize: 10,
+//               fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+//               color: textColor,
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+//   return Row(
+//     children: [
+//       step(1, 'Connecting'),
+//       step(2, 'Authorizing'),
+//       step(3, 'Charging'),
+//     ],
+//   );
+// }
+
+Widget _summaryCard({
+  required IconData icon,
+  required String value,
+  required String label,
+}) {
+  return Container(
+    height: 90,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 10,
+      vertical: 12,
+    ),
+    decoration: _cardDecoration(),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          color: const Color(0xFF142B70),
+          size: 18,
+        ),
+        const Spacer(),
+        Text(
+          value,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF101828),
+          ),
+        ),
+        const SizedBox(height: 3),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 10,
+            color: Color(0xFF667085),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _navigateBack() {
+  if (widget.args.isActive == true) {
+    Navigator.push(
+      routeGlobalKey.currentContext!,
+      MaterialPageRoute(
+        builder: (_) => ActiveSessionsScreen(
+          selectedTabIndex: 0,
+        ),
+      ),
+    );
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MainTab(
+          isLoggedIn: GlobalLists.islLogin,
+          currentIndex: 1,
+        ),
+      ),
+    );
+  }
+}
+
+//   @override
+//   Widget build(BuildContext context) {
+//     final provider = context.watch<ChargingProvider>();
+//     final data = provider.sessionDetails?.data;
+
+//     return WillPopScope(
+//       onWillPop: () async {
+//         if (widget.args!.isActive!) {
+//           Navigator.push(
+//             routeGlobalKey.currentContext!,
+//             MaterialPageRoute(
+//               builder: (_) => ActiveSessionsScreen(
+//                 selectedTabIndex: 0,
+//               ),
+//             ),
+//           );
+//         } else {
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (_) => MainTab(
+//                 isLoggedIn: GlobalLists.islLogin,
+//                 currentIndex: 1,
+//               ),
+//             ),
+//           );
+//         }
+
+       
+//         return false; // prevent default pop
+//       },
+//       child: Scaffold(
+//         backgroundColor: CommonColors.white,
+//         appBar: CommonAppBar(
+//           title: "Charging Session",
+//           onBack: () {
+//             if (widget.args!.isActive!) {
+//               Navigator.push(
+//                 routeGlobalKey.currentContext!,
+//                 MaterialPageRoute(
+//                   builder: (_) => ActiveSessionsScreen(
+//                     selectedTabIndex: 0,
+//                   ),
+//                 ),
+//               );
+//             } else {
+//               Navigator.push(
+//                 context,
+//                 MaterialPageRoute(
+//                   builder: (_) => MainTab(
+//                     isLoggedIn: GlobalLists.islLogin,
+//                     currentIndex: 1,
+//                   ),
+//                 ),
+//               );
+//             }
+//           },
+//         ),
+//         bottomNavigationBar: _sessionId != ""  && status !=null? Padding(
+//           padding: const EdgeInsets.all(8.0),
+//           child: Row(
+//             children: [
 //               Expanded(
 //                 child: ElevatedButton(
 //                   onPressed: status == "Completed"
 //                       ? null
 //                       : () async {
-//                         bool? result = await unlockSessionDialog(context);
-//                         if (result == true) {
-//   _durationTimer?.cancel();
+//                           // print("Charging session ID ${data!.session!.recId!}");
 
-//                           final response = await provider.unlockUnifiedConnector(
-//                               context: context,
-//                               chargingStationId: data!
-//                                   .stationId!, // 🔑 station id
-//                               connectorId:data.connectorId!
-//                                   // int.parse(data.session!.chargingGunId!)
-//                                   );
-//                           status = response!.data!.status;
-// } else {
-//   // ❌ User clicked NO or closed dialog
-//   print("User cancelled");
-// }
+//                           bool? result = await stopSessionDialog(context,
+//                               amount: cost, units: unitConsumed);
+//                           if (result == true) {
+//                             // ✅ User clicked YES
+//                             final response = await provider.endUnifiedSession(
+//                                 context: context,
+//                                 sessionId:
+//                                     widget.args.sessionId!, // 🔑 station id
+//                                 endMeterReading: endMeterReading!);
+
+//                             setState(() async {
+//                               _durationTimer?.cancel();
+//                               if (await Vibration.hasVibrator() ?? false) {
+//                                 Vibration.vibrate(pattern: [0, 500, 200, 500]);
+//                               }
+//                               showToast("charging session stopped");
+//                               Navigator.push(
+//                                 routeGlobalKey.currentContext!,
+//                                 MaterialPageRoute(
+//                                     builder: (context) => ChargingHistoryScreen(
+//                                           initialTabIndex: 1,
+//                                         )),
+//                               );
+                             
+//                             });
+//                           } else {
+//                             // ❌ User clicked NO or closed dialog
+//                             print("User cancelled");
+//                           }
 //                         },
 //                   style: ElevatedButton.styleFrom(
-//                     backgroundColor: CommonColors.white,
-//                     side: const BorderSide(
-//                       color: CommonColors.blue, // 👈 border color
-//                       width: 1.5, // 👈 border width
-//                     ),
+//                     backgroundColor: CommonColors.blue,
 //                     shape: RoundedRectangleBorder(
 //                       borderRadius: BorderRadius.circular(12),
 //                     ),
 //                     padding: const EdgeInsets.symmetric(vertical: 14),
 //                   ),
 //                   child: Text(
-//                     "Unlock Session",
-//                     style: const TextStyle(color: CommonColors.blue),
+//                     "Stop Charging",
+//                     style: const TextStyle(color: CommonColors.white),
 //                   ),
 //                 ),
 //               ),
-            ],
-          ),
-        ):null,
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              status == ""
-                  ? Container()
-                  : _sessionId != ""  && status !=null?Row(
-                      children: [
-                        Expanded(
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: 30),
-                              child: Text(
-                                '${status}',
-                                style: TextStyle(
-                                    color: CommonColors.blue, fontSize: 22),
-                              ),
-                            ),
-                          ),
-                        ),
-                        // SizedBox(
-                        //   width: 60,
-                        // ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 20),
-                          child: GestureDetector(
-                              onTap: () async {
-                                print("REFRESH CLICKED");
-                                final res = await context
-                                    .read<ChargingProvider>()
-                                    .fetchChargingSessionDetails(
-                                      context: context,
-                                      sessionId: widget.args.sessionId,
-                                    );
-                                setState(() {
-                                  status = res!.data!.raw!.status == null
-                                      ? ""
-                                      : res!.data!.raw!.status;
-                                  cost = "${res.data!.cost!.toString()!}";
-                                   print("COST 3 ${cost}");
-                                  unitConsumed = res.data!.raw!.energyLimit ==
-                                          null
-                                      ? ""
-                                      : "${res.data!.raw!.energyLimit!.toString()} ";
-                                  outputPower =
-                                      "${res.data!.raw!.totalEnergyKwh} KW";
+// //              
+//             ],
+//           ),
+//         ):null,
+//         body: SingleChildScrollView(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.start,
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               status == ""
+//                   ? Container()
+//                   : _sessionId != ""  && status !=null?Row(
+//                       children: [
+//                         Expanded(
+//                           child: Center(
+//                             child: Padding(
+//                               padding: const EdgeInsets.only(left: 30),
+//                               child: Text(
+//                                 '${status}',
+//                                 style: TextStyle(
+//                                     color: CommonColors.blue, fontSize: 22),
+//                               ),
+//                             ),
+//                           ),
+//                         ),
+//                         // SizedBox(
+//                         //   width: 60,
+//                         // ),
+//                         Padding(
+//                           padding: const EdgeInsets.only(right: 20),
+//                           child: GestureDetector(
+//                               onTap: () async {
+//                                 print("REFRESH CLICKED");
+//                                 final res = await context
+//                                     .read<ChargingProvider>()
+//                                     .fetchChargingSessionDetails(
+//                                       context: context,
+//                                       sessionId: widget.args.sessionId,
+//                                     );
+//                                 setState(() {
+//                                   status = res!.data!.raw!.status == null
+//                                       ? ""
+//                                       : res!.data!.raw!.status;
+//                                   cost = "${res.data!.cost!.toString()!}";
+//                                    print("COST 3 ${cost}");
+//                                   unitConsumed = res.data!.raw!.energyLimit ==
+//                                           null
+//                                       ? ""
+//                                       : "${res.data!.raw!.energyLimit!.toString()} ";
+//                                   outputPower =
+//                                       "${res.data!.raw!.totalEnergyKwh} KW";
 
-                                  stationName = "${res.data!.locationName}";
-                                  //  ConnectorGunID="${res.data!.session!.connectorName}";
-                                  batteryPercentage = res!.data!.isActive == 1
-                                      ? res.data!.batteryStateOfCharge!
-                                          .currentSoC
-                                          .toString()
-                                      :res.data!.batteryStateOfCharge==null?"": res.data!.batteryStateOfCharge!.endSoC
-                                          .toString();
-                                  final isActive = res?.data?.isActive == 1;
+//                                   stationName = "${res.data!.locationName}";
+//                                   //  ConnectorGunID="${res.data!.session!.connectorName}";
+//                                   batteryPercentage = res!.data!.isActive == 1
+//                                       ? res.data!.batteryStateOfCharge!
+//                                           .currentSoC
+//                                           .toString()
+//                                       :res.data!.batteryStateOfCharge==null?"": res.data!.batteryStateOfCharge!.endSoC
+//                                           .toString();
+//                                   final isActive = res?.data?.isActive == 1;
 
-                                  batteryPercentage = isActive
-                                      ? res?.data?.batteryStateOfCharge
-                                              ?.currentSoC
-                                              ?.toString() ??
-                                          "0"
-                                      : res?.data?.batteryStateOfCharge?.endSoC
-                                              ?.toString() ??
-                                          "0";
-                                  print("AFTER 15 sec batteryStateOfCharge");
-                                  print(res
-                                      .data!.batteryStateOfCharge!.currentSoC
-                                      .toString());
+//                                   batteryPercentage = isActive
+//                                       ? res?.data?.batteryStateOfCharge
+//                                               ?.currentSoC
+//                                               ?.toString() ??
+//                                           "0"
+//                                       : res?.data?.batteryStateOfCharge?.endSoC
+//                                               ?.toString() ??
+//                                           "0";
+//                                   print("AFTER 15 sec batteryStateOfCharge");
+//                                   print(res
+//                                       .data!.batteryStateOfCharge!.currentSoC
+//                                       .toString());
 
-                                  endMeterReading =
-                                      res.data!.meterCurrent == null
-                                          ? ""
-                                          : res.data!.meterCurrent.toString();
-                                });
-                              },
-                              child: provider.loading
-                                  ? CircularProgressIndicator(
-                                      color: CommonColors.blue,
-                                    )
-                                  : Icon(Icons.refresh)),
-                        ),
-                      ],
-                    ):Container(),
-                    _sessionId != ""  && status !=null
-                    // && status != null
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
+//                                   endMeterReading =
+//                                       res.data!.meterCurrent == null
+//                                           ? ""
+//                                           : res.data!.meterCurrent.toString();
+//                                 });
+//                               },
+//                               child: provider.loading
+//                                   ? CircularProgressIndicator(
+//                                       color: CommonColors.blue,
+//                                     )
+//                                   : Icon(Icons.refresh)),
+//                         ),
+//                       ],
+//                     ):Container(),
+//                     _sessionId != ""  && status !=null
+//                     // && status != null
+//               ? Column(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
                    
-                    ChargerAnimation(
-                      status: status!,
-                    ),
-                  ],
-                )
-              : 
+//                     ChargerAnimation(
+//                       status: status!,
+//                     ),
+//                   ],
+//                 )
+//               : 
               
-Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  crossAxisAlignment: CrossAxisAlignment.center,
-  children: [
-    Center(
-      child: Container(
-        width: 180,
-        height: 180,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFFE5F7ED),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF16A05D).withOpacity(0.12),
-              blurRadius: 24,
-              spreadRadius: 3,
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Circular loading ring
-            if (isWaiting && !hasError)
-              const SizedBox(
-                width: 174,
-                height: 174,
-                child: CircularProgressIndicator(
-                  strokeWidth: 5,
-                  backgroundColor: Color(0xFFC8E8D6),
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Color(0xFF16A05D),
-                  ),
-                ),
-              )
-            else
-              Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: const Color(0xFFC8E8D6),
-                    width: 5,
-                  ),
-                ),
-              ),
-
-            // Car in the center
-            Padding(
-              padding: const EdgeInsets.all(18),
-              child: Image.asset(
-                CommonImagePath.car,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-
-    const SizedBox(height: 24),
-
-    Text(
-      hasError
-          ? 'Session not confirmed'
-          : 'Getting your charger ready',
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF172B4D),
-      ),
-    ),
-
-    const SizedBox(height: 12),
-
-    Text(
-      message,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        fontSize: 15,
-        height: 1.5,
-        color: Color(0xFF667085),
-      ),
-    ),
-
-    if (hasError) ...[
-      const SizedBox(height: 16),
-      SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: isWaiting ? null : _waitForSession,
-          icon: const Icon(Icons.refresh_rounded),
-          label: const Text('Try Again'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF16A05D),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 15),
-          ),
-        ),
-      ),
-    ],
-  ],
-),
-
-              // Column(
-              //     mainAxisAlignment: MainAxisAlignment.center,
-              //     crossAxisAlignment: CrossAxisAlignment.center,
-              //     children: [
-              //       Center(
-              //         child: Container(
-              //           width: 160,
-              //           height: 160,
-              //           decoration: BoxDecoration(
-              //             // color: const Color(0xFFE5F7ED),
-              //             // shape: BoxShape.circle,
-              //             // boxShadow: [
-              //             //   BoxShadow(
-              //             //     color: Colors.green.withOpacity(0.10),
-              //             //     blurRadius: 24,
-              //             //     spreadRadius: 3,
-              //             //   ),
-              //             // ],
-              //           ),
-              //           child: Image.asset(
-              //             CommonImagePath.car,
-              //           ),
-              //         ),
-              //       ),
-              //       const SizedBox(height: 20),
-              //       Text(
-              //         hasError
-              //             ? 'Session not confirmed'
-              //             : 'Getting your charger ready',
-              //         textAlign: TextAlign.center,
-              //         style: const TextStyle(
-              //           fontSize: 14,
-              //           fontWeight: FontWeight.bold,
-              //           color: Color(0xFF172B4D),
-              //         ),
-              //       ),
-              //       const SizedBox(height: 12),
-              //       Text(
-              //         message,
-              //         textAlign: TextAlign.center,
-              //         style: const TextStyle(
-              //           fontSize: 15,
-              //           height: 1.5,
-              //           color: Color(0xFF667085),
-              //         ),
-              //       ),
-              //       const SizedBox(height: 12),
-              //       if (isWaiting && !hasError)
-              //         const SizedBox(
-              //           width: 230,
-              //           child: LinearProgressIndicator(
-              //             minHeight: 5,
-              //             backgroundColor: Color(0xFFDDE5E1),
-              //             valueColor:
-              //                 AlwaysStoppedAnimation<Color>(
-              //               Color(0xFF16A05D),
-              //             ),
-              //           ),
-              //         ),
-              //       if (hasError) ...[
-              //         const SizedBox(height: 16),
-              //         SizedBox(
-              //           width: double.infinity,
-              //           child: ElevatedButton.icon(
-              //             onPressed:
-              //                 isWaiting ? null : _waitForSession,
-              //             icon: const Icon(Icons.refresh_rounded),
-              //             label: const Text('Try Again'),
-              //             style: ElevatedButton.styleFrom(
-              //               backgroundColor:
-              //                   const Color(0xFF16A05D),
-              //               foregroundColor: Colors.white,
-              //               padding: const EdgeInsets.symmetric(
-              //                 vertical: 15,
-              //               ),
-              //             ),
-              //           ),
-              //         ),
-              //       ],
-              //     ],
-              //   ),
-              // ChargerAnimation(
-              //   status: status!, // "Active" or "Complete"
-              // ),
-
-// Row(
+// Column(
+//   mainAxisAlignment: MainAxisAlignment.center,
+//   crossAxisAlignment: CrossAxisAlignment.center,
 //   children: [
-//     Expanded(
-//       child: SelectableText(
-//         "${widget.args.sessionId}",
-//         style: TextStyle(fontSize: 12),
+//     Center(
+//       child: Container(
+//         width: 180,
+//         height: 180,
+//         padding: const EdgeInsets.all(12),
+//         decoration: BoxDecoration(
+//           shape: BoxShape.circle,
+//           color: const Color(0xFFE5F7ED),
+//           boxShadow: [
+//             BoxShadow(
+//               color: const Color(0xFF16A05D).withOpacity(0.12),
+//               blurRadius: 24,
+//               spreadRadius: 3,
+//             ),
+//           ],
+//         ),
+//         child: Stack(
+//           alignment: Alignment.center,
+//           children: [
+//             // Circular loading ring
+//             if (isWaiting && !hasError)
+//               const SizedBox(
+//                 width: 174,
+//                 height: 174,
+//                 child: CircularProgressIndicator(
+//                   strokeWidth: 5,
+//                   backgroundColor: Color(0xFFC8E8D6),
+//                   valueColor: AlwaysStoppedAnimation<Color>(
+//                     Color(0xFF16A05D),
+//                   ),
+//                 ),
+//               )
+//             else
+//               Container(
+//                 decoration: BoxDecoration(
+//                   shape: BoxShape.circle,
+//                   border: Border.all(
+//                     color: const Color(0xFFC8E8D6),
+//                     width: 5,
+//                   ),
+//                 ),
+//               ),
+
+//             // Car in the center
+//             Padding(
+//               padding: const EdgeInsets.all(18),
+//               child: Image.asset(
+//                 CommonImagePath.car,
+//                 fit: BoxFit.contain,
+//               ),
+//             ),
+//           ],
+//         ),
 //       ),
 //     ),
-//     IconButton(
-//       icon: Icon(Icons.copy),
-//       onPressed: () {
-//         Clipboard.setData( ClipboardData(text:  "${widget.args.sessionId}",));
-//         ScaffoldMessenger.of(context).showSnackBar(
-//           const SnackBar(content: Text("Copied to clipboard")),
-//         );
-//       },
-//     )
+
+//     const SizedBox(height: 24),
+
+//     Text(
+//       hasError
+//           ? 'Session not confirmed'
+//           : 'Getting your charger ready',
+//       textAlign: TextAlign.center,
+//       style: const TextStyle(
+//         fontSize: 16,
+//         fontWeight: FontWeight.bold,
+//         color: Color(0xFF172B4D),
+//       ),
+//     ),
+
+//     const SizedBox(height: 12),
+
+//     Text(
+//       message,
+//       textAlign: TextAlign.center,
+//       style: const TextStyle(
+//         fontSize: 15,
+//         height: 1.5,
+//         color: Color(0xFF667085),
+//       ),
+//     ),
+
+//     if (hasError) ...[
+//       const SizedBox(height: 16),
+//       SizedBox(
+//         width: double.infinity,
+//         child: ElevatedButton.icon(
+//           onPressed: isWaiting ? null : _waitForSession,
+//           icon: const Icon(Icons.refresh_rounded),
+//           label: const Text('Try Again'),
+//           style: ElevatedButton.styleFrom(
+//             backgroundColor: const Color(0xFF16A05D),
+//             foregroundColor: Colors.white,
+//             padding: const EdgeInsets.symmetric(vertical: 15),
+//           ),
+//         ),
+//       ),
+//     ],
 //   ],
-// )
-// ,
+// ),
 
-              SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, bottom: 10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          "Station Name: ",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          "${stationName!.toUpperCase()}",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      "(Connector ${ConnectorGunID})",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+             
 
-              _batteryProgress(),
-              _infoGrid(),
+//               SizedBox(
+//                 height: 10,
+//               ),
+//               Padding(
+//                 padding: const EdgeInsets.only(left: 20, bottom: 10),
+//                 child: Column(
+//                   mainAxisAlignment: MainAxisAlignment.start,
+//                   crossAxisAlignment: CrossAxisAlignment.start,
+//                   children: [
+//                     Row(
+//                       children: [
+//                         Text(
+//                           "Station Name: ",
+//                           style: TextStyle(
+//                             color: Colors.black,
+//                             fontWeight: FontWeight.bold,
+//                             fontSize: 14,
+//                           ),
+//                         ),
+//                         Text(
+//                           "${stationName!.toUpperCase()}",
+//                           style: TextStyle(
+//                             color: Colors.black,
+//                             fontSize: 14,
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                     Text(
+//                       "(Connector ${ConnectorGunID})",
+//                       style: TextStyle(
+//                         color: Colors.black,
+//                         fontSize: 12,
+//                       ),
+//                     ),
+//                   ],
+//                 ),
+//               ),
 
-              //  _ecoSection(data),
-              // _stopChargingButton(provider, data),
+//               _batteryProgress(),
+//               _infoGrid(),
 
-              // const Spacer(),
-
-              /// Bottom Buttons
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 
   Widget _batteryProgress() {
-    // final double percentage = 10; // data.session?.batteryPercentage ?? 0;
-
+   
     return Padding(
       padding: const EdgeInsets.only(left: 18, right: 18),
       child: Container(
@@ -1443,66 +1756,6 @@ Column(
     );
   }
 
-  // Widget _batteryProgress(SessionDetailData data) {
-  //   // final percentage = data.session?.batteryPercentage ?? 0;
-  //   final double percentage = 10;
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(
-  //       horizontal: 14,
-  //     ),
-  //     child: Container(
-  //       padding: const EdgeInsets.all(4),
-  //       decoration: BoxDecoration(
-  //         color: const Color(0xFF101E3A),
-  //         borderRadius: BorderRadius.circular(16),
-  //       ),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         mainAxisAlignment: MainAxisAlignment.start,
-  //         children: [
-  //           Stack(
-  //             alignment: Alignment.center,
-  //             children: [
-  //               Padding(
-  //                 padding: const EdgeInsets.all(8.0),
-  //                 child: TweenAnimationBuilder<double>(
-  //                   tween: Tween(begin: 0, end: percentage),
-  //                   duration: const Duration(seconds: 1),
-  //                   builder: (_, value, __) {
-  //                     return BatteryIndicator(
-  //                       percentage: value,
-  //                       width: 80,
-  //                       height: 30,
-  //                     );
-  //                   },
-  //                 ),
-  //               ),
-  //               const Icon(
-  //                 Icons.flash_on,
-  //                 color: Colors.white,
-  //                 size: 24,
-  //               ),
-  //             ],
-  //           ),
-  //           const SizedBox(height: 20),
-  //           Text(
-  //             "Battery (estimated)",
-  //             style: TextStyle(color: Colors.white70),
-  //           ),
-  //           Text(
-  //             "$percentage%",
-  //             style: TextStyle(
-  //               color: Colors.white,
-  //               fontSize: 18,
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget _infoGrid() {
     print("UI COST $cost");
     print("UI UNIT $unitConsumed");
@@ -1518,11 +1771,7 @@ Column(
       childAspectRatio: 1.8,
       children: [
         _infoCard("Amount", "₹ ${"${cost}" ?? 0}", CommonImagePath.current),
-        // _infoCard(
-        //   "Battery",
-        //   "${25.0 ?? 0} km",
-        //   // "${data.session?.batteryKm ?? 0} km\n${data.session?.batteryPercentage ?? 0}%",
-        // ),
+       
         _infoCard(
             "Units ", "${unitConsumed ?? '--'}", CommonImagePath.unitconsumed),
         _infoCard(
@@ -1566,17 +1815,6 @@ Column(
                 ),
               )
 
-              //         Text(
-              //           "9.33333rrrr33",
-              //           // value,
-              //           maxLines: 1,
-              // overflow: TextOverflow.ellipsis,
-              //           style: TextStyle(
-              //             color: Colors.white,
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //         ),
             ],
           ),
         ],

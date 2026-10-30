@@ -78,88 +78,258 @@ class _MainTabState extends State<MainTab> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: screens[currentIndex],
-      
-         bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-      color: CommonColors.white,
-      border: const Border(
-        top: BorderSide(
-          color: Colors.black12, // light shadow line
-          width: 1,
-        ),
+      bottomNavigationBar: Container(
+  decoration: const BoxDecoration(
+    color: CommonColors.white,
+    border: Border(
+      top: BorderSide(
+        color: Color(0xFFE8ECF3),
+        width: 1,
       ),
-        ),
-        child: BottomAppBar(
-      height: 70,
-      color: Colors.transparent,
-      elevation: 0,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 6,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          navItem(0, CommonImagePath.map, "Map"),
-           const SizedBox(width: 10),
-          navItem(1, CommonImagePath.station, "Hubs"),
-          const SizedBox(width: 40),
-          navItem(3, CommonImagePath.transaction, "Wallet"),
-          navItem(4, CommonImagePath.profile, "Profile"),
-        ],
-      ),
-        ),
-      ),
-    
-floatingActionButton: GestureDetector(
-     onTap: () {
-      setState(() => currentIndex = 2); 
-        },
-  child: Container(
-    width: 60,   // Outer white circle
-    height: 60,
-    decoration: BoxDecoration(
-     color: CommonColors.white,
-      shape: BoxShape.circle,
-  
     ),
-    child: Center(
-      child: Container(
-        width: 48,   // Inner blue circle (reduced size)
-        height: 48,
-        decoration: const BoxDecoration(
-          color: CommonColors.blue,
-          shape: BoxShape.circle,
+  ),
+  child: BottomAppBar(
+    height: 76,
+    color: Colors.transparent,
+    elevation: 0,
+    padding: EdgeInsets.zero,
+    shape: const CircularNotchedRectangle(),
+    notchMargin: 6,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: navItem(0, CommonImagePath.map, "Map"),
         ),
-        child: Center(
-          child: SvgPicture.asset(
-            CommonImagePath.scanner,
-            width: 22,    // smaller icon (perfect size)
-            height: 22,
+        Expanded(
+          child: navItem(1, CommonImagePath.station, "Hubs"),
+        ),
+
+        const SizedBox(width: 68),
+
+        Expanded(
+          child: navItem(3, CommonImagePath.transaction, "Wallet"),
+        ),
+        Expanded(
+          child: navItem(4, CommonImagePath.profile, "Profile"),
+        ),
+      ],
+    ),
+  ),
+),
+floatingActionButton: GestureDetector(
+  onTap: () {
+    setState(() => currentIndex = 2);
+  },
+  child: SizedBox(
+    width: 76,
+    height: 82,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Scan circular button
+        Container(
+          width: 60,
+          height: 60,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.10),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: CommonColors.blue,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white,
+                  width: 2,
+                ),
+              ),
+              child: Center(
+                child: SvgPicture.asset(
+                  CommonImagePath.scanner,
+                  width: 24,
+                  height: 24,
+                  fit: BoxFit.contain,
+                  colorFilter: const ColorFilter.mode(
+                    Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
+
+        const SizedBox(height: 2),
+
+        // Scan label
+        Text(
+          'Scan',
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: currentIndex == 2
+                ? FontWeight.w600
+                : FontWeight.w400,
+            color: currentIndex == 2
+                ? CommonColors.blue
+                : const Color(0xFF778196),
+          ),
+        ),
+      ],
     ),
   ),
 ),
 
+floatingActionButtonLocation:
+    FloatingActionButtonLocation.centerDocked,
+// floatingActionButton: GestureDetector(
+//   onTap: () {
+//     setState(() => currentIndex = 2);
+//   },
+//   child: Container(
+//     width: 64,
+//     height: 64,
+//     decoration: BoxDecoration(
+//       color: CommonColors.white,
+//       shape: BoxShape.circle,
+//       boxShadow: [
+//         BoxShadow(
+//           color: Colors.black.withOpacity(0.10),
+//           blurRadius: 10,
+//           offset: const Offset(0, 3),
+//         ),
+//       ],
+//     ),
+//     child: Center(
+//       child: Container(
+//         width: 52,
+//         height: 52,
+//         decoration: BoxDecoration(
+//           color: CommonColors.blue,
+//           shape: BoxShape.circle,
+//           border: Border.all(
+//             color: CommonColors.white,
+//             width: 2,
+//           ),
+//         ),
+//         child: Center(
+//           child: SvgPicture.asset(
+//             CommonImagePath.scanner,
+//             width: 23,
+//             height: 23,
+//             colorFilter: const ColorFilter.mode(
+//               Colors.white,
+//               BlendMode.srcIn,
+//             ),
+//           ),
+//         ),
+//       ),
+//     ),
+//   ),
+// ),
 
-        floatingActionButtonLocation:
-            FloatingActionButtonLocation.centerDocked,
+// floatingActionButtonLocation:
+//     FloatingActionButtonLocation.centerDocked,
+    
       ),
     );
   }
+Widget navItem(int index, String image, String name) {
+  final bool isSelected = currentIndex == index;
 
-  Widget navItem(int index, String image,String name) {
-    return InkWell(
-      onTap: () => setState(() => currentIndex = index),
-      child: Column(
-        children: [
-          SvgPicture.asset(
-            image,
-            color: currentIndex == index ? CommonColors.blue : Colors.grey,
+  return InkWell(
+    onTap: () {
+      setState(() {
+        currentIndex = index;
+      });
+    },
+    splashColor: CommonColors.blue.withOpacity(0.08),
+    highlightColor: Colors.transparent,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        // Blue divider above the selected tab
+        Container(
+          height: 3,
+          width: 32,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? CommonColors.blue
+                : Colors.transparent,
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(3),
+            ),
           ),
-          Text(name,style: TextStyle(fontSize: 12, color: currentIndex == index ? CommonColors.blue : Colors.grey,),)
-        ],
-      ),
-    );
-  }
+        ),
+
+        const SizedBox(height: 10),
+
+        // Rounded icon card for the selected tab
+        Container(
+          width: 50,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFFE8EEFC)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: SvgPicture.asset(
+            image,
+            width: 21,
+            height: 21,
+            colorFilter: ColorFilter.mode(
+              isSelected
+                  ? CommonColors.blue
+                  : const Color(0xFF778196),
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 2),
+
+        // Selected label becomes blue
+        Text(
+          name,
+          maxLines: 1,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight:
+                isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected
+                ? CommonColors.blue
+                : const Color(0xFF778196),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+  // Widget navItem(int index, String image,String name) {
+  //   return InkWell(
+  //     onTap: () => setState(() => currentIndex = index),
+  //     child: Column(
+  //       children: [
+  //         SvgPicture.asset(
+  //           image,
+  //           color: currentIndex == index ? CommonColors.blue : Colors.grey,
+  //         ),
+  //         Text(name,style: TextStyle(fontSize: 12, color: currentIndex == index ? CommonColors.blue : Colors.grey,),)
+  //       ],
+  //     ),
+  //   );
+  // }
 }

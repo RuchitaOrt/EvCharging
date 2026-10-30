@@ -187,31 +187,76 @@ for (var e in manufacturers) {
   ///---------------------------------------------------------
   /// GET USER VEHICLES
   ///---------------------------------------------------------
+Future<void> getUserVehicleList(BuildContext context) async {
+  isLoading = true;
+  notifyListeners();
 
-  Future<void> getUserVehicleList(BuildContext context) async {
-    print("getUserVehicleList 1");
-    isLoading = true;
-    notifyListeners();
-
+  try {
     final response = await _service.getUserVehicleList(context);
-     print("getUserVehicleList 2");
-print(response);
+
+    debugPrint('Vehicle API response: $response');
+
     if (response != null) {
       userVehicles = response.vehicles;
-      notifyListeners();
-       // Select default vehicle from API
-    final defaultVehicle = userVehicles.where((e) => e.defaultConfig == 1);
 
-    if (defaultVehicle.isNotEmpty) {
-      selectedUserVehicleId = defaultVehicle.first.recId;
-    } else if (userVehicles.isNotEmpty) {
-      selectedUserVehicleId = userVehicles.first.recId;
-    }
-    }
+      debugPrint('User vehicles count: ${userVehicles.length}');
 
+      for (final vehicle in userVehicles) {
+        debugPrint(
+          'Vehicle: ${vehicle.carRegistrationNumber}, '
+          'Model ID: ${vehicle.carModelID}, '
+          'Default: ${vehicle.defaultConfig}',
+        );
+      }
+
+      final defaultVehicle = userVehicles.where(
+        (vehicle) => vehicle.defaultConfig == 1,
+      );
+
+      if (defaultVehicle.isNotEmpty) {
+        selectedUserVehicleId = defaultVehicle.first.recId;
+      } else if (userVehicles.isNotEmpty) {
+        selectedUserVehicleId = userVehicles.first.recId;
+      } else {
+        selectedUserVehicleId = null;
+      }
+    } else {
+      debugPrint('Vehicle API returned null');
+      userVehicles = [];
+      selectedUserVehicleId = null;
+    }
+  } catch (e, stackTrace) {
+    debugPrint('Error loading user vehicles: $e');
+    debugPrintStack(stackTrace: stackTrace);
+  } finally {
     isLoading = false;
     notifyListeners();
   }
+}
+//   Future<void> getUserVehicleList(BuildContext context) async {
+//     print("getUserVehicleList 1");
+//     isLoading = true;
+//     notifyListeners();
+
+//     final response = await _service.getUserVehicleList(context);
+//      print("getUserVehicleList 2");
+// print(response);
+//     if (response != null) {
+//       userVehicles = response.vehicles;
+//       notifyListeners();
+//        // Select default vehicle from API
+//     final defaultVehicle = userVehicles.where((e) => e.defaultConfig == 1);
+
+//     if (defaultVehicle.isNotEmpty) {
+//       selectedUserVehicleId = defaultVehicle.first.recId;
+//     } else if (userVehicles.isNotEmpty) {
+//       selectedUserVehicleId = userVehicles.first.recId;
+//     }
+//     }
+
+//     isLoading = false;
+//     notifyListeners();
+//   }
 
   ///---------------------------------------------------------
   /// ADD VEHICLE

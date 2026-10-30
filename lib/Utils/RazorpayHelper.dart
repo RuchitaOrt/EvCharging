@@ -2,6 +2,7 @@
 import 'package:HyCharge/Provider/PaymentProvider.dart';
 import 'package:HyCharge/Provider/WalletProvider.dart';
 import 'package:HyCharge/Request/AddWalletRequest.dart';
+import 'package:HyCharge/Screens/PaymentSuccessfulscreen.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/main.dart';
 import 'package:provider/provider.dart';
@@ -46,7 +47,7 @@ class RazorpayHelper {
     }
   }
 
-  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response, dynamic context) async {
     debugPrint('Payment Success: ${response.paymentId}');
     // print("PAYMENT RESPONSE");
     // print(response);
@@ -80,6 +81,13 @@ class RazorpayHelper {
           amount: double.parse(amountValue!),
         ),
       );
+  //      if (!context.mounted) return;
+
+  // Navigator.of(context).push(
+  //   MaterialPageRoute(
+  //     builder: (_) => const PaymentSuccessfulScreen(),
+  //   ),
+  // );
     } else {
       debugPrint("❌ Verification failed");
     }

@@ -1,14 +1,11 @@
 import 'package:HyCharge/Provider/ActiveSessionProvider.dart';
-import 'package:HyCharge/Provider/PaymentProvider.dart';
 import 'package:HyCharge/Screens/BookingDetailsScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Screens/SessionChargingScreen.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
-import 'package:HyCharge/Utils/LocationConvert.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
-import 'package:HyCharge/Utils/sizeConfig.dart';
-import 'package:HyCharge/model/ActiveSessionResponse.dart';
+
 import 'package:HyCharge/model/StartChargingSessionResponse.dart';
 import 'package:HyCharge/model/UnifiedActiveSessionResponse.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
@@ -28,63 +25,7 @@ class _ChargingHistoryScreenState extends State<ChargingHistoryScreen>
     with SingleTickerProviderStateMixin {
   late final ScrollController _scrollController;
   late TabController _tabController;
-//   @override
-//   void initState() {
-//     super.initState();
-//  final provider = context.read<ActiveSessionProvider>();
-//     _scrollController = ScrollController()..addListener(_onScroll);
-//  provider.fetchActiveSessions(
-//           context,
-//           "",
-//         );
-//     // Initialize TabController first
-//     _tabController = TabController(
-//       length: 2,
-//       vsync: this,
-//       initialIndex: widget.initialTabIndex,
-//     );
 
-//     // _tabController.addListener(() {
-//     //   if (_tabController.indexIsChanging) {
-//     //     return;
-//     //   }
-
-
-
-//     //   provider.changeMainTab(_tabController.index);
-
-//     //   if (widget.initialTabIndex  == 0) {
-//     //     provider.fetchActiveSessions(
-//     //       context,
-//     //       "",
-//     //     );
-//     //   } else {
-//     //     provider.fetchAUnifiedctiveSessions(
-//     //       context,
-//     //       "",
-//     //     );
-//     //   }
-//     // });
-
-
-// if (widget.initialTabIndex == 0) {
-//   provider.fetchActiveSessions(context, "");
-// } else {
-//   provider.fetchAUnifiedctiveSessions(context, "");
-// }
-
-// _tabController.addListener(() {
-//   if (_tabController.indexIsChanging) return;
-
-//   provider.changeMainTab(_tabController.index);
-
-//   if (_tabController.index == 0) {
-//     provider.fetchActiveSessions(context, "");
-//   } else {
-//     provider.fetchAUnifiedctiveSessions(context, "");
-//   }
-// });
-//   }
 @override
 void initState() {
   super.initState();
@@ -150,190 +91,233 @@ void _onScroll() {
     provider.loadMoreUnifiedData(context, "");
   }
 }
-  // void _onScroll() {
-  //   final provider = context.read<ActiveSessionProvider>();
 
-  //   if (_scrollController.position.pixels >=
-  //           _scrollController.position.maxScrollExtent - 200 &&
-  //       provider.hasMore &&
-  //       !provider.loadingMore) {
-  //     provider.loadMore(context, "");
-  //   }
-  // }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
-          ),
-        );
-
-        return false; // ✅ now it's Future<bool>
-      },
-      child: Scaffold(
-          appBar: CommonAppBar(
-            title: "Charging History",
-            onBack: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
-                ),
-              );
-            },
-          ),
-          backgroundColor: CommonColors.neutral50,
-          body: Consumer<ActiveSessionProvider>(
-            builder: (context, provider, _) {
-              if (provider.loading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              //  if (provider.sessions.isEmpty) {
-              //           return  Center(child: Text("No charging history found"));
-              //         }
-            //  if( provider.selectedMainTab == 0){
-            //   if (provider.totalSessions == "0") {
-            //     return Center(child: Text("No charging history found"));
-            //   }
-            //  }
-              return ListView(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _summaryRow(),
-                  const SizedBox(height: 20),
-                  TabBar(
-                    indicatorColor: CommonColors.blue,
-                    controller: _tabController,
-                    tabs:  [
-                      Tab(child: Text("Charging Session",style: TextStyle(color: provider.selectedMainTab == 0?CommonColors.blue:CommonColors.blacklight ),),),
-                      Tab(child: Text("Partner Session",style: TextStyle(color: provider.selectedMainTab == 1?CommonColors.blue:CommonColors.blacklight ),),)
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const FilterTabsWidget(),
-                  const SizedBox(height: 20),
-                  provider.selectedMainTab == 0
-                      ? Column(
-                          children: provider.sessions
-                              .map((session) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
-                                  child: _historyCard(session)))
-                              .toList(),
-                        )
-                      : Column(
-                          children: provider.partnerSessions
-                              .map((session) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
-                                  child: _partnerhistoryCard(session)))
-                              .toList(),
-                        )
-                  //               provider.sessions.isEmpty
-                  // ? Center(
-                  //     child: Center(child: Text("No charging history found"))
-                  //   )
-                  // : Column(
-                  //     children:
-                  //      provider.sessions.map(
-                  //       (session) => Padding(
-                  //         padding: const EdgeInsets.only(bottom: 12, top: 12),
-                  //         child: _historyCard(session),
-                  //       ),
-                  //     ).toList(),
-                  //   ),
-
-                  //               if (provider.loadingMore)
-                  //                 const Padding(
-                  //                   padding: EdgeInsets.symmetric(vertical: 16),
-                  //                   child: Center(child: CircularProgressIndicator()),
-                  //                 ),
-                ],
-              );
-            },
-          )),
-    );
-  }
-
-  Widget _summaryRow() {
-    return Consumer<ActiveSessionProvider>(
-      builder: (context, provider, _) {
-        // Calculate summary values
-
-        final totalSessions = provider.totalSessions;
-        final totalEnergy = provider.totalEnergy;
-        //  provider.sessions.fold<double>(
-        //   0,
-        //   (sum, s) => sum + (double.tryParse(s!.energyTransmitted!) ?? 0),
-        // );
-        final totalSpent = provider.totalSpent;
-        //  provider.sessions.fold<double>(
-        //   0,
-        //   (sum, s) => sum + (double.tryParse(s.chargingTotalFee) ?? 0),
-        // );
-        final durationString = provider.totalTime;
-        // provider.sessions.fold<Duration>(
-        //   Duration.zero,
-        //   (sum, s) {
-        //     // assuming s.duration is "hh:mm" or "h:mm"
-        //     final parts = s.duration.split(':');
-        //     final hours = int.tryParse(parts[0]) ?? 0;
-        //     final minutes = int.tryParse(parts[1]) ?? 0;
-        //     return sum + Duration(hours: hours, minutes: minutes);
-        //   },
-        // );
-
-        // Format total duration as Hh Mm
-        // final durationString =
-        //     "${totalDuration.inHours}h ${totalDuration.inMinutes.remainder(60)}m";
-
-        return Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _summaryBox("$totalSessions", "Sessions"),
-                _summaryBox("${totalEnergy} kW", "Total Energy"),
-              ],
+@override
+Widget build(BuildContext context) {
+  return WillPopScope(
+    onWillPop: () async {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
+        ),
+      );
+      return false;
+    },
+    child: Scaffold(
+      backgroundColor: const Color(0xFFF4F6FA),
+      appBar: CommonAppBar(
+        title: "Charging History",
+        onBack: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _summaryBox("₹ ${totalSpent}", "Total Spent"),
-                _summaryBox(durationString, "Total Time"),
-              ],
+          );
+        },
+      ),
+      body: Consumer<ActiveSessionProvider>(
+        builder: (context, provider, _) {
+          if (provider.loading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          return ListView(
+            controller: _scrollController,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            children: [
+              _summaryRow(),
+              const SizedBox(height: 16),
+
+              // Session tabs
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE9EDF4),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  indicator: BoxDecoration(
+                    color: const Color(0xFF142F7D),
+                    borderRadius: BorderRadius.circular(26),
+                  ),
+                  dividerColor: Colors.transparent,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: const Color(0xFF687386),
+                  labelStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  tabs: const [
+                    Tab(
+                      height: 42,
+                      text: "Charging Session",
+                    ),
+                    Tab(
+                      height: 42,
+                      text: "Partner Session",
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 14),
+              const FilterTabsWidget(),
+              const SizedBox(height: 12),
+
+              if (provider.selectedMainTab == 0)
+                if (provider.sessions.isEmpty)
+                  _emptyHistory()
+                else
+                  ...provider.sessions.map(
+                    (session) => 
+                    // Padding(
+                    //   padding: const EdgeInsets.only(bottom: 12),
+                      // child: 
+                      _historyCard(session),
+                    // ),
+                  )
+              else if (provider.partnerSessions.isEmpty)
+                _emptyHistory()
+              else
+                ...provider.partnerSessions.map(
+                  (session) => _partnerhistoryCard(session),
+                ),
+
+              if (provider.selectedMainTab == 1 &&
+                  provider.loadingMore)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+}
+
+Widget _emptyHistory() {
+  return Container(
+    margin: const EdgeInsets.only(top: 24),
+    padding: const EdgeInsets.all(28),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: const Column(
+      children: [
+        Icon(
+          Icons.ev_station_rounded,
+          size: 42,
+          color: Color(0xFF8B97AA),
+        ),
+        SizedBox(height: 12),
+        Text(
+          "No charging history found",
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF27344D),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _summaryRow() {
+  return Consumer<ActiveSessionProvider>(
+    builder: (context, provider, _) {
+      final items = [
+        (provider.totalSessions, "Sessions"),
+        ("${provider.totalEnergy} kWh", "Energy"),
+        ("₹ ${provider.totalSpent}", "Spent"),
+        (provider.totalTime, "Time"),
+      ];
+
+      return Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 4,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF152B55).withOpacity(0.04),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
           ],
-        );
-      },
-    );
-  }
+        ),
+        child: Row(
+          children: List.generate(items.length, (index) {
+            final item = items[index];
 
-  // Widget _summaryRow() {
-  //   return Column(
-  //     children: [
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           _summaryBox("12", "Sessions"),
-  //           _summaryBox("214 kW", "Total Energy"),
-  //         ],
-  //       ),
-  //       Row(
-  //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //         children: [
-  //           _summaryBox("₹ 5,428", "Total Spent"),
-  //           _summaryBox("15h 42m", "Total Time"),
-  //         ],
-  //       ),
-  //     ],
-  //   );
-  // }
+            return Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: index == 0
+                      ? null
+                      : const Border(
+                          left: BorderSide(
+                            color: Color(0xFFE4E8F0),
+                          ),
+                        ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        item.$1,
+                        maxLines: 1,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF142F7D),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      item.$2,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 10,
+                        color: Color(0xFF687386),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    },
+  );
+}
+
 Widget _invoiceButton({
   required String sessionId,
 }) {
@@ -360,17 +344,21 @@ Widget _invoiceButton({
                   }
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CommonColors.white,
-                foregroundColor: CommonColors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: BorderSide(
-                    color: CommonColors.blue.withOpacity(0.4),
-                    width: 0.8,
-                  ),
-                ),
-              ),
+               style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEAF0FF),
+                              foregroundColor: CommonColors.blue,
+                              minimumSize: const Size(0, 38),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                              // side: BorderSide(
+                              //   color: CommonColors.blue.withOpacity(0.25),
+                              // ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
               child: snapshot.connectionState == ConnectionState.waiting
                   ? const SizedBox(
                       height: 16,
@@ -379,14 +367,27 @@ Widget _invoiceButton({
                         strokeWidth: 2,
                       ),
                     )
-                  : Text(
-                      isDownloaded ? "View Download" : "Download",
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: CommonColors.blue,
-                        fontWeight: FontWeight.w600,
+                  : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                       Icon(
+                             isDownloaded?Icons.remove_red_eye_sharp:     Icons.download,
+                                  size: 15,
+                                ),
+                                SizedBox(width: 2),
+                      Center(
+                        child: Text(
+                            isDownloaded ? "View Download" : "Download",
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: CommonColors.blue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                       ),
-                    ),
+                    ],
+                  ),
             ),
           );
         },
@@ -394,439 +395,371 @@ Widget _invoiceButton({
     },
   );
 }
-  Widget _summaryBox(String value, String label) {
-    return Padding(
-      padding: const EdgeInsets.all(4),
-      child: Container(
-        width: SizeConfig.blockSizeHorizontal * 40,
-        decoration: BoxDecoration(
-          color: CommonColors.white,
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-        ),
-        child: Padding(
-          padding:
-              const EdgeInsets.only(left: 8, right: 8, top: 10, bottom: 10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-             Text(value,
-                
-                    style: TextStyle(
-                        fontSize: 20,
-                        
-                        fontWeight: FontWeight.bold,
-                        color: CommonColors.blue)),
-              
-              const SizedBox(height: 4),
-              Text(label, style: TextStyle(fontSize: 14, color: Colors.grey)),
-            ],
+
+
+Widget _partnerhistoryCard(Session data) {
+  final String sessionId = data.sessionId ?? "";
+  final bool isExpanded = _expandedSessionId == sessionId;
+
+  return Container(
+    // margin: const EdgeInsets.only(bottom: 8),
+    decoration: BoxDecoration(
+      color: CommonColors.white,
+      border: Border.all(color: CommonColors.neutral200),
+      // borderRadius: BorderRadius.circular(14),
+    ),
+    child: Column(
+      children: [
+        // Compact, always-visible header
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            setState(() {
+              _expandedSessionId =
+                  isExpanded ? null : sessionId;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+            child: Row(
+              children: [
+                Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF0FF),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(9),
+                  child: Image.asset(
+                    CommonImagePath.borderGreen,color: CommonColors.blue,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(width: 10),
+
+                // Station and summary
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        (data.locationName ?? "Station").toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: CommonColors.black,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        "${formatTime("${data.startDateTime}")} • "
+                        "${data.totalEnergyKwh ?? 0} kW",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: CommonColors.neutral500,
+                        ),
+                      ),
+                      Text(
+                        data.totalCost == null
+                            ? "₹-"
+                            : "₹${data.totalCost}",
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: CommonColors.neutral500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(width: 5),
+                _statusChip(data.status ?? "", sessionId),
+                const SizedBox(width: 4),
+                Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: CommonColors.neutral500,
+                  size: 22,
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
 
-  Widget _partnerhistoryCard(Session data) {
-   
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: () {
-            data.status == "Active"
-                ? null
-                : Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BookingDetailsScreen(
-                        recID: data.sessionId!,
-                        bookingType: "P",
-                      ),
+        // Expandable session details
+
+AnimatedSize(
+  duration: const Duration(milliseconds: 220),
+  curve: Curves.easeInOut,
+  child: isExpanded
+      ? Column(
+          children: [
+            Divider(
+              height: 1,
+              color: CommonColors.neutral200,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                 
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 14,
                     ),
-                  );
-          },
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: CommonColors.white,
-                  border: Border.all(color: CommonColors.neutral200),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                    decoration: BoxDecoration(
+                      color: CommonColors.neutral50,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _historyInfo(
+                            "Duration",
+                            formatDuration(
+                              "${data.durationMinutes}",
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: _historyInfo(
+                            "Start Battery",
+                            data.soCStart == null
+                                ? "-"
+                                : "${data.soCStart}%",
+                          ),
+                        ),
+                        Expanded(
+                          child: _historyInfo(
+                            "End Battery",
+                            data.soCEnd == null
+                                ? "-"
+                                : "${data.soCEnd}%",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+Row(children: [
+    Text(
+                                "${data.locationCity} Time .",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: CommonColors.neutral500,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                data.startDateTime == null ||
+                                        data.endDateTime == null
+                                    ? "-"
+                                    : "${formatOnlyTimeIST(data.startDateTime!.toString())} - "
+                                        "${formatOnlyTimeIST(data.endDateTime!.toString())}",
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: CommonColors.black,
+                                ),
+                              ),
+],),
+                  // Session time panel
+                  // Container(
+                  //   width: double.infinity,
+                  //   padding: const EdgeInsets.symmetric(
+                  //     horizontal: 12,
+                  //     vertical: 12,
+                  //   ),
+                  //   decoration: BoxDecoration(
+                  //     color: CommonColors.neutral50,
+                  //     borderRadius: BorderRadius.circular(12),
+                  //   ),
+                  //   child: Row(
+                  //     children: [
+                  //       Icon(
+                  //         Icons.access_time_rounded,
+                  //         size: 18,
+                  //         color: CommonColors.neutral500,
+                  //       ),
+                  //       const SizedBox(width: 8),
+                  //       Expanded(
+                  //         child: Column(
+                  //           crossAxisAlignment:
+                  //               CrossAxisAlignment.start,
+                  //           children: [
+                  //             const Text(
+                  //               "Charging Time",
+                  //               style: TextStyle(
+                  //                 fontSize: 11,
+                  //                 color: CommonColors.neutral500,
+                  //               ),
+                  //             ),
+                  //             const SizedBox(height: 4),
+                  //             Text(
+                  //               data.startDateTime == null ||
+                  //                       data.endDateTime == null
+                  //                   ? "-"
+                  //                   : "${formatOnlyTimeIST(data.startDateTime!.toString())} - "
+                  //                       "${formatOnlyTimeIST(data.endDateTime!.toString())}",
+                  //               maxLines: 2,
+                  //               overflow: TextOverflow.ellipsis,
+                  //               style: const TextStyle(
+                  //                 fontSize: 12,
+                  //                 fontWeight: FontWeight.w600,
+                  //                 color: CommonColors.black,
+                  //               ),
+                  //             ),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
+
+                  const SizedBox(height: 16),
+
+                  // Active session: preserve existing navigation
+                  if (data.status == "Active")
                     SizedBox(
-                      height: 8,
-                    ),
-                    Container(
-                      width: SizeConfig.blockSizeHorizontal * 90,
-                      decoration: BoxDecoration(
-                        color: CommonColors.neutral50,
-                        borderRadius: BorderRadius.circular(8),
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SessionChargingScreen(
+                                args: SessionChargingArgs(
+                                  sessionId: data.sessionId ?? "",
+                                  status: data.status ?? "",
+                                  cost: data.totalCost?.toString() ?? "0",
+                                  unitConsumed:
+                                      data.totalEnergyKwh?.toString() ?? "0",
+                                  outputPower:
+                                      data.totalEnergyKwh?.toString() ?? "0",
+                                  batteryPercentage: "0",
+                                  endMeterReading: "0",
+                                  duration:
+                                      data.durationMinutes?.toString() ?? "0",
+                                  stationName: data.locationName ?? "",
+                                  ConnectorGunID: data.connectorId ?? "",
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: CommonColors.blue,
+                          minimumSize: const Size(double.infinity, 42),
+                          side: BorderSide(
+                            color: CommonColors.blue.withOpacity(0.4),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: const Text(
+                          "View Session",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                /// LEFT SIDE (FIXED)
-                                Expanded(
-                                  // ✅ KEY FIX
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Station: ${data.locationName!.toUpperCase() ?? "Station"}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12),
-                                      ),
-                                      Text(
-                                        "${data.locationCity}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12),
-                                      ),
-
-                                      const SizedBox(height: 4),
-                                      // Row(
-                                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                                      //   mainAxisAlignment: MainAxisAlignment.start,
-                                      //   children: [
-                                      //    Padding(
-                                      //      padding: const EdgeInsets.only(top: 4),
-                                      //      child: Image.asset( CommonImagePath.redpin,),
-                                      //    ),
-                                      //     const SizedBox(width: 4),
-
-                                      //   ],
-                                      // ),
-                                    ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        // View Receipt: same rounded button design + icon
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BookingDetailsScreen(
+                                    recID: data.sessionId!,
+                                    bookingType: "P",
                                   ),
                                 ),
-
-                                const SizedBox(width: 8),
-
-                                /// RIGHT SIDE (AUTO WIDTH)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      formatTime("${data.startDateTime}"),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        color: CommonColors.black,
-                                        fontSize: 12,
-                                      ),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: CommonColors.white,
+                              foregroundColor: CommonColors.blue,
+                              minimumSize: const Size(0, 42),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                              side: BorderSide(
+                                color: CommonColors.blue.withOpacity(0.2),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 16,
+                                ),
+                                SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    "View Receipt",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    // Text(
-                                    //   data.status == "Active"
-                                    //       ? formatonlyTimeIST(data.startDateTime!)
-                                    //       : "${formatonlyTimeIST(data.startDateTime!)} - ${formatonlyTimeIST(data.endDateTime!)}",
-                                    //   // data.status == "Active"
-                                    //   //     ? formatonlyTime("${data.startTime}")
-                                    //   //     : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
-                                    //   style: const TextStyle(
-                                    //     fontWeight: FontWeight.w400,
-                                    //     color: CommonColors.neutral500,
-                                    //     fontSize: 12,
-                                    //   ),
-                                    // ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Energy",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text(data.totalEnergyKwh ==null ?"-":"${data.totalEnergyKwh} kW",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
                           ),
                         ),
+                        const SizedBox(width: 8),
+
+                        // Keep your existing invoice action and rounded style
                         Expanded(
-                          child: Column(
-                            children: [
-                              Text("Duration",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text(formatDuration("${data.durationMinutes}"),
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
+                          child: _invoiceButton(
+                            sessionId: data.sessionId!,
                           ),
                         ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text("Fee",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text(data.totalCost==null?"-": "₹${data.totalCost}",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                       
                       ],
                     ),
-
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Start Battery",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text(
-                                data.soCStart == null
-                                    ? "-"
-                                    : "${data.soCStart} %",
-                                
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                          ],
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text("End Battery",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text(
-                                  data.soCEnd == null
-                                      ? "-"
-                                      : "${data.soCEnd} %",
-                              
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                       
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                          Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                       children: [
-                         Expanded(
-                              child: Column(
-                                 mainAxisAlignment: MainAxisAlignment.start,
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                
-                                  Text("Time",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          color: CommonColors.neutral500,
-                                          fontSize: 12)),
-                                  Text(
-                                     ( data.startDateTime == null || data.endDateTime==null)
-                                          ? "-"
-                                          : "${formatOnlyTimeIST(data.startDateTime!.toString())} - ${formatOnlyTimeIST(data.endDateTime!.toString())}",
-                                  
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                       ],
-                     ),
-                    const SizedBox(height: 16),
-                    data.status == "Active"
-                        ? Container(
-                            width: SizeConfig.blockSizeHorizontal * 90,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SessionChargingScreen(
-                                      args: SessionChargingArgs(
-                                          sessionId: data.sessionId! ?? "",
-                                          status: data.status ?? "",
-                                          cost: data.totalCost?.toString() ??
-                                              "0",
-                                          unitConsumed: data.totalEnergyKwh
-                                                  ?.toString() ??
-                                              "0",
-                                          outputPower: data.totalEnergyKwh
-                                                  ?.toString() ??
-                                          "0"
-                                             ,
-                                          batteryPercentage:
-                                              "0",
-                                          endMeterReading:
-                                            
-                                                  "0",
-                                          duration:
-                                              data.durationMinutes?.toString() ?? "0",
-                                          stationName:
-                                              data.locationName ?? "",
-                                          ConnectorGunID:
-                                              data.connectorId ?? ""),
-                                    ),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CommonColors.white,
-                                foregroundColor: CommonColors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color: CommonColors.blue.withOpacity(0.4),
-                                    width: 0.8,
-                                  ),
-                                ),
-                              ),
-                              child: const Text(
-                                "View Session",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: CommonColors.blue,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          )
-                          : Row(
-    children: [
-      Expanded(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BookingDetailsScreen(
-                  recID:data.sessionId!,
-                  bookingType: "P",
-                ),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: CommonColors.white,
-            foregroundColor: CommonColors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
-                color: CommonColors.blue.withOpacity(0.4),
-                width: 0.8,
+                ],
               ),
             ),
-          ),
-          child: const Text(
-            "View Receipt",
-            style: TextStyle(
-              fontSize: 12,
-              color: CommonColors.blue,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
+          ],
+        )
+      : const SizedBox.shrink(),
+),
 
-      const SizedBox(width: 10),
-
-      _invoiceButton(
-        sessionId: data.sessionId!,
-      ),
-    ],
-  ),
-                        // : Container(
-                        //     width: SizeConfig.blockSizeHorizontal * 90,
-                        //     child: ElevatedButton(
-                        //       onPressed: () {
-                        //         data.status == "Active"
-                        //             ? null
-                        //             : Navigator.push(
-                        //                 context,
-                        //                 MaterialPageRoute(
-                        //                   builder: (_) => BookingDetailsScreen(
-                        //                     recID: data.sessionId!,
-                        //                     bookingType: "P",
-                        //                   ),
-                        //                 ),
-                        //               );
-                        //       },
-                        //       style: ElevatedButton.styleFrom(
-                        //         backgroundColor: CommonColors.white,
-                        //         foregroundColor: CommonColors.blue,
-                        //         shape: RoundedRectangleBorder(
-                        //           borderRadius: BorderRadius.circular(12),
-                        //           side: BorderSide(
-                        //             color: CommonColors.blue.withOpacity(0.4),
-                        //             width: 0.8,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //       child: const Text(
-                        //         //Download
-                        //         "View Receipt",
-                        //         style: TextStyle(
-                        //             fontSize: 12,
-                        //             color: CommonColors.blue,
-                        //             fontWeight: FontWeight.w600),
-                        //       ),
-                        //     ),
-                        //   ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: -10,
-                left: 16,
-                child: _statusChip(data.status!, data.sessionId!),
-              ),
-            ],
-          ),
-        ),
+     
       ],
-    );
-  }
-
+    ),
+  );
+}
 
   String formatDuration(String duration) {
     List<String> parts = duration.split(':');
@@ -892,457 +825,377 @@ String formatOnlyTimeIST(String? timeString) {
     return "";
   }
 }
-  Widget _historyCard(ChargingSession data) {
-    // print("API VALUE");
-    // print(data.startTime!);
-    // print(data.endTime!);
-    if(data.startTime !=null && data.endTime !=null )
-      print("${data.startTime} - ${data.endTime}");
-    return Column(
+String? _expandedSessionId;
+Widget _historyCard(ChargingSession data) {
+  final String sessionId = data.recId ?? "";
+  final bool isExpanded = _expandedSessionId == sessionId;
+
+  return Container(
+    margin: const EdgeInsets.only(bottom: 8),
+    decoration: BoxDecoration(
+      color: CommonColors.white,
+      border: Border.all(color: CommonColors.neutral200),
+      borderRadius: BorderRadius.circular(14),
+    ),
+    child: Column(
       children: [
-        GestureDetector(
+        // Always-visible compact header
+        InkWell(
+          borderRadius: BorderRadius.circular(14),
           onTap: () {
-            data.status == "Active"
-                ? null
-                : Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BookingDetailsScreen(
-                        recID: data.recId!,
-                        bookingType: "L",
-                      ),
-                    ),
-                  );
+            setState(() {
+              _expandedSessionId =
+                  isExpanded ? null : sessionId;
+            });
           },
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: CommonColors.white,
-                  border: Border.all(color: CommonColors.neutral200),
-                  borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
+            child: Row(
+              children: [
+                // Charging icon
+                Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEAF0FF),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Image.asset(CommonImagePath.borderGreen,color: CommonColors.blue,),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Container(
-                      width: SizeConfig.blockSizeHorizontal * 90,
-                      decoration: BoxDecoration(
-                        color: CommonColors.neutral50,
-                        borderRadius: BorderRadius.circular(8),
+                const SizedBox(width: 10),
+
+                // Station name and date
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        (data.chargingStationName ?? "Station")
+                            .toUpperCase(),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: CommonColors.black,
+                        ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                /// LEFT SIDE (FIXED)
-                                Expanded(
-                                  // ✅ KEY FIX
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Station: ${data.chargingStationName!.toUpperCase() ?? "Station"}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12),
-                                      ),
-                                      Text(
-                                        "${data.chargingHubName}",
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12),
-                                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        "${formatTime("${data.createdOn}")} • "
+                        "${data.energyTransmitted ?? 0} kW",
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: CommonColors.neutral500,
+                        ),
+                      ),
+                      Text(
+                        "₹${data.chargingTotalFee ?? 0}",
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: CommonColors.neutral500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-                                      const SizedBox(height: 4),
-                                      // Row(
-                                      //   crossAxisAlignment: CrossAxisAlignment.start,
-                                      //   mainAxisAlignment: MainAxisAlignment.start,
-                                      //   children: [
-                                      //    Padding(
-                                      //      padding: const EdgeInsets.only(top: 4),
-                                      //      child: Image.asset( CommonImagePath.redpin,),
-                                      //    ),
-                                      //     const SizedBox(width: 4),
+                const SizedBox(width: 6),
 
-                                      //   ],
-                                      // ),
-                                    ],
+                // Status
+                _statusChip(
+                  data.status ?? "",
+                  sessionId,
+                ),
+
+                const SizedBox(width: 4),
+
+                // Expand/collapse arrow
+                Icon(
+                  isExpanded
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
+                  color: CommonColors.neutral500,
+                  size: 22,
+                ),
+              ],
+            ),
+          ),
+        ),
+
+        // Expanded details
+        // Expanded details
+AnimatedSize(
+  duration: const Duration(milliseconds: 220),
+  curve: Curves.easeInOut,
+  child: isExpanded
+      ? Column(
+          children: [
+            Divider(
+              height: 1,
+              color: CommonColors.neutral200,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Energy, Duration and Fee
+                  // Row(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     Expanded(
+                  //       child: _historyInfo(
+                  //         "Energy",
+                  //         "${data.energyTransmitted ?? 0} kW",
+                  //       ),
+                  //     ),
+                  //     Expanded(
+                  //       child: _historyInfo(
+                  //         "Duration",
+                  //         formatDuration("${data.duration}"),
+                  //       ),
+                  //     ),
+                  //     Expanded(
+                  //       child: _historyInfo(
+                  //         "Fee",
+                  //         "₹${data.chargingTotalFee ?? 0}",
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+
+                  const SizedBox(height: 12),
+
+                  // Grey rounded information panel
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: CommonColors.neutral50,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: _historyInfo(
+                            "Duration",
+                            formatDuration("${data.duration}"),
+                          ),
+                        ),
+                        Expanded(
+                          child: _historyInfo(
+                            "Start Battery",
+                            data.soCStart == null
+                                ? "-"
+                                : "${data.soCStart} %",
+                          ),
+                        ),
+                        Expanded(
+                          child: _historyInfo(
+                            "End Battery",
+                            data.soCEnd == null
+                                ? "-"
+                                : "${data.soCEnd} %",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+Row(
+  children: [
+     
+      Text(
+        ". Time ",
+        style: const TextStyle(
+          fontWeight: FontWeight.w400,
+          color: CommonColors.neutral500,
+          fontSize: 11,
+        ),
+      ),
+    Text(
+           data.startTime == null || data.endTime == null
+                            ? "-"
+                            : "${formatOnlyTimeIST(data.startTime!.toString())} - "
+                                "${formatOnlyTimeIST(data.endTime!.toString())}",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+              color: CommonColors.black,
+            ),
+          ),
+  ],
+),
+                
+                  const SizedBox(height: 12),
+
+                  // Existing View Session action for active sessions
+                  if (data.status == "Active")
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SessionChargingScreen(
+                                args: SessionChargingArgs(
+                                  sessionId: data.recId ?? "",
+                                  status: data.status ?? "",
+                                  cost: data.chargingTotalFee?.toString() ?? "0",
+                                  unitConsumed:
+                                      data.energyTransmitted?.toString() ?? "0",
+                                  outputPower:
+                                      data.chargingGun?.powerOutput == null ||
+                                              data.chargingGun?.powerOutput ==
+                                                  "null"
+                                          ? "0"
+                                          : data.chargingGun!.powerOutput
+                                              .toString(),
+                                  batteryPercentage:
+                                      data.soCStart?.toString() ?? "0",
+                                  endMeterReading:
+                                      data.endMeterReading?.toString() ?? "0",
+                                  duration: data.duration?.toString() ?? "0",
+                                  stationName: data.chargingStationName ?? "",
+                                  ConnectorGunID:
+                                      data.chargingGun?.connectorId ?? "",
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: CommonColors.blue,
+                          minimumSize: const Size(double.infinity, 40),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          side: BorderSide(
+                            color: CommonColors.blue.withOpacity(0.4),
+                          ),
+                        ),
+                        child: const Text(
+                          "View Session",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        // View Receipt
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BookingDetailsScreen(
+                                    recID: data.recId!,
+                                    bookingType: "L",
                                   ),
                                 ),
-
-                                const SizedBox(width: 8),
-
-                                /// RIGHT SIDE (AUTO WIDTH)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      formatTime("${data.createdOn}"),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        color: CommonColors.black,
-                                        fontSize: 12,
-                                      ),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: CommonColors.white,
+                              foregroundColor: CommonColors.blue,
+                              minimumSize: const Size(0, 40),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              side: BorderSide(
+                                color: CommonColors.blue.withOpacity(0.2),
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.receipt_long_outlined,
+                                  size: 15,
+                                ),
+                                SizedBox(width: 6),
+                                Flexible(
+                                  child: Text(
+                                    "View Receipt",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    Text(
-                                      data.status == "Active"
-                                          ? formatonlyTimeIST(data.startTime!)
-                                          : "${formatonlyTimeIST(data.startTime!)} - ${formatonlyTimeIST(data.endTime!)}",
-                                      // data.status == "Active"
-                                      //     ? formatonlyTime("${data.startTime}")
-                                      //     : "${formatonlyTime("${data.startTime}")} - ${formatonlyTime("${data.endTime}")}",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w400,
-                                        color: CommonColors.neutral500,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Energy",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text("${data.energyTransmitted} kW",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
                           ),
                         ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text("Duration",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text(formatDuration("${data.duration}"),
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            children: [
-                              Text("Fee",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text("₹${data.chargingTotalFee}",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                        // Expanded(
-                        //   child: Column(
-                        //     children: [
-                        //       Text("Plug Type",
-                        //           style: TextStyle(
-                        //               fontWeight: FontWeight.w400,
-                        //               color: CommonColors.neutral500,
-                        //               fontSize: 12)),
-                        //       Text("${data.chargingTariff}",
-                        //           style: TextStyle(
-                        //               fontWeight: FontWeight.w600, fontSize: 12)),
-                        //     ],
-                        //   ),
-                        // ),
-                      ],
-                    ),
 
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Start Battery",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: CommonColors.neutral500,
-                                    fontSize: 12)),
-                            Text(
-                                data.soCStart == null
-                                    ? "-"
-                                    : "${data.soCStart} %",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w600, fontSize: 12)),
-                          ],
-                        ),
+                        const SizedBox(width: 8),
+
                         Expanded(
-                          child: Column(
-                            children: [
-                              Text("End Battery",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w400,
-                                      color: CommonColors.neutral500,
-                                      fontSize: 12)),
-                              Text(
-                                  data.soCEnd == null
-                                      ? "-"
-                                      : "${data.soCEnd} %",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12)),
-                            ],
+                          child: _invoiceButton(
+                            sessionId: data.recId!,
                           ),
                         ),
-                        // Expanded(
-                        //   child: Column(
-                        //     children: [
-                        //       Text("Fee",
-                        //           style: TextStyle(
-                        //               fontWeight: FontWeight.w400,
-                        //               color: CommonColors.neutral500,
-                        //               fontSize: 12)),
-                        //       Text("₹${data.chargingTotalFee}",
-                        //           style: TextStyle(
-                        //               fontWeight: FontWeight.w600, fontSize: 12)),
-                        //     ],
-                        //   ),
-                        // ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                     Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                       children: [
-                         Expanded(
-                              child: Column(
-                                 mainAxisAlignment: MainAxisAlignment.start,
-                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                
-                                  Text("Time",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w400,
-                                          color: CommonColors.neutral500,
-                                          fontSize: 12)),
-                                  Text(
-                                     ( data.startTime == null || data.endTime==null)
-                                          ? "-"
-                                          : "${formatOnlyTimeIST(data.startTime!.toString())} - ${formatOnlyTimeIST(data.endTime!.toString())}",
-                                  
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 12)),
-                                ],
-                              ),
-                            ),
-                       ],
-                     ),
-                    //  Column(
-                    //   mainAxisAlignment: MainAxisAlignment.start,
-                    //   crossAxisAlignment: CrossAxisAlignment.start,
-                    //    children: [
-                    //      Text("Location",
-                    //          style: TextStyle(
-                    //              fontWeight: FontWeight.w400,
-                    //              color: CommonColors.neutral500,
-                    //              fontSize: 12)),
-                    //     Text(
-                    //            "${data.chargingHubName}",
-                    //             maxLines: 2,
-                    //             overflow: TextOverflow.ellipsis,
-                    //             style: const TextStyle(
-                    //               fontWeight: FontWeight.w600,
-                    //               fontSize: 12,
-                    //             ),
-                    //           ),
-                    //    ],
-                    //  ),
-                    const SizedBox(height: 16),
-                    data.status == "Active"
-                        ? Container(
-                            width: SizeConfig.blockSizeHorizontal * 90,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => SessionChargingScreen(
-                                      args: SessionChargingArgs(
-                                          sessionId: data?.recId ?? "",
-                                          status: data?.status ?? "",
-                                          cost: data?.chargingTotalFee?.toString() ??
-                                              "0",
-                                          unitConsumed: data?.energyTransmitted
-                                                  ?.toString() ??
-                                              "0",
-                                          outputPower: (data?.chargingGun
-                                                          ?.powerOutput ==
-                                                      null ||
-                                                  data?.chargingGun?.powerOutput ==
-                                                      "null")
-                                              ? "0"
-                                              : data!.chargingGun!.powerOutput
-                                                  .toString(),
-                                          batteryPercentage:
-                                              data?.soCStart?.toString() ?? "0",
-                                          endMeterReading:
-                                              data?.endMeterReading?.toString() ??
-                                                  "0",
-                                          duration:
-                                              data?.duration?.toString() ?? "0",
-                                          stationName:
-                                              data.chargingStationName ?? "",
-                                          ConnectorGunID:
-                                              data.chargingGun!.connectorId ?? ""),
-                                    ),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CommonColors.white,
-                                foregroundColor: CommonColors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color: CommonColors.blue.withOpacity(0.4),
-                                    width: 0.8,
-                                  ),
-                                ),
-                              ),
-                              child: const Text(
-                                "View Session",
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: CommonColors.blue,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                          )
-                          : Row(
+                ],
+              ),
+            ),
+          ],
+        )
+      : const SizedBox.shrink(),
+),
+     
+      ],
+    ),
+  );
+}
+Widget _historyInfo(String title, String value) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Expanded(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BookingDetailsScreen(
-                  recID: data.recId!,
-                  bookingType: "L",
-                ),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: CommonColors.white,
-            foregroundColor: CommonColors.blue,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
-                color: CommonColors.blue.withOpacity(0.4),
-                width: 0.8,
-              ),
-            ),
-          ),
-          child: const Text(
-            "View Receipt",
-            style: TextStyle(
-              fontSize: 12,
-              color: CommonColors.blue,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+      Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w400,
+          color: CommonColors.neutral500,
+          fontSize: 11,
         ),
       ),
-
-      const SizedBox(width: 10),
-
-      _invoiceButton(
-        sessionId: data.recId!,
+      const SizedBox(height: 3),
+      Text(
+        value,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+          color: CommonColors.black,
+        ),
       ),
     ],
-  ),
-                        // : Container(
-                        //     width: SizeConfig.blockSizeHorizontal * 90,
-                        //     child: ElevatedButton(
-                        //       onPressed: () {
-                        //         data.status == "Active"
-                        //             ? null
-                        //             : Navigator.push(
-                        //                 context,
-                        //                 MaterialPageRoute(
-                        //                   builder: (_) => BookingDetailsScreen(
-                        //                     recID: data.recId!,
-                        //                     bookingType: "L",
-                        //                   ),
-                        //                 ),
-                        //               );
-                        //       },
-                        //       style: ElevatedButton.styleFrom(
-                        //         backgroundColor: CommonColors.white,
-                        //         foregroundColor: CommonColors.blue,
-                        //         shape: RoundedRectangleBorder(
-                        //           borderRadius: BorderRadius.circular(12),
-                        //           side: BorderSide(
-                        //             color: CommonColors.blue.withOpacity(0.4),
-                        //             width: 0.8,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //       child: const Text(
-                        //         //Download
-                        //         "View Receipt",
-                        //         style: TextStyle(
-                        //             fontSize: 12,
-                        //             color: CommonColors.blue,
-                        //             fontWeight: FontWeight.w600),
-                        //       ),
-                        //     ),
-                        //   ),
-                  ],
-                ),
-              ),
-              Positioned(
-                top: -10,
-                left: 16,
-                child: _statusChip(data.status!, data.recId!),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
+  );
+}
 
   String formatonlyTimeIST(DateTime time) {
     final utcTime = DateTime.utc(
@@ -1370,43 +1223,39 @@ String formatOnlyTimeIST(String? timeString) {
     return time.toUtc().add(const Duration(hours: 5, minutes: 30));
   }
 
-// String formatonlyTimeIST(DateTime time) {
-//   final istTime = convertToIST(time);
-//   return DateFormat("hh.mm a").format(istTime);
 // }
-// DateTime convertToIST(DateTime time) {
-//   return time.toUtc().add(const Duration(hours: 5, minutes: 30));
-// }
-// String formatonlyTimeIST(DateTime time) {
-//   final istTime = convertToIST(time);
-//   return DateFormat("hh.mm a").format(istTime);
-// }
-  Widget _statusChip(
-    String isActive,
-    String recId,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: isActive == "Completed"
-            ? Colors.green.shade50
-            : Colors.red.shade100,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isActive == "Completed" ? Colors.green : CommonColors.red,
-          width: 0.8,
-        ),
+
+Widget _statusChip(String isActive, String recId) {
+  final isCompleted =
+      isActive.toLowerCase() == "completed";
+
+  final statusColor = isCompleted
+      ? const Color(0xFF16844A)
+      : const Color(0xFFE5484D);
+
+  return Container(
+    padding: const EdgeInsets.symmetric(
+      horizontal: 10,
+      vertical: 5,
+    ),
+    decoration: BoxDecoration(
+      color: isCompleted
+          ? const Color(0xFFE8F7EE)
+          : const Color(0xFFFFEEEE),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      isActive.toUpperCase(),
+      style: TextStyle(
+        fontSize: 9,
+        letterSpacing: 0.2,
+        fontWeight: FontWeight.w800,
+        color: statusColor,
       ),
-      child: Text(
-        "${isActive} ",
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: isActive == "Completed" ? Colors.green : CommonColors.red,
-        ),
-      ),
-    );
-  }
+    ),
+  );
+}
+
   
 }
 
@@ -1414,93 +1263,76 @@ class FilterTabsWidget extends StatefulWidget {
   const FilterTabsWidget({super.key});
 
   @override
-  State<FilterTabsWidget> createState() => _FilterTabsWidgetState();
+  State<FilterTabsWidget> createState() =>
+      _FilterTabsWidgetState();
 }
 
 class _FilterTabsWidgetState extends State<FilterTabsWidget> {
-  // Track selected tab index
   int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
+    const labels = ["This month", "Last 7 Days", "All"];
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: [
-          _tabButton("This month", Icons.calendar_month, 0),
-          const SizedBox(width: 10),
-          _tabButton("Last 7 Days", Icons.bolt, 1),
-          const SizedBox(width: 10),
-          _tabButton("All", Icons.apps, 2), // NEW
-          SizedBox(width: 10),
-          // _tabButton("Filter", Icons.filter, 2),
-        ],
-      ),
-    );
-  }
+        children: List.generate(labels.length, (index) {
+          final selected = selectedIndex == index;
 
-  Widget _tabButton(String title, IconData icon, int index) {
-    final isSelected = selectedIndex == index;
-    return GestureDetector(
-      // onTap: () {
-      //   setState(() {
-      //     selectedIndex = index;
-      //   });
-      // },
-      onTap: () {
-        setState(() {
-          selectedIndex = index;
-        });
-
-        final provider = context.read<ActiveSessionProvider>();
-
-        if (index == 0) {
-          provider.setFilter(SessionFilter.thisMonth);
-        } else if (index == 1) {
-          provider.setFilter(SessionFilter.last7Days);
-        } else if (index == 2) {
-          provider.setFilter(SessionFilter.all); // NEW
-        }
-
-        // Debug: print length after filtering
-        Future.microtask(() {
-          print("Filtered sessions: ${provider.sessions.length}");
-        });
-          Future.microtask(() {
-          print("Filtered  Partner sessions: ${provider.partnerSessions.length}");
-        });
-      },
-
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? CommonColors.blue.withOpacity(0.1)
-              : Colors.grey[200],
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-              color: isSelected
-                  ? CommonColors.blue.withOpacity(0.6)
-                  : Colors.grey.shade300),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? CommonColors.blue : Colors.black,
-              size: 20,
+          return Padding(
+            padding: EdgeInsets.only(
+              right: index == labels.length - 1 ? 0 : 8,
             ),
-            const SizedBox(width: 5),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? CommonColors.blue : Colors.black,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: () {
+                setState(() => selectedIndex = index);
+
+                final provider =
+                    context.read<ActiveSessionProvider>();
+
+                if (index == 0) {
+                  provider.setFilter(SessionFilter.thisMonth);
+                } else if (index == 1) {
+                  provider.setFilter(SessionFilter.last7Days);
+                } else {
+                  provider.setFilter(SessionFilter.all);
+                }
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 9,
+                ),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? const Color(0xFFEAF0FF)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: selected
+                        ? const Color(0xFF193A8A)
+                        : const Color(0xFFD9DFE9),
+                  ),
+                ),
+                child: Text(
+                  labels[index],
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: selected
+                        ? FontWeight.w600
+                        : FontWeight.w500,
+                    color: selected
+                        ? const Color(0xFF193A8A)
+                        : const Color(0xFF687386),
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          );
+        }),
       ),
     );
   }

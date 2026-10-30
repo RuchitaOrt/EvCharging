@@ -2,14 +2,17 @@ import 'package:HyCharge/Provider/VehicleProvider.dart';
 import 'package:HyCharge/Screens/Vehicle/ManageVehicleScreen.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
 
 import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/EvModelResponse.dart';
 import 'package:HyCharge/model/VehicleModel.dart';
+import 'package:HyCharge/widget/CommonButton.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
@@ -40,6 +43,7 @@ void showAddVehicleBottomSheet(
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Colors.white,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -55,6 +59,7 @@ void showAddVehicleBottomSheet(
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Container(
@@ -67,15 +72,15 @@ void showAddVehicleBottomSheet(
                 ),
               ),
             ),
-            Center(
-              child: const Text(
-                "Enter your Vehicle Number",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+             Text(
+              "Enter your Vehicle Number",
+              style: TextStyle(
+                fontSize: 16,
+                 fontFamily: 'Poppins',
+                fontWeight: FontWeight.bold,
               ),
             ),
+            SizedBox(height: 10,),
             Form(
               key: formKey,
               child: Column(
@@ -83,6 +88,7 @@ void showAddVehicleBottomSheet(
                 children: [
                   CustomTextFieldWidget(
                     textFieldContainerHeight: 60,
+                    
                     isMandatory: false,
                     title: "",
                     // CommonStrings.strVehicle,
@@ -94,6 +100,13 @@ void showAddVehicleBottomSheet(
                     ],
                     textInputType: TextInputType.text,
                     validator: validateVehicleNumber,
+                  leadingIcon: SvgPicture.asset(
+  CommonImagePath.carIcons,
+  color: CommonColors.black.withOpacity(0.7),
+  width: 12,
+  height: 12,
+  fit: BoxFit.contain,
+),
                     onChange: (val) {
                       final upperCaseValue = val.toUpperCase();
 
@@ -111,17 +124,10 @@ void showAddVehicleBottomSheet(
               ),
             ),
             const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 38,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CommonColors.blue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () async {
+             CommonButton(
+      title: "Submit",
+     
+      onPressed: () async {
                   if (!formKey.currentState!.validate()) {
                     return;
                   }
@@ -145,29 +151,67 @@ void showAddVehicleBottomSheet(
                     showToast("Failed to add vehicle");
                   }
                 },
-                child: provider.isLoading
-                    ? CircularProgressIndicator(
-                        color: CommonColors.white,
-                      )
-                    : Text(
-                        "Submit",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-              ),
-            ),
+    ),
+            // SizedBox(
+            //   width: double.infinity,
+            //   height: 38,
+            //   child: ElevatedButton(
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: CommonColors.blue,
+            //       shape: RoundedRectangleBorder(
+            //         borderRadius: BorderRadius.circular(12),
+            //       ),
+            //     ),
+            //     onPressed: () async {
+            //       if (!formKey.currentState!.validate()) {
+            //         return;
+            //       }
+
+                
+                 
+            //       final success = await provider.addVehicle(
+            //         context,
+            //         manufacturerId: selectedVehicle.manufacturerId!,
+            //         modelId: selectedVehicle.recId!,
+            //         registrationNumber: controller.text.trim(),
+            //       );
+            //       print(success);
+            //       if (success) {
+            //           Navigator.pop(context);
+            //         // Navigator.pop(routeGlobalKey.currentContext!);
+            //         print(selectedVehicle);
+            //         showSubmittedVehicleBottomSheet(
+            //             routeGlobalKey.currentContext!, selectedVehicle);
+            //       } else {
+            //         showToast("Failed to add vehicle");
+            //       }
+            //     },
+            //     child: provider.isLoading
+            //         ? CircularProgressIndicator(
+            //             color: CommonColors.white,
+            //           )
+            //         : Text(
+            //             "Submit",
+            //             style: TextStyle(
+            //               fontSize: 14,
+            //               fontWeight: FontWeight.w700,
+            //               color: Colors.white,
+            //             ),
+            //           ),
+            //   ),
+            // ),
             SizedBox(
               height: 10,
             ),
-            Center(
-              child: Text(
-                CommonStrings.strVehicleNote,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w300,
+            Padding(
+              padding: const EdgeInsets.only(left: 10,right: 15),
+              child: Center(
+                child: Text(
+                  CommonStrings.strVehicleNote,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w300,
+                  ),
                 ),
               ),
             ),

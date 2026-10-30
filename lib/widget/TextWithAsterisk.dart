@@ -11,7 +11,9 @@ class TextWithAsterisk extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
+    return 
+     
+    RichText(
       text: TextSpan(
         text: text,
         style: CommonStyles.textFieldHeading,

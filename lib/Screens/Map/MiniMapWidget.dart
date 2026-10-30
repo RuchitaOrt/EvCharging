@@ -58,21 +58,37 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
 
   /// Load icons
   Future<void> _loadIcons() async {
-    hubIcon = await getResizedMarker(
-      'assets/images/targetMarker.png',
-      width: 90,
-    );
+  hubIcon = await getResizedMarker(
+    'assets/images/green_charging_marker.png',
+    width: 140,
+  );
 
-    nearbyIcon = await getResizedMarker(
-      'assets/images/normalMarker.png',
-      width: 40,
-    );
+  nearbyIcon = await getResizedMarker(
+    'assets/images/green_charging_marker.png',
+    width: 140,
+  );
 
-    currentIcon = await getResizedMarker(
-      'assets/images/currentMarker.png',
-      width: 40,
-    );
-  }
+  currentIcon = await getResizedMarker(
+    'assets/images/green_charging_marker.png',
+    width: 140,
+  );
+}
+  // Future<void> _loadIcons() async {
+  //   hubIcon = await getResizedMarker(
+  //     'assets/images/targetMarker.png',
+  //     width: 90,
+  //   );
+
+  //   nearbyIcon = await getResizedMarker(
+  //     'assets/images/normalMarker.png',
+  //     width: 40,
+  //   );
+
+  //   currentIcon = await getResizedMarker(
+  //     'assets/images/currentMarker.png',
+  //     width: 40,
+  //   );
+  // }
 
   /// Setup markers
   void _setupMarkers() {
@@ -215,58 +231,99 @@ class _MiniMapWidgetState extends State<MiniMapWidget> {
     return Column(
       children: [
         Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              children: [
-                GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: widget.currentLocation,
-                    zoom: 14,
-                  ),
-                  markers: markers,
-                  polylines: polylines,
-                  circles: circles,
-                  onMapCreated: (controller) {
-                    mapController = controller;
-                    if (mapStyle != null) {
-                      controller.setMapStyle(mapStyle);
-                    }
-                    Future.delayed(
-                      const Duration(milliseconds: 500),
-                      _fitMarkers,
-                    );
-                  },
-                  gestureRecognizers: {
-                    Factory<OneSequenceGestureRecognizer>(
-                      () => EagerGestureRecognizer(),
-                    ),
-                  },
-                  zoomControlsEnabled: false,
-                  compassEnabled: false,
-                  mapToolbarEnabled: false,
+          child: Stack(
+            children: [
+              GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: widget.currentLocation,
+                  zoom: 14,
                 ),
-                /// Direction button
-                Positioned(
-                  right: 12,
-                  bottom: 12,
-                  child: FloatingActionButton(
-                    mini: true,
-                    backgroundColor: Colors.white,
-                    onPressed: () {
-                      openMaps(
-                        latitude: widget.hubLocation.latitude,
-                        longitude: widget.hubLocation.longitude,
-                      );
-                    },
-                    child: const Icon(
-                      Icons.directions,
-                      color: Colors.black,
-                    ),
+                markers: markers,
+                polylines: polylines,
+                circles: circles,
+                onMapCreated: (controller) {
+                  mapController = controller;
+                  if (mapStyle != null) {
+                    controller.setMapStyle(mapStyle);
+                  }
+                  Future.delayed(
+                    const Duration(milliseconds: 500),
+                    _fitMarkers,
+                  );
+                },
+                gestureRecognizers: {
+                  Factory<OneSequenceGestureRecognizer>(
+                    () => EagerGestureRecognizer(),
                   ),
-                )
-              ],
+                },
+                zoomControlsEnabled: false,
+                compassEnabled: false,
+                mapToolbarEnabled: false,
+              ),
+              /// Direction button
+              /// Directions button
+Positioned(
+  right: 12,
+  bottom: 12,
+  child: Material(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(30),
+    elevation: 3,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(30),
+      onTap: () {
+        openMaps(
+          latitude: widget.hubLocation.latitude,
+          longitude: widget.hubLocation.longitude,
+        );
+      },
+      child: const Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 11,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.north_east,
+              size: 18,
+              color: Color(0xFF0F2669),
             ),
+            SizedBox(width: 7),
+            Text(
+              'Directions',
+              style: TextStyle(
+                color: Color(0xFF0F2669),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
+),
+              // Positioned(
+              //   right: 12,
+              //   bottom: 12,
+              //   child: FloatingActionButton(
+              //     mini: true,
+              //     backgroundColor: Colors.white,
+              //     onPressed: () {
+              //       openMaps(
+              //         latitude: widget.hubLocation.latitude,
+              //         longitude: widget.hubLocation.longitude,
+              //       );
+              //     },
+              //     child: const Icon(
+              //       Icons.directions,
+              //       color: Colors.black,
+              //     ),
+              //   ),
+              // )
+            ],
           ),
         ),
         const SizedBox(height: 8),

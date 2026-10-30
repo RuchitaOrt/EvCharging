@@ -1,18 +1,22 @@
 import 'package:HyCharge/Provider/AuthProvider.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
+import 'package:HyCharge/Screens/auth/login_bottom_sheet.dart';
 import 'package:HyCharge/Utils/APIManager.dart';
 import 'package:HyCharge/Utils/AuthStorage.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/CommonStyles.dart';
 import 'package:HyCharge/Utils/ShowDialog.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
+import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/commonstrings.dart';
+import 'package:HyCharge/Utils/extentions.dart';
 import 'package:HyCharge/Utils/regex_helper.dart';
 import 'package:HyCharge/Utils/sizeConfig.dart';
 import 'package:HyCharge/widget/GlobalLists.dart';
 import 'package:HyCharge/widget/custom_text_field_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -78,6 +82,21 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
     // SUCCESS
+final normalBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(16),
+    borderSide: const BorderSide(
+      color: Color(0xFFDCE2EC),
+      width: 1,
+    ),
+  );
+
+  final focusedInputBorder = OutlineInputBorder(
+    borderRadius: BorderRadius.circular(16),
+    borderSide: BorderSide(
+      color: CommonColors.blue,
+      width: 1.4,
+    ),
+  );
 
     return Consumer<AuthProvider>(builder: (context, authProvider, _) {
       // SUCCESS
@@ -85,12 +104,25 @@ class _ResetPasswordScreenState extends State<ResetPassword> {
       return Scaffold(
         backgroundColor: CommonColors.neutral50,
         resizeToAvoidBottomInset: true,
-          appBar: CommonAppBar(title: "Reset Password"),
+          // appBar: CommonAppBar(title: "Reset Password"),
         body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+                  GestureDetector(
+                    onTap: () {
+                          Navigator.pop(context);
+                    
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 20),
+                      child: SvgPicture.asset(CommonImagePath.back),
+                    )),
+                     Padding(
+    padding: const EdgeInsets.only(top: 12, bottom: 20,left: 18),
+    child: const Text( CommonStrings.strResetPassword,textAlign: TextAlign.center, style: LoginText.title),
+  ),
               // Scrollable content
               // GestureDetector(
               //     onTap: () {
@@ -140,6 +172,7 @@ inputFormatters: [
                         //       RegExp(RegexHelper().numberOnlyRegex)),
                         // ],
                       ),
+                      16.0.heightBox,
                       CustomTextFieldWidget(
                         isMandatory: false,
                         title: CommonStrings.strEmail,
@@ -149,138 +182,214 @@ inputFormatters: [
                           isFieldDisabled: true,
                         autovalidateMode: AutovalidateMode.disabled,
                       ),
-                      SizedBox(height:8),
+                      16.0.heightBox,
                       Text(
                         CommonStrings.strOldPassword,
                         style: CommonStyles.textFieldHeading,
                       ),
-                      SizedBox(height:6),
+                      8.0.heightBox,
                       TextFormField(
-                        cursorColor: CommonColors.blue,
-                        style: CommonStyles.textFieldHeading,
-                        obscureText: isoldPasswordObscured,
-                        controller: oldpasswordController,
-                        autovalidateMode: AutovalidateMode.disabled,
-                        decoration: InputDecoration(
-                          errorMaxLines: 3,
-                          suffixIcon: IconButton(
-                            onPressed: toggleoldPasswordVisibility,
-                            icon: Icon(
-                              isoldPasswordObscured
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: isoldPasswordObscured
-                                  ? CommonColors.hintGrey
-                                  : CommonColors.blue,
-                            ),
-                          ),
-                          hintText: CommonStrings.strOldPasswordHint,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 8.0),
-                          border: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: enableBorder),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: focusedBorder),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: enableBorder),
-                          filled: true,
-                          fillColor: CommonColors.white,
-                          hintStyle: CommonStyles.textFieldHint,
-                          errorStyle: CommonStyles.textFieldHint,
-                          counterText: "",
-                        ),
-                      ),
+  cursorColor: CommonColors.blue,
+  style: CommonStyles.textFieldHeading,
+  obscureText: isoldPasswordObscured,
+  controller: oldpasswordController,
+  autovalidateMode: AutovalidateMode.disabled,
+  decoration: InputDecoration(
+    hintText: CommonStrings.strOldPasswordHint,
+    hintStyle: const TextStyle(
+      fontSize: 13,
+      color: Color(0xFF939BAD),
+    ),
+    contentPadding: const EdgeInsets.symmetric(
+      vertical: 16,
+      horizontal: 16,
+    ),
+    border: normalBorder,
+    enabledBorder: normalBorder,
+    focusedBorder: focusedInputBorder,
+    filled: true,
+    fillColor: Colors.white,
+    errorStyle: CommonStyles.textFieldHint,
+    errorMaxLines: 3,
+    counterText: '',
+    suffixIcon: IconButton(
+      onPressed: toggleoldPasswordVisibility,
+      icon: Icon(
+        isoldPasswordObscured
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+        color: isoldPasswordObscured
+            ? CommonColors.hintGrey
+            : CommonColors.blue,
+        size: 20,
+      ),
+    ),
+  ),
+),
                       SizedBox(height:15),
                       Text(
                         CommonStrings.strNewPassword,
                         style: CommonStyles.textFieldHeading,
                       ),
                       SizedBox(height:6),
+                      // TextFormField(
+                      //   cursorColor: CommonColors.blue,
+                      //   style: CommonStyles.textFieldHeading,
+                      //   obscureText: isPasswordObscured,
+                      //   controller: newpasswordController,
+                      //   autovalidateMode: AutovalidateMode.disabled,
+                      //   decoration: InputDecoration(
+                      //     errorMaxLines: 3,
+                      //     suffixIcon: IconButton(
+                      //       onPressed: togglePasswordVisibility,
+                      //       icon: Icon(
+                      //         isPasswordObscured
+                      //             ? Icons.visibility_off
+                      //             : Icons.visibility,
+                      //         color: isPasswordObscured
+                      //             ? CommonColors.hintGrey
+                      //             : CommonColors.blue,
+                      //       ),
+                      //     ),
+                      //     hintText: CommonStrings.strnewPasswordHint,
+                      //     contentPadding: const EdgeInsets.symmetric(
+                      //         vertical: 10.0, horizontal: 8.0),
+                      //     border: OutlineInputBorder(
+                      //         borderRadius: borderRadius,
+                      //         borderSide: enableBorder),
+                      //     focusedBorder: OutlineInputBorder(
+                      //         borderRadius: borderRadius,
+                      //         borderSide: focusedBorder),
+                      //     enabledBorder: OutlineInputBorder(
+                      //         borderRadius: borderRadius,
+                      //         borderSide: enableBorder),
+                      //     filled: true,
+                      //     fillColor: CommonColors.white,
+                      //     hintStyle: CommonStyles.textFieldHint,
+                      //     errorStyle: CommonStyles.textFieldHint,
+                      //     counterText: "",
+                      //   ),
+                      // ),
                       TextFormField(
-                        cursorColor: CommonColors.blue,
-                        style: CommonStyles.textFieldHeading,
-                        obscureText: isPasswordObscured,
-                        controller: newpasswordController,
-                        autovalidateMode: AutovalidateMode.disabled,
-                        decoration: InputDecoration(
-                          errorMaxLines: 3,
-                          suffixIcon: IconButton(
-                            onPressed: togglePasswordVisibility,
-                            icon: Icon(
-                              isPasswordObscured
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: isPasswordObscured
-                                  ? CommonColors.hintGrey
-                                  : CommonColors.blue,
-                            ),
-                          ),
-                          hintText: CommonStrings.strnewPasswordHint,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 8.0),
-                          border: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: enableBorder),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: focusedBorder),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: enableBorder),
-                          filled: true,
-                          fillColor: CommonColors.white,
-                          hintStyle: CommonStyles.textFieldHint,
-                          errorStyle: CommonStyles.textFieldHint,
-                          counterText: "",
-                        ),
-                      ),
+  cursorColor: CommonColors.blue,
+  style: CommonStyles.textFieldHeading,
+  obscureText: isPasswordObscured,
+  controller: newpasswordController,
+  autovalidateMode: AutovalidateMode.disabled,
+  decoration: InputDecoration(
+    hintText: CommonStrings.strnewPasswordHint,
+    hintStyle: const TextStyle(
+      fontSize: 13,
+      color: Color(0xFF939BAD),
+    ),
+    contentPadding: const EdgeInsets.symmetric(
+      vertical: 16,
+      horizontal: 16,
+    ),
+    border: normalBorder,
+    enabledBorder: normalBorder,
+    focusedBorder: focusedInputBorder,
+    filled: true,
+    fillColor: Colors.white,
+    errorStyle: CommonStyles.textFieldHint,
+    errorMaxLines: 3,
+    counterText: '',
+    suffixIcon: IconButton(
+      onPressed: togglePasswordVisibility,
+      icon: Icon(
+        isPasswordObscured
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+        color: isPasswordObscured
+            ? CommonColors.hintGrey
+            : CommonColors.blue,
+        size: 20,
+      ),
+    ),
+  ),
+),
                       SizedBox(height:15),
                       Text(
                         CommonStrings.strconfirmpassword,
                         style: CommonStyles.textFieldHeading,
                       ),
                     SizedBox(height:6),
+                      // TextFormField(
+                      //   cursorColor: CommonColors.blue,
+                      //   style: CommonStyles.textFieldHeading,
+                      //   obscureText: isConfirmPasswordObscured,
+                      //   controller: confirmpasswordController,
+                      //   autovalidateMode: AutovalidateMode.disabled,
+                      //   decoration: InputDecoration(
+                      //     errorMaxLines: 3,
+                      //     suffixIcon: IconButton(
+                      //       onPressed: toggleConfirmPasswordVisibility,
+                      //       icon: Icon(
+                      //         isConfirmPasswordObscured
+                      //             ? Icons.visibility_off
+                      //             : Icons.visibility,
+                      //         color: isConfirmPasswordObscured
+                      //             ? CommonColors.hintGrey
+                      //             : CommonColors.blue,
+                      //       ),
+                      //     ),
+                      //     hintText: CommonStrings.strconfirmpassword,
+                      //     contentPadding: const EdgeInsets.symmetric(
+                      //         vertical: 10.0, horizontal: 8.0),
+                      //     border: OutlineInputBorder(
+                      //         borderRadius: borderRadius,
+                      //         borderSide: enableBorder),
+                      //     focusedBorder: OutlineInputBorder(
+                      //         borderRadius: borderRadius,
+                      //         borderSide: focusedBorder),
+                      //     enabledBorder: OutlineInputBorder(
+                      //         borderRadius: borderRadius,
+                      //         borderSide: enableBorder),
+                      //     filled: true,
+                      //     fillColor: CommonColors.white,
+                      //     hintStyle: CommonStyles.textFieldHint,
+                      //     errorStyle: CommonStyles.textFieldHint,
+                      //     counterText: "",
+                      //   ),
+                      // ),
                       TextFormField(
-                        cursorColor: CommonColors.blue,
-                        style: CommonStyles.textFieldHeading,
-                        obscureText: isConfirmPasswordObscured,
-                        controller: confirmpasswordController,
-                        autovalidateMode: AutovalidateMode.disabled,
-                        decoration: InputDecoration(
-                          errorMaxLines: 3,
-                          suffixIcon: IconButton(
-                            onPressed: toggleConfirmPasswordVisibility,
-                            icon: Icon(
-                              isConfirmPasswordObscured
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: isConfirmPasswordObscured
-                                  ? CommonColors.hintGrey
-                                  : CommonColors.blue,
-                            ),
-                          ),
-                          hintText: CommonStrings.strconfirmpassword,
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 10.0, horizontal: 8.0),
-                          border: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: enableBorder),
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: focusedBorder),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: borderRadius,
-                              borderSide: enableBorder),
-                          filled: true,
-                          fillColor: CommonColors.white,
-                          hintStyle: CommonStyles.textFieldHint,
-                          errorStyle: CommonStyles.textFieldHint,
-                          counterText: "",
-                        ),
-                      ),
+  cursorColor: CommonColors.blue,
+  style: CommonStyles.textFieldHeading,
+  obscureText: isConfirmPasswordObscured,
+  controller: confirmpasswordController,
+  autovalidateMode: AutovalidateMode.disabled,
+  decoration: InputDecoration(
+    hintText: CommonStrings.strconfirmpassword,
+    hintStyle: const TextStyle(
+      fontSize: 13,
+      color: Color(0xFF939BAD),
+    ),
+    contentPadding: const EdgeInsets.symmetric(
+      vertical: 16,
+      horizontal: 16,
+    ),
+    border: normalBorder,
+    enabledBorder: normalBorder,
+    focusedBorder: focusedInputBorder,
+    filled: true,
+    fillColor: Colors.white,
+    errorStyle: CommonStyles.textFieldHint,
+    errorMaxLines: 3,
+    counterText: '',
+    suffixIcon: IconButton(
+      onPressed: toggleConfirmPasswordVisibility,
+      icon: Icon(
+        isConfirmPasswordObscured
+            ? Icons.visibility_off_outlined
+            : Icons.visibility_outlined,
+        color: isConfirmPasswordObscured
+            ? CommonColors.hintGrey
+            : CommonColors.blue,
+        size: 20,
+      ),
+    ),
+  ),
+),
                       SizedBox(height: SizeConfig.blockSizeVertical * 1.5),
                     ],
                   ),
@@ -294,14 +403,19 @@ inputFormatters: [
                 child: SafeArea(
                   child: SizedBox(
                     width: double.infinity,
+                    height: 50,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CommonColors.blue,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                       style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF142D78),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 10,
                       ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
                       onPressed: () async {
                         final provider = context.read<AuthProvider>();
 

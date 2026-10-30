@@ -41,57 +41,60 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, color: Colors.white),
+          const Icon(Icons.search, color: Colors.black),
           const SizedBox(width: 10),
 
           Expanded(
-            child: TextField(
-              controller: _controller,
-              focusNode: _focusNode,
-              style: const TextStyle(color: Colors.white),
-              textInputAction: TextInputAction.search,
-              cursorColor: Colors.white,
+  child: TextField(
+    controller: _controller,
+    focusNode: _focusNode,
+    style: const TextStyle(
+      color: Colors.black, // Typed text color
+      fontSize: 13,
+    ),
+    textInputAction: TextInputAction.search,
+    cursorColor: CommonColors.primary,
 
-              decoration: InputDecoration(
-                hintText: "Search nearby charging station",
-                hintStyle: TextStyle(
-                  color: CommonColors.background,
-                  fontSize: 13,
-                ),
-                border: InputBorder.none,
-
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(
-                          Icons.clear,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          FocusManager.instance.primaryFocus?.unfocus();
-
-                          _controller.clear();
-
-                          /// optional reset callback
-                          widget.onSearch?.call("");
-                        },
-                      )
-                    : null,
+    decoration: InputDecoration(
+      hintText: "Search nearby charging station",
+      hintStyle: TextStyle(
+        color: CommonColors.black,
+        fontSize: 13,
+      ),
+      border: InputBorder.none,
+      suffixIcon: _controller.text.isNotEmpty
+          ? IconButton(
+              icon: const Icon(
+                Icons.clear,
+                color: Colors.black,
               ),
-
-              onSubmitted: (value) {
-                if (value.trim().isEmpty) return;
-
-                widget.onSearch?.call(value.trim());
-
-                _focusNode.unfocus();
+              onPressed: () {
+                FocusManager.instance.primaryFocus?.unfocus();
+                _controller.clear();
+                widget.onSearch?.call("");
+                setState(() {}); // Refresh clear icon
               },
-            ),
-          ),
+            )
+          : null,
+    ),
+
+    onChanged: (value) {
+      setState(() {}); // Update clear icon visibility
+    },
+
+    onSubmitted: (value) {
+      if (value.trim().isEmpty) return;
+
+      widget.onSearch?.call(value.trim());
+      _focusNode.unfocus();
+    },
+  ),
+)
         ],
       ),
     );

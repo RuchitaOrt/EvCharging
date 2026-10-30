@@ -75,6 +75,7 @@ dependencies:
   vibration: 
   package_info_plus: ^8.0.0
   open_filex: ^4.7.0
+  permission_handler: ^12.0.1
 
   
   # 4.0.1

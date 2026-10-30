@@ -31,7 +31,7 @@ class CommonStrings {
 
     static const String strRegistration = "Register";
      static const String strSetPassword = "Set Password";
-        static const String strResetPassword = "Reset Password";
+        static const String strResetPassword = "Set Password";
 static const String strfirstName = "First Name";
 static const String strAmount = "Amount";
 static const String strAmountHint = "Enter amount";
