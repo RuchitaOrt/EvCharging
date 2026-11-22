@@ -103,7 +103,7 @@ SizedBox(
       selected: provider.selectedUserVehicleId == vehicle.recId,
       title: provider.getModelName(vehicle.carModelID),
       number: vehicle.carRegistrationNumber ?? "",
-      image: CommonImagePath.vehicle5,
+      image: CommonImagePath.carskyblue,
     ),
   ),
 );
@@ -246,7 +246,8 @@ Widget _vehicleCard({
           maxLines: 2,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 12,
+             fontFamily: 'Poppins',
+            fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -254,7 +255,8 @@ Widget _vehicleCard({
         Text(
           number,
           style: TextStyle(
-            fontSize: 10,
+             fontFamily: 'Poppins',
+            fontSize: 12,
             color: Colors.grey.shade600,
           ),
         ),

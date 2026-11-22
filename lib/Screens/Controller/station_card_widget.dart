@@ -2,15 +2,19 @@
 
 import 'dart:typed_data';
 
+import 'package:HyCharge/Screens/StationDetailsScreen.dart';
 import 'package:HyCharge/Utils/FilterBottomSheet.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/Utils/commonimages.dart';
 import 'package:HyCharge/Utils/commonstrings.dart';
 import 'package:HyCharge/Utils/googleMap.dart';
+import 'package:HyCharge/Utils/iconresizer.dart';
+import 'package:HyCharge/main.dart';
 import 'package:HyCharge/model/UnifiedComprehensiveResponse.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../Provider/HubProvider.dart';
@@ -276,157 +280,184 @@ class _StationCardState extends State<_StationCard> {
         widget.chargingHub.id == CommonStrings.strDummyRecID ||
         widget.chargingHub.id == CommonStrings.strDummyRecID1;
 
-    return SizedBox(
-      width: widget.cardWidth,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 12, 20, 0),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Station image, name, distance and rating
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    CommonImagePath.stationImage,
-                    height: 68,
-                    width: 68,
-                    fit: BoxFit.cover,
-                  ),
+    return GestureDetector(
+      onTap: ()
+      async {
+         LatLng? location = LocationConvert.getLatLngFromUnifiedHub(widget.chargingHub);
+        if (location != null) {
+          BitmapDescriptor icon = await getResizedMarker(
+            'assets/images/targetMarker.png',
+            width: 120,
+          );
+          Navigator.push(
+            routeGlobalKey.currentContext!,
+            MaterialPageRoute(
+              builder: (_) => StationDetailsScreen(
+                nearbyHubs: widget.nearbyHubs,
+                hub: widget.chargingHub,
+                marker: Marker(
+                  markerId: MarkerId(widget.chargingHub.id!),
+                  position: location,
+                  icon: icon,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.chargingHub.name ?? 'Station Name',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF101A35),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _InfoTag(
-                            icon: CommonImagePath.locationred,
-                            text: distance == null
-                                ? '-- km'
-                                : '${distance.toStringAsFixed(2)} km',
-                            background: const Color(0xFFEEF0F5),
+                location: location,
+              ),
+            ),
+          );
+        }
+      },
+      child: SizedBox(
+        width: widget.cardWidth,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(12, 12, 20, 0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Station image, name, distance and rating
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      CommonImagePath.stationImage,
+                      height: 68,
+                      width: 68,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.chargingHub.name ?? 'Station Name',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF101A35),
                           ),
-                          if (widget.chargingHub.averageRating != null)
+                        ),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
                             _InfoTag(
-                              icon: CommonImagePath.stargold,
-                              text: widget.chargingHub.averageRating!
-                                  .toStringAsFixed(0),
+                              icon: CommonImagePath.locationred,
+                              text: distance == null
+                                  ? '-- km'
+                                  : '${distance.toStringAsFixed(2)} km',
                               background: const Color(0xFFEEF0F5),
                             ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // Divider
-            Container(
-              height: 1.5,
-              color: const Color(0xFFDDE2EA),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Pricing and Go button
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _TypeInfo(
-                          type: isDummyStation ? 'AC Station' : 'Station 1',
-                          price: typeAPrice,
+                            if (widget.chargingHub.averageRating != null)
+                              _InfoTag(
+                                icon: CommonImagePath.stargold,
+                                text: widget.chargingHub.averageRating!
+                                    .toStringAsFixed(0),
+                                background: const Color(0xFFEEF0F5),
+                              ),
+                          ],
                         ),
-                      ),
-                      if (!isDummyStation)
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+      
+              const SizedBox(height: 8),
+      
+              // Divider
+              Container(
+                height: 1.5,
+                color: const Color(0xFFDDE2EA),
+              ),
+      
+              const SizedBox(height: 8),
+      
+              // Pricing and Go button
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
                         Expanded(
                           child: _TypeInfo(
-                            type: 'Station 2',
-                            price: typeBPrice,
+                            type: isDummyStation ? 'AC Station' : 'Station 1',
+                            price: typeAPrice,
                           ),
                         ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Material(
-                  color: const Color(0xFF142D78),
-                  borderRadius: BorderRadius.circular(40),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(40),
-                    onTap: () {
-                      if (stationLocation != null) {
-                        openMaps(
-                          latitude: stationLocation.latitude,
-                          longitude: stationLocation.longitude,
-                        );
-                      }
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.near_me_outlined,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                          SizedBox(width: 2),
-                          Text(
-                            'Go',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
+                        if (!isDummyStation)
+                          Expanded(
+                            child: _TypeInfo(
+                              type: 'Station 2',
+                              price: typeBPrice,
                             ),
                           ),
-                           SizedBox(width: 6),
-                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Material(
+                    color: const Color(0xFF142D78),
+                    borderRadius: BorderRadius.circular(40),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(40),
+                      onTap: () {
+                        if (stationLocation != null) {
+                          openMaps(
+                            latitude: stationLocation.latitude,
+                            longitude: stationLocation.longitude,
+                          );
+                        }
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.near_me_outlined,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 2),
+                            Text(
+                              'Go',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                             SizedBox(width: 6),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

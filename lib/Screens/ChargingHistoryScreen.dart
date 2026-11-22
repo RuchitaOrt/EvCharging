@@ -105,7 +105,8 @@ Widget build(BuildContext context) {
       return false;
     },
     child: Scaffold(
-      backgroundColor: const Color(0xFFF4F6FA),
+      backgroundColor:CommonColors.neutral50,
+      //  const Color(0xFFF4F6FA),
       appBar: CommonAppBar(
         title: "Charging History",
         onBack: () {

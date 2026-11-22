@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -48,6 +47,7 @@ import 'Screens/Controller/map_overview_controller.dart';
 
 import 'package:app_links/app_links.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
 void rToast(String message) {
   print("🔥 DEBUG: $message");
 
@@ -60,6 +60,7 @@ void rToast(String message) {
   //   timeInSecForIosWeb: 3,
   // );
 }
+
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
@@ -68,81 +69,74 @@ final GlobalKey<NavigatorState> routeGlobalKey = GlobalKey();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
- if (Platform.isAndroid) {
-  AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
-}
+  if (Platform.isAndroid) {
+    AndroidGoogleMapsFlutter.useAndroidViewSurface = true;
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
- 
-   MyApp.pendingChargerId = null;
-MyApp.deepLinkChecked = false;
-SplashScreen.deepLinkHandled = false;
- await Utility().loadAPIConfig();
+  MyApp.pendingChargerId = null;
+  MyApp.deepLinkChecked = false;
+  SplashScreen.deepLinkHandled = false;
+  await Utility().loadAPIConfig();
 
-   runApp(const MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
   static String? pendingChargerId;
-static bool deepLinkChecked = false;
+  static bool deepLinkChecked = false;
   @override
   State<MyApp> createState() => MyAppState();
 }
 
 class MyAppState extends State<MyApp> {
-
   late final AppLinks _appLinks;
   StreamSubscription<Uri>? _linkSubscription;
 
-void _navigateToEstimateIOS(String chargerId) {
-   MyApp.pendingChargerId = chargerId;
- if (_hasNavigated) return;
+  void _navigateToEstimateIOS(String chargerId) {
+    MyApp.pendingChargerId = chargerId;
+    if (_hasNavigated) return;
 
-  _hasNavigated = true;
+    _hasNavigated = true;
 
- 
-
-  rToast("STORE PENDING NAVIGATION");
-
- 
-}
-
- void _handleDeepLink(Uri uri) {
-  print("Deep link received: $uri");
-
-  if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == "c") {
-    final chargerId = uri.pathSegments.length > 1
-        ? uri.pathSegments[1]
-        : null;
-
-    if (chargerId == null || chargerId.isEmpty) {
-      rToast("INVALID CHARGER ID");
-      return;
-    }
-
-    rToast("CHARGER ID: $chargerId");
-
-   
-      // _navigateToEstimateIOS(chargerId);
-   if (Platform.isIOS) {
-      // ✅ KEEP YOUR EXISTING FLOW (UNCHANGED)
-      _navigateToEstimateIOS(chargerId);
-    } else {
-      // ✅ ANDROID FIX
-      _navigateToEstimateAndroid(chargerId);
-    }
-  } else {
-    rToast("INVALID LINK FORMAT");
+    rToast("STORE PENDING NAVIGATION");
   }
-}
-void _navigateToEstimateAndroid(String chargerId) {
-  GlobalLists.globalChargerId = chargerId;
-}
+
+  void _handleDeepLink(Uri uri) {
+    print("Deep link received: $uri");
+
+    if (uri.pathSegments.length >= 2 && uri.pathSegments[0] == "c") {
+      final chargerId =
+          uri.pathSegments.length > 1 ? uri.pathSegments[1] : null;
+
+      if (chargerId == null || chargerId.isEmpty) {
+        rToast("INVALID CHARGER ID");
+        return;
+      }
+
+      rToast("CHARGER ID: $chargerId");
+
+      // _navigateToEstimateIOS(chargerId);
+      if (Platform.isIOS) {
+        // ✅ KEEP YOUR EXISTING FLOW (UNCHANGED)
+        _navigateToEstimateIOS(chargerId);
+      } else {
+        // ✅ ANDROID FIX
+        _navigateToEstimateAndroid(chargerId);
+      }
+    } else {
+      rToast("INVALID LINK FORMAT");
+    }
+  }
+
+  void _navigateToEstimateAndroid(String chargerId) {
+    GlobalLists.globalChargerId = chargerId;
+  }
 // void _navigateToEstimateAndroid(String chargerId) {
 //   final navigator = routeGlobalKey.currentState;
 
@@ -163,44 +157,43 @@ void _navigateToEstimateAndroid(String chargerId) {
 
   Uri? _lastUri;
   bool _hasNavigated = false;
-Future<void> _initDeepLinks() async {
-  _appLinks = AppLinks();
+  Future<void> _initDeepLinks() async {
+    _appLinks = AppLinks();
 
-  try {
-    /// ✅ HANDLE INITIAL LINK (COLD START)
-    final Uri? initialLink = await _appLinks.getInitialLink();
+    try {
+      /// ✅ HANDLE INITIAL LINK (COLD START)
+      final Uri? initialLink = await _appLinks.getInitialLink();
 
-    if (initialLink != null) {
-      rToast("INITIAL LINK: $initialLink");
-      _handleDeepLink(initialLink);
-    } else {
-      rToast("NO INITIAL LINK");
+      if (initialLink != null) {
+        rToast("INITIAL LINK: $initialLink");
+        _handleDeepLink(initialLink);
+      } else {
+        rToast("NO INITIAL LINK");
+      }
+    } catch (e) {
+      rToast("DEEPLINK ERROR: $e");
     }
-  } catch (e) {
-    rToast("DEEPLINK ERROR: $e");
-  }
 
-  /// ✅ STREAM (FOREGROUND / BACKGROUND)
-  _linkSubscription = _appLinks.uriLinkStream.listen((Uri uri) {
-    rToast("STREAM LINK: $uri");
-    _handleDeepLink(uri);
-  });
+    /// ✅ STREAM (FOREGROUND / BACKGROUND)
+    _linkSubscription = _appLinks.uriLinkStream.listen((Uri uri) {
+      rToast("STREAM LINK: $uri");
+      _handleDeepLink(uri);
+    });
 
-  /// ✅ ALWAYS MARK COMPLETE
-  // MyApp.deepLinkChecked = true;
-  // Future.delayed(const Duration(milliseconds: 800), () {
-  MyApp.deepLinkChecked = true;
-  rToast("DEEPLINK CHECK COMPLETE");
+    /// ✅ ALWAYS MARK COMPLETE
+    // MyApp.deepLinkChecked = true;
+    // Future.delayed(const Duration(milliseconds: 800), () {
+    MyApp.deepLinkChecked = true;
+    rToast("DEEPLINK CHECK COMPLETE");
 // });
-}
+  }
 
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
+
     /// ✅ iOS navigation listener (SAFE PLACE)
-  
-  
   }
 
   @override
@@ -211,16 +204,15 @@ Future<void> _initDeepLinks() async {
 
   @override
   Widget build(BuildContext context) {
-  
     final mapController = MapController();
     final mapDriverController = DriverMapController();
     final mapOverViewController = OverViewMapController();
 
     return MultiProvider(
       providers: [
-ChangeNotifierProvider(
-  create: (_) => VehicleProvider(),
-),
+        ChangeNotifierProvider(
+          create: (_) => VehicleProvider(),
+        ),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => ChargerDetailsProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
@@ -239,15 +231,13 @@ ChangeNotifierProvider(
         ChangeNotifierProvider(create: (_) => PaymentProvider()),
         ChangeNotifierProvider(create: (_) => WalletProvider()),
         ChangeNotifierProvider(create: (_) => HardwareMasterProvider()),
-ChangeNotifierProvider(create: (_) => AppVersionProvider()),
+        ChangeNotifierProvider(create: (_) => AppVersionProvider()),
         ChangeNotifierProvider(
           create: (_) => HubProvider(mapController),
         ),
-
         ChangeNotifierProvider(
           create: (_) => NavigationProvider(mapDriverController),
         ),
-
         ChangeNotifierProvider(
           create: (_) => MapOverViewProvider(mapOverViewController),
         ),
@@ -259,7 +249,6 @@ ChangeNotifierProvider(create: (_) => AppVersionProvider()),
           navigatorObservers: [routeObserver],
           title: 'HyCharge',
           debugShowCheckedModeBanner: false,
-
           theme: ThemeData(
             textTheme: GoogleFonts.poppinsTextTheme(),
             progressIndicatorTheme:
@@ -270,19 +259,19 @@ ChangeNotifierProvider(create: (_) => AppVersionProvider()),
               cursorColor: CommonColors.blue,
             ),
           ),
- builder: (context, child) {
-    ErrorWidget.builder = (FlutterErrorDetails details) {
-      return Scaffold(
-        body: Center(
-          child: Text(
-          "ERROR:\n${details.exception}\n\nSTACK:\n${details.stack} ",
-          style: const TextStyle(fontSize: 12),
-        ),
-        ),
-      );
-    };
-    return child!;
-  },
+          builder: (context, child) {
+            ErrorWidget.builder = (FlutterErrorDetails details) {
+              return Scaffold(
+                body: Center(
+                  child: Text(
+                    "ERROR:\n${details.exception}\n\nSTACK:\n${details.stack} ",
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              );
+            };
+            return child!;
+          },
           initialRoute: SplashScreen.route,
           onGenerateRoute: Routers.generateRoute,
         ),

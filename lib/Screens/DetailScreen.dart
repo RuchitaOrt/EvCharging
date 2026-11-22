@@ -1,10 +1,12 @@
 
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Screens/BookingDetailsScreen.dart';
 import 'package:HyCharge/Screens/MainTab.dart';
 import 'package:HyCharge/Utils/CommonAppBar.dart';
 import 'package:HyCharge/Utils/commoncolors.dart';
 import 'package:HyCharge/model/SessionIDDetailResponse.dart';
 import 'package:HyCharge/model/UnifiedSessionDetailResponse.dart';
+import 'package:HyCharge/widget/GlobalLists.dart';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -470,79 +472,107 @@ final sessionIdaprtner= widget.recID.startsWith('P:')
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: background,
-    bottomNavigationBar: SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton.icon(
-                onPressed: _viewReceipt,
-                icon: const Icon(
-                  Icons.receipt_long_rounded,
-                  size: 19,
+    return WillPopScope(
+        onWillPop: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MainTab(isLoggedIn: GlobalLists.islLogin),
+          ),
+        );
+
+        return false; // ✅ now it's Future<bool>
+      },
+      child: Scaffold(
+        backgroundColor: background,
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton.icon(
+                  onPressed: ()
+                  {
+                    final recId = widget.recID.startsWith('L:') ||
+          widget.recID.startsWith('P:')
+      ? widget.recID.substring(2)
+      : widget.recID;
+      
+                      Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => BookingDetailsScreen(
+                                      recID: recId,
+                                      bookingType:widget.bookingType == "L"?"L": "P",
+                                    ),
+                                  ),
+                                );
+                  },
+                  icon: const Icon(
+                    Icons.receipt_long_rounded,
+                    size: 19,
+                  ),
+                  label: const Text(
+                    "View Receipt",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: navy,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
                 ),
-                label: const Text(
-                  "View Receipt",
+              ),
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: (){
+       Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MainTab(isLoggedIn: true),
+              ),
+              (_) => false,
+            );
+                },
+                child: const Text(
+                  "Back to Map",
                   style: TextStyle(
-                    fontSize: 15,
+                    color: navy,
+                    fontSize: 14,
                     fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: navy,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 4),
-            TextButton(
-              onPressed: (){
- Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MainTab(isLoggedIn: true),
-            ),
-            (_) => false,
-          );
-              },
-              child: const Text(
-                "Back to Map",
-                style: TextStyle(
-                  color: navy,
-                  fontSize: 14,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-      body: SafeArea(
-        child: isLoading
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: navy,
-                ),
-              )
-            : errorMessage != null
-                ? _buildError()
-                : !hasData
-                    ? _buildNoData()
-                    : _buildDetails(),
+        body: SafeArea(
+          child: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: navy,
+                  ),
+                )
+              : errorMessage != null
+                  ? _buildError()
+                  : !hasData
+                      ? _buildNoData()
+                      : _buildDetails(),
+        ),
       ),
     );
   }
@@ -863,14 +893,5 @@ final sessionIdaprtner= widget.recID.startsWith('P:')
     );
   }
 
-  void _viewReceipt() {
-    // Connect your receipt screen or PDF generation here when available.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          "Receipt viewing is not connected yet.",
-        ),
-      ),
-    );
-  }
+  
 }

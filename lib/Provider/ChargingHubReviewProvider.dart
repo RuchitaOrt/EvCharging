@@ -51,12 +51,18 @@ class ChargingHubReviewProvider extends ChangeNotifier {
   }) async {
     loading = true;
     notifyListeners();
+ final formattedHubId = chargingHubId.startsWith('L:')
+      ? chargingHubId.substring(2)
+      : chargingHubId;
 
+       final formattedchargingStationId= chargingStationId.startsWith('L:')
+      ? chargingStationId.substring(2)
+      : chargingStationId;
     try {
       final res = await _service.addReview(
         context,
-        chargingHubId: chargingHubId,
-        chargingStationId: chargingStationId,
+        chargingHubId: formattedHubId,
+        chargingStationId: formattedchargingStationId,
         rating: rating,
         description: description,
         reviewImage1: reviewImage1,
@@ -68,11 +74,13 @@ class ChargingHubReviewProvider extends ChangeNotifier {
       if (res.success) {
         FocusScope.of(context).unfocus();
         showToast(res.message);
-
+ final formattedHubId = chargingHubId.startsWith('L:')
+      ? chargingHubId.substring(2)
+      : chargingHubId;
         /// 🔁 refresh list after add
         await fetchReviews(
           context: context,
-          hubId: chargingHubId,
+          hubId: formattedHubId,
         );
       } else {
         FocusScope.of(context).unfocus();
@@ -104,12 +112,18 @@ class ChargingHubReviewProvider extends ChangeNotifier {
   }) async {
     loading = true;
     notifyListeners();
+final formattedHubId = chargingHubId.startsWith('L:')
+      ? chargingHubId.substring(2)
+      : chargingHubId;
 
+        final formattedchargingStationId= chargingStationId.startsWith('L:')
+      ? chargingStationId.substring(2)
+      : chargingStationId;
     try {
       final res = await _service.updateReview(
         context,
-        chargingHubId: chargingHubId,
-        chargingStationId: chargingStationId,
+        chargingHubId: formattedHubId,
+        chargingStationId: formattedchargingStationId,
         rating: rating,
         description: description,
         reviewImage1: reviewImage1,
@@ -122,11 +136,13 @@ class ChargingHubReviewProvider extends ChangeNotifier {
       if (res.success) {
         FocusScope.of(context).unfocus();
         showToast(res.message);
-
+ final formattedHubId = chargingHubId.startsWith('L:')
+      ? chargingHubId.substring(2)
+      : chargingHubId;
         /// 🔁 refresh list after add
         await fetchReviews(
           context: context,
-          hubId: chargingHubId,
+          hubId: formattedHubId,
         );
       } else {
         FocusScope.of(context).unfocus();

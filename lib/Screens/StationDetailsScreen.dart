@@ -119,12 +119,15 @@ Map<String, bool> stationExpansionState = {};
   }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      getUserInfo();
+       getUserInfo();
       context.read<WalletProvider>().fetchWallet(context);
       _startPolling();
+       final formattedHubId = widget.hub.id!.startsWith('L:')
+      ? widget.hub.id!.substring(2)
+      : widget.hub.id!;
       context.read<ChargingHubReviewProvider>().fetchReviews(
             context: context,
-            hubId: widget.hub.id!,
+            hubId: formattedHubId
           );
       _fetchCurrentLocation();
     });
@@ -775,14 +778,14 @@ body: SingleChildScrollView(
                                             ),
                                           ],
                                         ),
-                                     
+                                    //  Text(widget.hub.stations![0].id!),
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            GestureDetector(
+                          widget.hub.stations![0].id!.contains("L:")?  GestureDetector(
                               onTap: () {
                                 print("open bottom ${widget.hub.id!}");
                                 _openReviewsBottomSheet(
@@ -800,7 +803,8 @@ body: SingleChildScrollView(
                                         SvgPicture.asset(CommonImagePath.stargold,width: 14,height: 14,),
                                         SizedBox(width: 5,),
                                         Text(
-                                                                          totalReviews==0 ?"Reviews":    "${totalReviews} Reviews",
+                                          // widget.hub.stations![0].id!,
+                                                                         totalReviews==0 ?"Reviews":    "${totalReviews} Reviews",
                                           style: TextStyle(
                                             fontSize: 12,
                                              fontFamily: 'Poppins',
@@ -820,7 +824,7 @@ body: SingleChildScrollView(
                                   ],
                                 ),
                               ),
-                            ),
+                            ):Container(),
                           ],
                         ),
                       ),
@@ -1041,11 +1045,23 @@ body: SingleChildScrollView(
 
   Widget _stationReviews(String stationId, String stationName, String hubId) {
     final provider = context.watch<ChargingHubReviewProvider>();
-    final allReviews = provider.response?.reviews ?? [];
+    // final allReviews = provider.response?.reviews ?? [];
 
-    final stationReviews =
-        allReviews.where((r) => r.chargingStationId == stationId).toList();
+    // final stationReviews =
+    //     allReviews.where((r) => r.chargingStationId == stationId).toList();
+final allReviews = provider.response?.reviews ?? [];
 
+final formattedStationId = stationId.startsWith('L:')
+    ? stationId.substring(2)
+    : stationId;
+
+final stationReviews = allReviews.where((r) {
+  final reviewStationId = r.chargingStationId?.startsWith('L:') == true
+      ? r.chargingStationId!.substring(2)
+      : r.chargingStationId;
+
+  return reviewStationId == formattedStationId;
+}).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1747,7 +1763,7 @@ Widget _stationsList(List<Station> stations) {
                 height: 1,
                 color: Color(0xFFEDF0F5),
               ),
-              Padding(
+            widget.hub.stations![0].id!.contains("L:")?   Padding(
                 padding: const EdgeInsets.fromLTRB(14, 14, 14, 4),
                 child: _stationTabs(
                   stationId: stationId,
@@ -1757,9 +1773,9 @@ Widget _stationsList(List<Station> stations) {
                     });
                   },
                 ),
-              ),
+              ):Container(),
 
-              const SizedBox(height: 12),
+              widget.hub.stations![0].id!.contains("L:")? const SizedBox(height: 12):Container(),
 
               if (selectedTab == 0)
                 if (chargers.isEmpty)
@@ -1809,7 +1825,7 @@ Widget _stationsList(List<Station> stations) {
                     ),
                   ),
 
-              if (selectedTab == 1)
+               if (selectedTab == 1 && widget.hub.stations![0].id!.contains("L:"))
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 14),
                   child: _stationReviews(
@@ -2237,21 +2253,23 @@ if (confirmed != true || !mounted) {
  
 
   Widget _reviewPlaceholder() {
-    return Container(
-      width: SizeConfig.blockSizeHorizontal * 100,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: CommonColors.neutral50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Text(
+    return 
+    // Container(
+    //   width: SizeConfig.blockSizeHorizontal * 100,
+    //   padding: const EdgeInsets.all(16),
+    //   decoration: BoxDecoration(
+    //     color: CommonColors.neutral50,
+    //     borderRadius: BorderRadius.circular(12),
+    //   ),
+    //   child: const 
+      Text(
         "No reviews yet",
         style: TextStyle(
           fontSize: 13,
           color: CommonColors.neutral500,
         ),
-      ),
-    );
+      );
+    // );
   }
 
 }
@@ -2294,7 +2312,7 @@ class _WriteReviewSheet extends StatefulWidget {
 class _WriteReviewSheetState extends State<_WriteReviewSheet> {
   int rating = 0;
   TextEditingController reviewCtrl = TextEditingController();
-
+bool _isSubmitting = false; // ADD THIS
   final ImagePicker _picker = ImagePicker();
 
   List<File> selectedImages = [];
@@ -2527,62 +2545,133 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () async {
-                await _uploadSelectedImages();
+              onPressed: _isSubmitting
+    ? null
+    : () async {
+        // Validate before uploading images
+        if (!widget.isEdit) {
+          if (rating == 0) {
+            showToast("Please select rating");
+            return;
+          }
 
-                final allImages = [
-                  ...existingImageIds,
-                  ...uploadedImageIds,
-                ];
-                if (widget.isEdit) {
-                  context.read<ChargingHubReviewProvider>().updateReview(
-                        context: context,
-                        chargingHubId: widget.hubId,
-                        chargingStationId: widget.stationId,
-                        rating: rating,
-                        description: reviewCtrl.text,
-                        recId: widget.recId!,
-                        reviewImage1:
-                            allImages.length > 0 ? allImages[0] : null,
-                        reviewImage2:
-                            allImages.length > 1 ? allImages[1] : null,
-                        reviewImage3:
-                            allImages.length > 2 ? allImages[2] : null,
-                        reviewImage4:
-                            allImages.length > 3 ? allImages[3] : null,
-                      );
-                } else {
-                  if (rating == 0) {
-                    FocusScope.of(context).unfocus();
-                    showToast("Please select rating");
-                    return;
-                  }
+          if (!ValidationHelper.isNotEmpty(reviewCtrl.text)) {
+            showToast("Please enter your review");
+            return;
+          }
+        }
 
-                  // 🔹 Review validation (for Add only)
-                  if (!ValidationHelper.isNotEmpty(reviewCtrl.text)) {
-                    FocusScope.of(context).unfocus();
-                    showToast("Please enter your review");
-                    return;
-                  }
-                  context.read<ChargingHubReviewProvider>().addReview(
-                        context: context,
-                        chargingHubId: widget.hubId,
-                        chargingStationId: widget.stationId,
-                        rating: rating,
-                        description: reviewCtrl.text,
-                        reviewImage1:
-                            allImages.length > 0 ? allImages[0] : null,
-                        reviewImage2:
-                            allImages.length > 1 ? allImages[1] : null,
-                        reviewImage3:
-                            allImages.length > 2 ? allImages[2] : null,
-                        reviewImage4:
-                            allImages.length > 3 ? allImages[3] : null,
-                      );
-                }
+        setState(() {
+          _isSubmitting = true;
+        });
 
-                Navigator.pop(context);
-              },
+        try {
+          await _uploadSelectedImages();
+
+          if (!mounted) return;
+
+          final allImages = [
+            ...existingImageIds,
+            ...uploadedImageIds,
+          ];
+
+          final provider = context.read<ChargingHubReviewProvider>();
+
+          if (widget.isEdit) {
+            await provider.updateReview(
+              context: context,
+              chargingHubId: widget.hubId,
+              chargingStationId: widget.stationId,
+              rating: rating,
+              description: reviewCtrl.text,
+              recId: widget.recId!,
+              reviewImage1: allImages.isNotEmpty ? allImages[0] : null,
+              reviewImage2: allImages.length > 1 ? allImages[1] : null,
+              reviewImage3: allImages.length > 2 ? allImages[2] : null,
+              reviewImage4: allImages.length > 3 ? allImages[3] : null,
+            );
+          } else {
+            await provider.addReview(
+              context: context,
+              chargingHubId: widget.hubId,
+              chargingStationId: widget.stationId,
+              rating: rating,
+              description: reviewCtrl.text,
+              reviewImage1: allImages.isNotEmpty ? allImages[0] : null,
+              reviewImage2: allImages.length > 1 ? allImages[1] : null,
+              reviewImage3: allImages.length > 2 ? allImages[2] : null,
+              reviewImage4: allImages.length > 3 ? allImages[3] : null,
+            );
+          }
+
+          if (!mounted) return;
+
+          Navigator.pop(context);
+        } finally {
+          if (mounted) {
+            setState(() {
+              _isSubmitting = false;
+            });
+          }
+        }
+      },
+              // onPressed: () async {
+              //   await _uploadSelectedImages();
+
+              //   final allImages = [
+              //     ...existingImageIds,
+              //     ...uploadedImageIds,
+              //   ];
+              //   if (widget.isEdit) {
+              //     context.read<ChargingHubReviewProvider>().updateReview(
+              //           context: context,
+              //           chargingHubId: widget.hubId,
+              //           chargingStationId: widget.stationId,
+              //           rating: rating,
+              //           description: reviewCtrl.text,
+              //           recId: widget.recId!,
+              //           reviewImage1:
+              //               allImages.length > 0 ? allImages[0] : null,
+              //           reviewImage2:
+              //               allImages.length > 1 ? allImages[1] : null,
+              //           reviewImage3:
+              //               allImages.length > 2 ? allImages[2] : null,
+              //           reviewImage4:
+              //               allImages.length > 3 ? allImages[3] : null,
+              //         );
+              //   } else {
+              //     if (rating == 0) {
+              //       FocusScope.of(context).unfocus();
+              //       showToast("Please select rating");
+              //       return;
+              //     }
+
+              //     // 🔹 Review validation (for Add only)
+              //     if (!ValidationHelper.isNotEmpty(reviewCtrl.text)) {
+              //       FocusScope.of(context).unfocus();
+              //       showToast("Please enter your review");
+              //       return;
+              //     }
+                  
+              //     context.read<ChargingHubReviewProvider>().addReview(
+              //           context: context,
+              //           chargingHubId: widget.hubId,
+              //           chargingStationId: widget.stationId,
+              //           rating: rating,
+              //           description: reviewCtrl.text,
+              //           reviewImage1:
+              //               allImages.length > 0 ? allImages[0] : null,
+              //           reviewImage2:
+              //               allImages.length > 1 ? allImages[1] : null,
+              //           reviewImage3:
+              //               allImages.length > 2 ? allImages[2] : null,
+              //           reviewImage4:
+              //               allImages.length > 3 ? allImages[3] : null,
+              //         );
+              //   }
+
+              //   Navigator.pop(context);
+              // },
               style: ElevatedButton.styleFrom(
                 backgroundColor: CommonColors.blue,
                 foregroundColor: CommonColors.blue,
@@ -2594,13 +2683,31 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                   ),
                 ),
               ),
-              child: const Text(
-                "Submit",
-                style: TextStyle(
-                    fontSize: 12,
-                    color: CommonColors.white,
-                    fontWeight: FontWeight.w600),
-              ),
+              child: 
+              _isSubmitting
+    ? const SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: CommonColors.white,
+        ),
+      )
+    : const Text(
+        "Submit",
+        style: TextStyle(
+          fontSize: 12,
+          color: CommonColors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+              // const Text(
+              //   "Submit",
+              //   style: TextStyle(
+              //       fontSize: 12,
+              //       color: CommonColors.white,
+              //       fontWeight: FontWeight.w600),
+              // ),
             ),
           ),
         ],

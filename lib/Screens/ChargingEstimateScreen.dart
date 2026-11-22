@@ -295,18 +295,34 @@ style: ElevatedButton.styleFrom(
                     height: 44,
                     
                     child: Consumer<ChargingProvider>(
-                      builder: (context, provider, _) => 
-                      provider.loading
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      CommonColors.white),
-                                ),
-                              )
-                            :  CommonButton(
+                      builder: (context, provider, _) {
+                      // provider.loading
+                      //       ? const SizedBox(
+                      //           height: 22,
+                      //           width: 22,
+                      //           child: CircularProgressIndicator(
+                      //             strokeWidth: 2.5,
+                      //             valueColor: AlwaysStoppedAnimation<Color>(
+                      //                 CommonColors.blue),
+                      //           ),
+                      //         )
+                      //       :  
+
+                      if (provider.loading) {
+      return const Center(
+        child: SizedBox(
+          height: 22,
+          width: 22,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(
+              CommonColors.blue,
+            ),
+          ),
+        ),
+      );
+    }
+                       return    CommonButton(
                               fontSize: 14,
         titleColor:  CommonColors.white,
         backgroundColor:    CommonColors.blue,
@@ -508,7 +524,8 @@ if (response is LocalStartUnifiedChargingSessionResponse) {
                                   );
                                 }
                               },
-    )
+    );
+                      }
                       
 //                       ElevatedButton(
 //                         style: ElevatedButton.styleFrom(

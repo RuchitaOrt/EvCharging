@@ -1,4 +1,5 @@
 import 'package:HyCharge/Provider/ChargingProvider.dart';
+import 'package:HyCharge/Provider/VehicleProvider.dart';
 import 'package:HyCharge/Screens/ActiveSessionsScreen.dart';
 import 'package:HyCharge/Screens/DetailScreen.dart';
 // import 'package:HyCharge/Screens/ChargingHistoryScreen.dart';
@@ -608,7 +609,7 @@ Widget build(BuildContext context) {
                     Container(
                       width: 76,
                       height: 54,
-                      padding: const EdgeInsets.all(4),
+                      padding: const EdgeInsets.only(left: 4,top: 4,bottom: 4),
                       decoration: BoxDecoration(
                         // color: const Color(0xFFF5F7FB),
                         borderRadius: BorderRadius.circular(12),
@@ -618,29 +619,98 @@ Widget build(BuildContext context) {
                         fit: BoxFit.contain,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                   
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Q4',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF101828),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
+                        
+                        
                           Row(
                             children: [
-                             SvgPicture.asset(CommonImagePath.car_navy,width: 12,height: 12,),
-                              const SizedBox(width: 4),
+                             
                               Flexible(
-                                child: Text(
-                                  widget.args.sessionId.isNotEmpty
-                                      ? 'Connected'
-                                      : 'Connecting vehicle...',
+                                child: widget.args.sessionId.isNotEmpty? Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+               Expanded(
+                 child: Consumer<VehicleProvider>(
+                   builder: (context, vehicleProvider, child) {
+                     if (vehicleProvider.evModels.isEmpty ||
+                         vehicleProvider.userVehicles.isEmpty) {
+                       return const SizedBox.shrink();
+                     }
+
+                     final vehicle = vehicleProvider.defaultVehicle;
+
+                     if (vehicle == null) {
+                       return const SizedBox.shrink();
+                     }
+
+                     final modelName = vehicleProvider.getModelName(
+                       vehicle.carModelID,
+                     );
+
+                     return GestureDetector(
+                       onTap: () {
+                        //  showMyVehiclesBottomSheet(
+                        //    routeGlobalKey.currentContext!,
+                        //  );
+                       },
+                       child: Row(
+                         mainAxisSize: MainAxisSize.min,
+                         children: [
+                        //  SvgPicture.asset(CommonImagePath.carIcons,,width: 18,height: 18,),
+                           const SizedBox(width: 4),
+                           Flexible(
+                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                               children: [
+                                 Text(
+                                   '${modelName ?? ""} · ',
+                                   
+                                   maxLines: 1,
+                                   overflow: TextOverflow.ellipsis,
+                                   style:  TextStyle(
+                                     fontSize: 11,
+                                        color: muted,
+                                    
+                                   ),
+                                 ),
+                                 Text(
+                                  
+                                   '${vehicle.carRegistrationNumber ?? ""}',
+                                   maxLines: 1,
+                                   overflow: TextOverflow.ellipsis,
+                                   style:  TextStyle(
+                                     fontSize: 11,
+                                        color: muted,
+                                    
+                                   ),
+                                 ),
+                               ],
+                             ),
+                           ),
+                         
+                         ],
+                       ),
+                     );
+                   },
+                 ),
+               ),
+
+              //  const SizedBox(width: 8),
+
+               // Environment label
+              
+             ],
+           )
+: Text(
+                                  // widget.args.sessionId.isNotEmpty
+                                  //     ? 'Connected'
+                                  //     :
+                                       'Connecting vehicle...',
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 11,

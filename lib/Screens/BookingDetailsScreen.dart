@@ -538,14 +538,14 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   // Amount, status and booking ID card.
   Widget _buildAmountCard() {
     final amount = widget.bookingType == "L"
-        ? '₹ ${response!.data!.costDetails!.totalCost}'
+        ? '₹ ${response?.data?.costDetails?.totalCost ?? 0}'
         : (Unifiedresponse!.data!.costDetails == null ||
                 Unifiedresponse!.data!.costDetails == "null")
             ? '₹ 0'
-            : '₹ ${Unifiedresponse!.data!.costDetails!.grandTotal}';
+            : '₹ ${Unifiedresponse?.data?.costDetails?.grandTotal ?? 0}';
 
     final status = widget.bookingType == "L"
-        ? '${response!.data!.status ?? "-"}'
+        ? '${response?.data?.status ?? "-"} '
         : '${Unifiedresponse!.data!.status ?? "-"}';
 
     return Container(
@@ -639,56 +639,56 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   // Existing local and partner data bindings are retained.
   Widget _buildDetailsCard() {
     if (widget.bookingType == "L") {
-      final data = response!.data!;
+      final data = response?.data;
 
       return _detailsContainer(
         items: [
           _DetailItem(
             'Date & time',
-            '${_formatDate(data.session!.createdOn?.toString())}\n'
-                '${formatOnlyTimeIST(data.session!.startTime?.toString())}'
+            '${_formatDate(data?.session!.createdOn?.toString())}\n'
+                '${formatOnlyTimeIST(data?.session!.startTime?.toString())}'
                 ' - '
-                '${formatOnlyTimeIST(data.session!.endTime?.toString())}',
+                '${formatOnlyTimeIST(data?.session!.endTime?.toString())}',
             multiline: true,
           ),
           _DetailItem(
             'Charger type',
-            '${data.chargerDetails!.chargerType ?? "-"}',
+            '${data?.chargerDetails!.chargerType ?? "-"}',
           ),
           _DetailItem(
             'Price per unit',
-            '₹ ${data.summary!.costPerKwh ?? "-"}',
+            '₹ ${data?.summary!.costPerKwh ?? "-"}',
           ),
           _DetailItem(
             'Total kW used',
-            data.energyConsumption!.totalEnergy == "null"
+            data?.energyConsumption!.totalEnergy == "null"
                 ? '-'
-                : '${data.energyConsumption!.totalEnergy ?? "-"}',
+                : '${data?.energyConsumption!.totalEnergy ?? "-"}',
           ),
           _DetailItem(
             'Total charging time',
-            data.timing!.duration!.formattedDuration == "null"
+            data?.timing!.duration!.formattedDuration == "null"
                 ? '-'
-                : '${data.timing!.duration!.formattedDuration ?? "-"}',
+                : '${data?.timing!.duration!.formattedDuration ?? "-"}',
           ),
           _DetailItem(
             'Service charge',
-            '₹ ${data.costDetails!.energyCost}',
+            '₹ ${data?.costDetails!.energyCost}',
           ),
           _DetailItem(
             'SGST (9%)',
-            '₹ ${data.costDetails!.sgst}',
+            '₹ ${data?.costDetails!.sgst}',
           ),
           _DetailItem(
             'CGST (9%)',
-            '₹ ${data.costDetails!.cgst}',
+            '₹ ${data?.costDetails!.cgst}',
           ),
           _DetailItem(
             'Duration',
-            '${data.timing!.duration!.formattedDuration}',
+            '${data?.timing!.duration!.formattedDuration}',
           ),
         ],
-        totalAmount: '₹ ${data.costDetails!.totalCost}',
+        totalAmount: '₹ ${data?.costDetails!.totalCost}',
       );
     }
 
